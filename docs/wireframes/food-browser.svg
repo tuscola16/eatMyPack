@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <filter id="shadowSm" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#2C2118" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Phone frame -->
+  <rect width="390" height="844" rx="40" fill="#F4EFE6"/>
+
+  <!-- Status bar -->
+  <text x="24" y="22" font-family="DM Sans, sans-serif" font-size="14" font-weight="500" fill="#2C2118">9:41</text>
+  <rect x="366" y="14" width="16" height="9" rx="2" stroke="#2C2118" stroke-width="1" fill="none"/>
+  <rect x="368" y="16" width="12" height="5" rx="1" fill="#2C2118"/>
+
+  <!-- Header -->
+  <text x="24" y="62" font-family="Nunito, sans-serif" font-size="28" font-weight="700" fill="#2C2118">Foods</text>
+
+  <!-- Search bar -->
+  <rect x="16" y="78" width="358" height="44" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  <!-- Magnifying glass icon -->
+  <circle cx="38" cy="100" r="7" stroke="#B0A090" stroke-width="1.5" fill="none"/>
+  <line x1="43" y1="105" x2="48" y2="110" stroke="#B0A090" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="56" y="105" font-family="DM Sans, sans-serif" font-size="15" fill="#B0A090">Search foods...</text>
+
+  <!-- ===== CATEGORY FILTER CHIPS with food SVG icons ===== -->
+  <g transform="translate(16, 136)">
+    <!-- Chip 1: Gels (SELECTED) -->
+    <g>
+      <rect x="0" y="0" width="78" height="34" rx="8" fill="#C3D9B8" stroke="#7A9E6E" stroke-width="1.5"/>
+      <!-- Mini gel icon -->
+      <g transform="translate(8, 4) scale(0.04)">
+        <path d="M222.31 130.866C172.575 112.201 188.098 137.912 174.551 152.194C174.551 152.194 135.964 197.252 120.371 212.896C104.779 228.539 157.216 157.137 94.686 224.79C49.8342 268.574 49.7368 231.352 53.7501 218.228C57.7633 205.103 115.957 120.202 37.2954 185.005C-41.3657 249.809 25.6569 82.4686 58.1647 123.073C90.6726 163.678 109.134 68.1133 58.1647 44.7349C7.1955 21.3565 125.384 -9.80395 113.147 38.9928C100.91 87.7896 177.225 112.445 190.203 38.9928C203.181 -34.4594 264.022 15.5864 232.744 38.9928C201.467 62.3993 174.214 84.276 252.41 68.1133C330.606 51.9507 272.045 149.531 222.31 130.866Z" fill="#4A6B3E"/>
+        <path d="M116.51 185.522C119.01 181.522 123.01 162.022 123.01 162.022H122.51C121.51 162.022 109.436 171.31 108.51 171.022C107.584 170.734 98.0103 156.522 98.5103 154.022C99.0103 151.522 155.51 118.522 158.51 119.522C161.51 120.522 168.01 136.522 168.01 136.522C167.01 138.022 153.51 142.022 155.01 144.022C156.51 146.022 176.01 151.022 178.51 150.522C181.01 150.022 197.51 137.522 200.01 138.022C202.51 138.522 276.51 266.022 275.51 269.522C274.51 273.022 174.01 330.522 170.01 330.022C166.01 329.522 93.5103 202.022 94.5103 198.522C95.5103 195.022 114.01 189.522 116.51 185.522Z" fill="#C3D9B8"/>
+      </g>
+      <text x="28" y="22" font-family="Nunito, sans-serif" font-size="13" font-weight="600" fill="#4A6B3E">Gels</text>
+    </g>
+
+    <!-- Chip 2: Bars -->
+    <g>
+      <rect x="86" y="0" width="74" height="34" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+      <g transform="translate(94, 6) scale(0.033)">
+        <path d="M257.833 5.83948C298.766 13.7515 356.228 34.7972 372.333 48.8395L231.832 282.839L109.332 327.339C65.4449 309.11 17.4125 276.179 6.33245 265.339C-4.74762 254.5 2.7088 12.1194 6.33245 5.83948C9.95609 -0.440464 216.899 -2.07257 257.833 5.83948Z" fill="#807F7F"/>
+        <path d="M371.275 327.265C362.361 332.687 119.032 331.253 108.775 327.265C98.5188 323.277 99.8059 55.2778 108.275 48.2648C116.745 41.2519 363.284 45.7122 371.275 48.2648C379.267 50.8175 380.19 321.843 371.275 327.265Z" fill="#D9D9D9"/>
+      </g>
+      <text x="114" y="22" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">Bars</text>
+    </g>
+
+    <!-- Chip 3: Chews -->
+    <g>
+      <rect x="168" y="0" width="84" height="34" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+      <g transform="translate(176, 4) scale(0.028)">
+        <path d="M257.833 5.83948C298.766 13.7515 356.228 34.7972 372.333 48.8395L231.832 282.839L109.332 327.339C65.4449 309.11 17.4125 276.179 6.33245 265.339C-4.74762 254.5 2.7088 12.1194 6.33245 5.83948Z" fill="#807F7F"/>
+        <path d="M490.83 173.116C527.376 186.793 577.126 214.805 589.795 229.876L423.528 414.472L303.499 433.988C265.839 410.683 226.652 373.669 218.119 362.255C209.587 350.841 254.361 137.161 258.687 132.183Z" fill="#807F7F"/>
+      </g>
+      <text x="200" y="22" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">Chews</text>
+    </g>
+
+    <!-- Chip 4: Drinks -->
+    <g>
+      <rect x="260" y="0" width="82" height="34" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+      <g transform="translate(268, 2) scale(0.025)">
+        <path d="M125.713 18.8806V3.38058H213.213V18.8806H199.213V37.8806L342.213 50.3806V159.381C340.928 163.794 322.213 176.881 319.213 181.381V582.881C213.77 605.264 139.151 604.942 1.71307 582.881V218.381C5.67777 211.985 27.7131 208.881 32.7131 205.881V50.3806L143.213 37.8806V18.8806H125.713Z" fill="#807F7F"/>
+      </g>
+      <text x="296" y="22" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">Drinks</text>
+    </g>
+  </g>
+
+  <!-- ===== FOOD CARD 1: GU Energy Gel ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="188" width="358" height="100" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Gel icon -->
+  <g transform="translate(28, 198) scale(0.09)">
+    <path d="M222.31 130.866C172.575 112.201 188.098 137.912 174.551 152.194C174.551 152.194 135.964 197.252 120.371 212.896C104.779 228.539 157.216 157.137 94.686 224.79C49.8342 268.574 49.7368 231.352 53.7501 218.228C57.7633 205.103 115.957 120.202 37.2954 185.005C-41.3657 249.809 25.6569 82.4686 58.1647 123.073C90.6726 163.678 109.134 68.1133 58.1647 44.7349C7.1955 21.3565 125.384 -9.80395 113.147 38.9928C100.91 87.7896 177.225 112.445 190.203 38.9928C203.181 -34.4594 264.022 15.5864 232.744 38.9928C201.467 62.3993 174.214 84.276 252.41 68.1133C330.606 51.9507 272.045 149.531 222.31 130.866Z" fill="#807F7F" stroke="black" stroke-width="0.5"/>
+    <path d="M116.51 185.522C119.01 181.522 123.01 162.022 123.01 162.022H122.51C121.51 162.022 109.436 171.31 108.51 171.022C107.584 170.734 98.0103 156.522 98.5103 154.022C99.0103 151.522 155.51 118.522 158.51 119.522C161.51 120.522 168.01 136.522 168.01 136.522C167.01 138.022 153.51 142.022 155.01 144.022C156.51 146.022 176.01 151.022 178.51 150.522C181.01 150.022 197.51 137.522 200.01 138.022C202.51 138.522 276.51 266.022 275.51 269.522C274.51 273.022 174.01 330.522 170.01 330.022C166.01 329.522 93.5103 202.022 94.5103 198.522C95.5103 195.022 114.01 189.522 116.51 185.522Z" fill="#D9D9D9" stroke="black" stroke-width="0.5"/>
+  </g>
+  <!-- Food info -->
+  <text x="70" y="214" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">GU Energy Gel</text>
+  <text x="70" y="232" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">GU Energy</text>
+  <!-- Calorie badge -->
+  <rect x="260" y="200" width="52" height="22" rx="11" fill="#F5E2D8"/>
+  <text x="286" y="215" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#C4623A">100 cal</text>
+  <!-- Carb badge -->
+  <rect x="316" y="200" width="46" height="22" rx="11" fill="#EBF3E6"/>
+  <text x="339" y="215" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#4A6B3E">25g</text>
+  <!-- Bottom row -->
+  <circle cx="78" cy="260" r="5" fill="#4A6B3E"/>
+  <text x="88" y="264" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Excellent</text>
+  <!-- Caffeine icon -->
+  <text x="162" y="264" font-family="DM Sans, sans-serif" font-size="12" fill="#A08B5E">☕ 20mg</text>
+  <!-- Pin button -->
+  <circle cx="348" cy="262" r="14" stroke="#E0D5C5" stroke-width="1.5" fill="none"/>
+  <text x="348" y="267" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" fill="#B0A090">📌</text>
+
+  <!-- ===== FOOD CARD 2: Clif Bar ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="300" width="358" height="100" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Bar icon -->
+  <g transform="translate(24, 316) scale(0.055)">
+    <path d="M257.833 5.83948C298.766 13.7515 356.228 34.7972 372.333 48.8395L231.832 282.839L109.332 327.339C65.4449 309.11 17.4125 276.179 6.33245 265.339C-4.74762 254.5 2.7088 12.1194 6.33245 5.83948C9.95609 -0.440464 216.899 -2.07257 257.833 5.83948Z" fill="#807F7F" stroke="black" stroke-width="0.5"/>
+    <path d="M371.275 327.265C362.361 332.687 119.032 331.253 108.775 327.265C98.5188 323.277 99.8059 55.2778 108.275 48.2648C116.745 41.2519 363.284 45.7122 371.275 48.2648C379.267 50.8175 380.19 321.843 371.275 327.265Z" fill="#D9D9D9"/>
+    <path d="M371.275 327.265C362.361 332.687 119.032 331.253 108.775 327.265C98.5188 323.277 99.8059 55.2778 108.275 48.2648C116.745 41.2519 363.284 45.7122 371.275 48.2648C379.267 50.8175 380.19 321.843 371.275 327.265Z" fill="black" fill-opacity="0.15"/>
+    <line x1="101.311" y1="44.963" x2="20.3113" y2="11.963" stroke="#B3B3B3"/>
+    <path d="M490.83 173.116C527.376 186.793 577.126 214.805 589.795 229.876L423.528 414.472L303.499 433.988C265.839 410.683 226.652 373.669 218.119 362.255C209.587 350.841 254.361 137.161 258.687 132.183Z" fill="#807F7F" stroke="black" stroke-width="0.5"/>
+    <path d="M545.293 476.555C536.217 479.911 311.841 439.037 302.997 433.831C294.153 428.626 337.238 191.228 346.152 186.389C355.066 181.55 581.932 225.63 588.91 229.194C595.887 232.758 554.369 473.198 545.293 476.555Z" fill="#D9D9D9"/>
+  </g>
+  <text x="70" y="326" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Clif Bar</text>
+  <text x="70" y="344" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Clif</text>
+  <rect x="260" y="312" width="52" height="22" rx="11" fill="#F5E2D8"/>
+  <text x="286" y="327" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#C4623A">250 cal</text>
+  <rect x="316" y="312" width="46" height="22" rx="11" fill="#EBF3E6"/>
+  <text x="339" y="327" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#4A6B3E">44g</text>
+  <circle cx="78" cy="372" r="5" fill="#7A9E6E"/>
+  <text x="88" y="376" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Very Good</text>
+  <circle cx="348" cy="374" r="14" stroke="#E0D5C5" stroke-width="1.5" fill="none"/>
+  <text x="348" y="379" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" fill="#B0A090">📌</text>
+
+  <!-- ===== FOOD CARD 3: Tailwind ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="412" width="358" height="100" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Drink mix icon -->
+  <g transform="translate(28, 416) scale(0.052)">
+    <path d="M125.713 18.8806V3.38058H213.213V18.8806H199.213V37.8806L342.213 50.3806V159.381C340.928 163.794 322.213 176.881 319.213 181.381C316.213 185.881 317.213 203.881 319.213 205.881C321.213 207.881 340.911 214.105 342.213 218.381V582.881C213.77 605.264 139.151 604.942 1.71307 582.881V218.381C5.67777 211.985 27.7131 208.881 32.7131 205.881C37.713 202.881 38.0244 183.703 32.7131 181.381C27.4017 179.058 4.63231 168.169 1.71307 159.381V114.381V50.3806L143.213 37.8806V18.8806H125.713Z" fill="#D9D9D9" stroke="black" stroke-width="0.5"/>
+    <path d="M1.71316 96.3806C-0.0178448 78.9253 0.213188 53.3806 1.71316 50.3806C3.21314 47.3806 142.713 37.8806 142.713 37.8806C144.768 28.1804 143.573 24.5257 142.713 18.8806L125.713 18.3806V3.3806C161.171 -0.398482 180.268 -0.521425 212.713 3.3806V18.8806H199.713C197.382 26.3006 197.589 30.4607 199.713 37.8806C199.713 37.8806 340.213 46.8806 342.213 50.3806C344.213 53.8806 343.787 78.4165 342.213 96.3806C206.933 114.949 132.474 114.198 1.71316 96.3806Z" fill="#787777" stroke="black" stroke-width="0.5"/>
+    <path d="M56.2131 339.881C18.4342 345.866 12.7688 343.592 1.71313 339.881V582.881C137.671 606.548 212.209 606.332 342.213 582.381C342.213 582.381 342.376 342.881 342.213 339.881C342.05 336.881 336.213 333.881 299.713 340.881C263.213 347.881 207.58 320.595 239.713 305.881C210.208 291.409 189.213 341.881 149.213 339.881C109.213 337.881 118.373 308.182 133.713 309.881C108.664 298.261 72.5387 337.869 56.2131 339.881Z" fill="#807F7F" stroke="black" stroke-width="0.5"/>
+  </g>
+  <text x="70" y="438" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Tailwind Endurance Fuel</text>
+  <text x="70" y="456" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Tailwind Nutrition</text>
+  <rect x="260" y="424" width="52" height="22" rx="11" fill="#F5E2D8"/>
+  <text x="286" y="439" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#C4623A">100 cal</text>
+  <rect x="316" y="424" width="46" height="22" rx="11" fill="#EBF3E6"/>
+  <text x="339" y="439" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#4A6B3E">25g</text>
+  <circle cx="78" cy="484" r="5" fill="#4A6B3E"/>
+  <text x="88" y="488" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Excellent</text>
+  <text x="162" y="488" font-family="DM Sans, sans-serif" font-size="12" fill="#A08B5E">☕ 35mg</text>
+  <!-- Pinned (filled) -->
+  <circle cx="348" cy="486" r="14" fill="#EBF3E6" stroke="#7A9E6E" stroke-width="1.5"/>
+  <text x="348" y="491" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14">📌</text>
+
+  <!-- ===== FOOD CARD 4: Nut Butter ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="524" width="358" height="100" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Nut butter icon -->
+  <g transform="translate(26, 530) scale(0.065)">
+    <path d="M0.779297 489.176C0.799386 437.327 1.2793 97.1755 1.2793 97.1755L428.779 97.6755C428.779 97.6755 428.789 430.927 428.779 489.176C428.769 547.424 0.759209 541.024 0.779297 489.176Z" fill="#D9D9D9" stroke="black" stroke-width="0.5"/>
+    <path d="M1.2797 95.6756C1.7627 46.0369 2.31268 90.5531 1.2797 38.6756C0.246716 -13.202 428.723 -11.239 429.28 38.6756C429.837 88.5901 429.712 34.8122 429.28 95.6756C428.847 156.539 0.796698 145.314 1.2797 95.6756Z" fill="#807F7F" stroke="black" stroke-width="0.5"/>
+    <path d="M230.325 226.167C260.806 196.801 291.913 193.976 316.713 213.478C341.513 232.979 338.125 264.684 314.772 297.027C291.42 329.371 265.896 334.96 259.759 342.277C253.623 349.593 254.943 382.158 234.839 414.854C214.736 447.55 160.634 461.504 131.554 434.141C102.474 406.778 105.081 364.145 133.724 330.009C162.368 295.872 194.82 302.329 199.757 291.929C204.694 281.528 199.843 255.534 230.325 226.167Z" fill="#807F7F" stroke="#AEAEAE" stroke-width="2"/>
+  </g>
+  <text x="70" y="550" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Spring Energy Awesome Sauce</text>
+  <text x="70" y="568" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Spring Energy</text>
+  <rect x="260" y="536" width="52" height="22" rx="11" fill="#F5E2D8"/>
+  <text x="286" y="551" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#C4623A">180 cal</text>
+  <rect x="316" y="536" width="46" height="22" rx="11" fill="#EBF3E6"/>
+  <text x="339" y="551" text-anchor="middle" font-family="Nunito, sans-serif" font-size="11" font-weight="700" fill="#4A6B3E">30g</text>
+  <circle cx="78" cy="596" r="5" fill="#E8A83A"/>
+  <text x="88" y="600" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Good</text>
+  <circle cx="348" cy="598" r="14" stroke="#E0D5C5" stroke-width="1.5" fill="none"/>
+  <text x="348" y="603" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" fill="#B0A090">📌</text>
+
+  <!-- ===== TAB BAR ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="0" y="790" width="390" height="54" rx="0" fill="#FAF7F2"/>
+  </g>
+  <!-- Home tab -->
+  <g transform="translate(65, 800)">
+    <path d="M10,14 L10,8 L2,14 L2,24 H8 V18 H12 V24 H18 V14 Z" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Home</text>
+  </g>
+  <!-- Foods tab (active) -->
+  <g transform="translate(178, 800)">
+    <rect x="2" y="8" width="7" height="7" rx="1" fill="#7A9E6E"/>
+    <rect x="11" y="8" width="7" height="7" rx="1" fill="#7A9E6E"/>
+    <rect x="2" y="17" width="7" height="7" rx="1" fill="#7A9E6E"/>
+    <rect x="11" y="17" width="7" height="7" rx="1" fill="#7A9E6E"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#7A9E6E">Foods</text>
+  </g>
+  <!-- Settings tab -->
+  <g transform="translate(290, 800)">
+    <circle cx="10" cy="16" r="5" stroke="#B0A090" stroke-width="1.5" fill="none"/>
+    <circle cx="10" cy="16" r="2" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Settings</text>
+  </g>
+
+  <!-- Home indicator -->
+  <rect x="142" y="832" width="106" height="4" rx="2" fill="#2C2118" opacity="0.2"/>
+</svg>

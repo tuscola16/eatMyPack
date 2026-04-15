@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="100" viewBox="0 0 160 100">
+  <defs>
+    <!-- Top-right corner only r=16 -->
+    <clipPath id="clip">
+      <path d="M0,0 H144 Q160,0 160,16 V100 H0 Z"/>
+    </clipPath>
+    <!-- Dawn sky: deep terracotta at top → warm cream at bottom -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#D87A30"/>
+      <stop offset="45%"  stop-color="#F2C98A"/>
+      <stop offset="100%" stop-color="#F5F0E8"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Sky -->
+    <rect width="160" height="100" fill="url(#sky)"/>
+
+    <!-- Sun glow bloom -->
+    <ellipse cx="80" cy="56" rx="42" ry="30" fill="#FFDB80" opacity="0.38"/>
+    <!-- Sun: rising half-disk over ridge -->
+    <clipPath id="sc"><rect x="0" y="54" width="160" height="46"/></clipPath>
+    <circle cx="80" cy="54" r="12" fill="#F5C050" clip-path="url(#sc)"/>
+
+    <!-- Franconia Ridge silhouette — Lafayette (tallest center-right), Lincoln, Haystack -->
+    <polygon
+      points="0,64 8,59 16,52 24,46 32,42 38,46 46,39 53,44 60,36 68,42 76,54 83,49 90,42 98,48 106,41 114,47 122,54 130,59 138,52 148,56 160,60 160,80 0,80"
+      fill="#A8C490"/>
+
+    <!-- Exposed rocky summit zone on Franconia (above treeline) -->
+    <polygon points="60,36 76,54 68,56 54,50 50,44" fill="#C8B898" opacity="0.55"/>
+
+    <!-- Atmospheric mist at treeline -->
+    <rect x="0" y="57" width="160" height="11" fill="#F5F0E8" opacity="0.32"/>
+
+    <!-- Spruce-fir treeline silhouette -->
+    <path d="M0,80 L0,70 L8,57 L16,70 L24,62 L32,72 L40,58 L48,72 L56,64 L64,76 L72,66 L80,76 L88,62 L96,76 L104,66 L112,78 L120,68 L128,80 L136,72 L144,84 L152,74 L160,82 L160,100 L0,100 Z"
+          fill="#4A6640"/>
+  </g>
+</svg>

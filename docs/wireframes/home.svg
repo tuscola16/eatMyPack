@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <!-- Shadows -->
+    <filter id="shadowSm" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#2C2118" flood-opacity="0.06"/>
+    </filter>
+    <filter id="shadowMd" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#2C2118" flood-opacity="0.08"/>
+    </filter>
+    <!-- Hero sky gradient -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D86A28"/>
+      <stop offset="28%" stop-color="#EDA860"/>
+      <stop offset="60%" stop-color="#F5DDB8"/>
+      <stop offset="100%" stop-color="#F5F0E8"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFDB90" stop-opacity="0.70"/>
+      <stop offset="100%" stop-color="#FFDB90" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ridgeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#B5C4AA"/>
+      <stop offset="100%" stop-color="#9CAE90"/>
+    </linearGradient>
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D4C5B0"/>
+      <stop offset="100%" stop-color="#C2B09A"/>
+    </linearGradient>
+    <!-- Hero clip -->
+    <clipPath id="heroClip">
+      <path d="M0,0 H390 V316 Q390,340 366,340 H24 Q0,340 0,316 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ===== PHONE FRAME ===== -->
+  <rect width="390" height="844" rx="40" fill="#F4EFE6"/>
+
+  <!-- ===== HERO ILLUSTRATION (inline hero-trail) ===== -->
+  <g clip-path="url(#heroClip)">
+    <!-- Sky -->
+    <rect width="390" height="340" fill="url(#skyGrad)"/>
+    <!-- Sun glow -->
+    <ellipse cx="192" cy="95" rx="140" ry="95" fill="url(#sunGlow)"/>
+    <ellipse cx="192" cy="148" rx="28" ry="28" fill="#F5C860" opacity="0.55"/>
+    <!-- Cloud wisps -->
+    <path d="M52,85 Q88,72 118,80 Q144,87 162,76" stroke="rgba(255,255,255,0.42)" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M235,65 Q272,53 308,62 Q332,69 350,58" stroke="rgba(255,255,255,0.30)" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <!-- Presidential Range (far) -->
+    <path d="M-8,210 C18,190 38,168 58,150 C72,137 84,144 98,131 C108,121 118,113 130,103 C142,94 152,108 164,98 C172,91 180,82 192,71 C200,64 208,74 216,67 C224,60 234,68 244,64 C254,58 263,70 272,65 C282,60 292,73 306,81 C319,90 334,99 354,113 C367,123 380,133 398,148 L398,212 L-8,212 Z" fill="url(#ridgeGrad)"/>
+    <!-- Rocky summit -->
+    <path d="M162,112 C170,101 180,88 192,71 C200,64 208,74 216,67 C224,61 234,69 244,65 C240,77 232,87 222,93 C212,99 200,99 190,101 C180,104 170,111 162,117 Z" fill="#C8B898" opacity="0.72"/>
+    <!-- Haze -->
+    <path d="M-8,200 Q195,216 398,200 L398,215 Q195,231 -8,215 Z" fill="rgba(245,240,230,0.38)"/>
+    <!-- Franconia Ridge (mid) -->
+    <path d="M-8,244 C22,224 52,230 80,220 C102,212 118,222 140,214 C158,208 172,217 195,210 C216,204 236,212 260,210 C282,208 308,216 338,224 C358,230 376,236 398,242 L398,258 L-8,258 Z" fill="#8FA87A"/>
+    <!-- Treeline -->
+    <path d="M-8,272 L-8,256 L4,238 L14,256 L20,244 L30,226 L40,244 L46,238 L56,220 L66,238 L72,248 L82,230 L92,248 L98,240 L108,222 L118,240 L124,250 L134,232 L144,250 L150,242 L160,224 L170,242 L176,254 L186,234 L196,254 L202,244 L212,226 L222,244 L228,252 L238,234 L248,252 L254,242 L264,224 L274,242 L280,250 L290,232 L300,250 L306,244 L316,226 L326,244 L332,254 L342,236 L352,254 L358,246 L368,228 L378,246 L384,256 L392,240 L398,253 L398,272 Z" fill="#4A6640"/>
+    <rect x="-8" y="268" width="408" height="15" fill="#4A6640"/>
+    <path d="M-8,278 C60,272 160,276 260,274 C328,272 368,277 398,282 L398,288 C368,285 328,280 260,282 C160,284 60,280 -8,286 Z" fill="#3A5030" opacity="0.7"/>
+    <!-- Foreground -->
+    <path d="M-8,280 C60,272 160,276 260,274 C328,272 368,278 398,284 L398,345 L-8,345 Z" fill="url(#groundGrad)"/>
+    <!-- Trail -->
+    <path d="M30,342 C80,320 140,300 190,289 C228,281 264,284 300,276 C328,270 358,263 384,254" stroke="#C4623A" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M30,342 C80,320 140,300 190,289 C228,281 264,284 300,276 C328,270 358,263 384,254" stroke="rgba(255,240,220,0.25)" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Runner -->
+    <circle cx="193" cy="279" r="4.5" fill="#3A2E22"/>
+    <path d="M189,277 L183,275" stroke="#3A2E22" stroke-width="2" stroke-linecap="round"/>
+    <line x1="193" y1="284" x2="193" y2="295" stroke="#3A2E22" stroke-width="3" stroke-linecap="round"/>
+    <path d="M188,287 L194,285 L200,288" stroke="#3A2E22" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M193,295 L188,304 M193,295 L199,303" stroke="#3A2E22" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M195,285 L202,284 L203,292 L196,293 Z" fill="#C4623A" opacity="0.90"/>
+    <!-- Mist -->
+    <path d="M-8,278 Q195,270 398,276 L398,286 Q195,280 -8,288 Z" fill="rgba(245,242,236,0.30)"/>
+  </g>
+
+  <!-- ===== STATUS BAR (overlaid on hero) ===== -->
+  <text x="24" y="22" font-family="DM Sans, sans-serif" font-size="14" font-weight="500" fill="#FAF7F2">9:41</text>
+  <text x="340" y="22" font-family="DM Sans, sans-serif" font-size="12" fill="#FAF7F2">100%</text>
+  <!-- Battery icon -->
+  <rect x="366" y="14" width="16" height="9" rx="2" stroke="#FAF7F2" stroke-width="1" fill="none"/>
+  <rect x="368" y="16" width="12" height="5" rx="1" fill="#FAF7F2"/>
+
+  <!-- ===== DISTANCE CHIPS (overlaid on hero bottom) ===== -->
+  <g transform="translate(16, 298)">
+    <!-- Selected chip: 100mi -->
+    <rect x="0" y="0" width="56" height="30" rx="8" fill="#C3D9B8" stroke="#7A9E6E" stroke-width="1.5"/>
+    <text x="28" y="20" text-anchor="middle" font-family="Nunito, sans-serif" font-size="13" font-weight="600" fill="#4A6B3E">50K</text>
+
+    <rect x="64" y="0" width="58" height="30" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="93" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">50mi</text>
+
+    <rect x="130" y="0" width="60" height="30" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="160" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">100K</text>
+
+    <rect x="198" y="0" width="62" height="30" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="229" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">100mi</text>
+
+    <rect x="268" y="0" width="62" height="30" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="299" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">200mi</text>
+
+    <rect x="338" y="0" width="30" height="30" rx="8" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="353" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">+</text>
+  </g>
+
+  <!-- ===== YOUR PLANS SECTION ===== -->
+  <text x="24" y="368" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">Your Plans</text>
+
+  <!-- Plan Card 1 -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="380" width="358" height="56" rx="16" fill="#FAF7F2"/>
+  </g>
+  <text x="32" y="404" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Seven Sisters</text>
+  <text x="32" y="424" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">3 hrs</text>
+  <text x="240" y="404" font-family="Nunito, sans-serif" font-size="13" font-weight="700" fill="#C4623A">400 cal</text>
+  <text x="310" y="404" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">24 oz</text>
+  <!-- Chevron -->
+  <path d="M356,404 L362,410 L356,416" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Plan Card 2 -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="444" width="358" height="56" rx="16" fill="#FAF7F2"/>
+  </g>
+  <text x="32" y="468" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Western States 100</text>
+  <text x="32" y="488" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">29 hrs</text>
+  <text x="240" y="468" font-family="Nunito, sans-serif" font-size="13" font-weight="700" fill="#C4623A">6000 cal</text>
+  <text x="310" y="468" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">200 oz</text>
+  <path d="M356,468 L362,474 L356,480" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Plan Card 3 -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="508" width="358" height="56" rx="16" fill="#FAF7F2"/>
+  </g>
+  <text x="32" y="532" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#2C2118">Presi Traverse</text>
+  <text x="32" y="552" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">8 hrs</text>
+  <text x="240" y="532" font-family="Nunito, sans-serif" font-size="13" font-weight="700" fill="#C4623A">1000 cal</text>
+  <text x="310" y="532" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">150 oz</text>
+  <path d="M356,532 L362,538 L356,544" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- ===== MY PANTRY SECTION ===== -->
+  <text x="24" y="600" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">My Pantry</text>
+
+  <!-- Pantry items — horizontal cards with food SVG icons -->
+  <!-- Item 1: Gel -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="614" width="80" height="96" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Inline gel icon (simplified from gels.svg) -->
+  <g transform="translate(32, 622) scale(0.12)">
+    <path d="M222.31 130.866C172.575 112.201 188.098 137.912 174.551 152.194C174.551 152.194 135.964 197.252 120.371 212.896C104.779 228.539 157.216 157.137 94.686 224.79C49.8342 268.574 49.7368 231.352 53.7501 218.228C57.7633 205.103 115.957 120.202 37.2954 185.005C-41.3657 249.809 25.6569 82.4686 58.1647 123.073C90.6726 163.678 109.134 68.1133 58.1647 44.7349C7.1955 21.3565 125.384 -9.80395 113.147 38.9928C100.91 87.7896 177.225 112.445 190.203 38.9928C203.181 -34.4594 264.022 15.5864 232.744 38.9928C201.467 62.3993 174.214 84.276 252.41 68.1133C330.606 51.9507 272.045 149.531 222.31 130.866Z" fill="#807F7F" stroke="black"/>
+    <path d="M116.51 185.522C119.01 181.522 123.01 162.022 123.01 162.022H122.51C121.51 162.022 109.436 171.31 108.51 171.022C107.584 170.734 98.0103 156.522 98.5103 154.022C99.0103 151.522 155.51 118.522 158.51 119.522C161.51 120.522 168.01 136.522 168.01 136.522C167.01 138.022 153.51 142.022 155.01 144.022C156.51 146.022 176.01 151.022 178.51 150.522C181.01 150.022 197.51 137.522 200.01 138.022C202.51 138.522 276.51 266.022 275.51 269.522C274.51 273.022 174.01 330.522 170.01 330.022C166.01 329.522 93.5103 202.022 94.5103 198.522C95.5103 195.022 114.01 189.522 116.51 185.522Z" fill="#D9D9D9" stroke="black"/>
+  </g>
+  <text x="56" y="693" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#2C2118">GU Gel</text>
+  <text x="56" y="705" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#7A6855">100 cal</text>
+
+  <!-- Item 2: Bar -->
+  <g filter="url(#shadowSm)">
+    <rect x="104" y="614" width="80" height="96" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Inline bar icon (simplified from bars.svg) -->
+  <g transform="translate(118, 628) scale(0.07)">
+    <path d="M257.833 5.83948C298.766 13.7515 356.228 34.7972 372.333 48.8395L231.832 282.839L109.332 327.339C65.4449 309.11 17.4125 276.179 6.33245 265.339C-4.74762 254.5 2.7088 12.1194 6.33245 5.83948C9.95609 -0.440464 216.899 -2.07257 257.833 5.83948Z" fill="#807F7F" stroke="black"/>
+    <path d="M371.275 327.265C362.361 332.687 119.032 331.253 108.775 327.265C98.5188 323.277 99.8059 55.2778 108.275 48.2648C116.745 41.2519 363.284 45.7122 371.275 48.2648C379.267 50.8175 380.19 321.843 371.275 327.265Z" fill="#D9D9D9"/>
+    <path d="M371.275 327.265C362.361 332.687 119.032 331.253 108.775 327.265C98.5188 323.277 99.8059 55.2778 108.275 48.2648C116.745 41.2519 363.284 45.7122 371.275 48.2648C379.267 50.8175 380.19 321.843 371.275 327.265Z" fill="black" fill-opacity="0.2"/>
+  </g>
+  <text x="144" y="693" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#2C2118">Clif Bar</text>
+  <text x="144" y="705" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#7A6855">250 cal</text>
+
+  <!-- Item 3: Drink Mix -->
+  <g filter="url(#shadowSm)">
+    <rect x="192" y="614" width="80" height="96" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Inline drink mix icon (simplified from drink_mixes.svg) -->
+  <g transform="translate(214, 620) scale(0.065)">
+    <path d="M125.713 18.8806V3.38058H213.213V18.8806H199.213V37.8806L342.213 50.3806V159.381C340.928 163.794 322.213 176.881 319.213 181.381C316.213 185.881 317.213 203.881 319.213 205.881C321.213 207.881 340.911 214.105 342.213 218.381V582.881C213.77 605.264 139.151 604.942 1.71307 582.881V218.381C5.67777 211.985 27.7131 208.881 32.7131 205.881C37.713 202.881 38.0244 183.703 32.7131 181.381C27.4017 179.058 4.63231 168.169 1.71307 159.381V114.381V50.3806L143.213 37.8806V18.8806H125.713Z" fill="#D9D9D9" stroke="black"/>
+    <path d="M1.71316 96.3806C-0.0178448 78.9253 0.213188 53.3806 1.71316 50.3806C3.21314 47.3806 142.713 37.8806 142.713 37.8806C144.768 28.1804 143.573 24.5257 142.713 18.8806L125.713 18.3806V3.3806C161.171 -0.398482 180.268 -0.521425 212.713 3.3806V18.8806H199.713C197.382 26.3006 197.589 30.4607 199.713 37.8806C199.713 37.8806 340.213 46.8806 342.213 50.3806C344.213 53.8806 343.787 78.4165 342.213 96.3806C206.933 114.949 132.474 114.198 1.71316 96.3806Z" fill="#787777" stroke="black"/>
+    <path d="M56.2131 339.881C18.4342 345.866 12.7688 343.592 1.71313 339.881V582.881C137.671 606.548 212.209 606.332 342.213 582.381C342.213 582.381 342.376 342.881 342.213 339.881C342.05 336.881 336.213 333.881 299.713 340.881C263.213 347.881 207.58 320.595 239.713 305.881C210.208 291.409 189.213 341.881 149.213 339.881C109.213 337.881 118.373 308.182 133.713 309.881C108.664 298.261 72.5387 337.869 56.2131 339.881Z" fill="#807F7F" stroke="black"/>
+  </g>
+  <text x="232" y="693" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#2C2118">Tailwind</text>
+  <text x="232" y="705" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#7A6855">100 cal</text>
+
+  <!-- Item 4: Real Food -->
+  <g filter="url(#shadowSm)">
+    <rect x="280" y="614" width="80" height="96" rx="16" fill="#FAF7F2"/>
+  </g>
+  <!-- Inline real food icon (simplified from real_food.svg) -->
+  <g transform="translate(296, 622) scale(0.08)">
+    <path d="M16.4562 540.697C-3.35934 366.15 -6.2298 265.197 16.4562 74.6974H467.956C498.418 255.413 500.938 357.339 467.956 540.697H16.4562Z" fill="#807F7F" stroke="black"/>
+    <path d="M16.4563 29.1974V76.6973H467.956C467.956 76.6973 472.956 62.6973 467.956 29.1974C462.956 -4.30256 439.149 56.725 426.456 29.1974C409.31 -8.22325 399.116 -7.61703 385.456 29.1974C377.806 44.0789 364.119 50.3014 352.456 29.1974C340.793 8.09335 332.944 -4.56588 312.956 29.1974C292.969 62.9606 281.163 31.6287 276.956 29.1974C260.044 -3.9338 254.156 3.66476 236.456 29.1974C218.756 54.7299 208.138 46.3841 198.956 29.1974C189.774 12.0106 172.112 -25.2074 154.956 29.1974C144.028 47.7354 137.303 49.1986 119.456 29.1974C97.6643 -11.0072 89.7671 -7.07373 80.4563 29.1974C68.1487 43.7584 61.2605 43.4152 48.9563 29.1974C34.2128 -2.37209 27.0626 -2.89877 16.4563 29.1974Z" fill="#807F7F" stroke="black"/>
+    <ellipse cx="245.456" cy="307.697" rx="151.5" ry="144" fill="#D9D9D9"/>
+  </g>
+  <text x="320" y="693" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#2C2118">Onigiri</text>
+  <text x="320" y="705" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#7A6855">180 cal</text>
+
+  <!-- ===== FAB BUTTON ===== -->
+  <rect x="252" y="732" width="122" height="44" rx="22" fill="#7A9E6E" filter="url(#shadowMd)"/>
+  <text x="280" y="759" font-family="Nunito, sans-serif" font-size="16" font-weight="700" fill="#FAF7F2">+ New Plan</text>
+
+  <!-- ===== TAB BAR ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="0" y="790" width="390" height="54" rx="0" fill="#FAF7F2"/>
+  </g>
+  <!-- Home tab (active) -->
+  <g transform="translate(65, 800)">
+    <!-- House icon -->
+    <path d="M10,14 L10,8 L2,14 L2,24 H8 V18 H12 V24 H18 V14 Z" fill="#7A9E6E"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#7A9E6E">Home</text>
+  </g>
+  <!-- Foods tab -->
+  <g transform="translate(178, 800)">
+    <!-- Grid icon -->
+    <rect x="2" y="8" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="11" y="8" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="2" y="17" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="11" y="17" width="7" height="7" rx="1" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Foods</text>
+  </g>
+  <!-- Settings tab -->
+  <g transform="translate(290, 800)">
+    <!-- Gear icon -->
+    <circle cx="10" cy="16" r="5" stroke="#B0A090" stroke-width="1.5" fill="none"/>
+    <circle cx="10" cy="16" r="2" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Settings</text>
+  </g>
+
+  <!-- Home indicator -->
+  <rect x="142" y="832" width="106" height="4" rx="2" fill="#2C2118" opacity="0.2"/>
+</svg>

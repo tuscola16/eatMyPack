@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <!-- Soft sunlight glow behind hill -->
+    <radialGradient id="sunGlow" cx="50%" cy="60%" r="50%">
+      <stop offset="0%" stop-color="#F2C98A" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#F2C98A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="240" height="240" fill="#F5F0E8"/>
+
+  <!-- Sun glow -->
+  <ellipse cx="120" cy="145" rx="120" ry="100" fill="url(#sunGlow)"/>
+
+  <!-- Hill: Franconia Ridge style, rocky rounded top, base fills to bottom -->
+  <!-- Rocky top edge with gentle angular jags, sage mid #8FA87A -->
+  <path d="
+    M 0 240
+    L 0 185
+    Q 15 175 25 178
+    Q 35 181 45 170
+    Q 55 160 62 165
+    Q 70 170 78 155
+    Q 86 142 95 148
+    Q 102 153 108 143
+    Q 114 135 120 138
+    Q 126 141 132 135
+    Q 138 129 145 138
+    Q 151 146 158 142
+    Q 166 137 174 150
+    Q 180 160 188 157
+    Q 196 154 204 165
+    Q 212 176 220 172
+    Q 230 168 240 178
+    L 240 240
+    Z
+  " fill="#8FA87A"/>
+
+  <!-- Hill darker base layer for depth -->
+  <path d="
+    M 0 240
+    L 0 200
+    Q 30 195 60 200
+    Q 90 205 120 198
+    Q 150 191 180 200
+    Q 210 209 240 200
+    L 240 240
+    Z
+  " fill="#7B9E6B" opacity="0.5"/>
+
+  <!-- Small rocks near pack base -->
+  <!-- Rock left -->
+  <ellipse cx="100" cy="145" rx="7" ry="4" fill="#3A2E22" opacity="0.7"/>
+  <!-- Rock right -->
+  <ellipse cx="143" cy="147" rx="5" ry="3" fill="#3A2E22" opacity="0.6"/>
+
+  <!-- Tiny wildflower: stem + leaves + amber dot -->
+  <line x1="152" y1="143" x2="152" y2="130" stroke="#7B9E6B" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="152" y1="138" x2="147" y2="134" stroke="#7B9E6B" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="152" y1="136" x2="157" y2="132" stroke="#7B9E6B" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="152" cy="129" r="3" fill="#E8A83A"/>
+
+  <!-- === BACKPACK === -->
+  <!-- Pack is centered at x=120, bottom of pack at y=145 -->
+
+  <!-- Shoulder straps (behind main body, sand colored) -->
+  <!-- Left strap -->
+  <path d="M 108 113 Q 103 125 104 138" stroke="#D4C5B0" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- Right strap -->
+  <path d="M 132 113 Q 137 125 136 138" stroke="#D4C5B0" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+  <!-- Hydration tube: sage dark, comes over left shoulder area -->
+  <path d="M 110 108 Q 105 115 102 120 Q 100 124 103 127" stroke="#7B9E6B" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Main pack body: terracotta #C4623A, 42×52, bottom at y=145, center x=120 -->
+  <!-- x = 120 - 21 = 99, y = 145 - 52 = 93 -->
+  <rect x="99" y="93" width="42" height="52" rx="7" ry="7" fill="#C4623A"/>
+
+  <!-- Top lid: slightly darker terracotta, smaller rounded rect on top -->
+  <!-- Lid: 36px wide, centered, ~12px tall, sitting on top of main body -->
+  <rect x="102" y="84" width="36" height="14" rx="5" ry="5" fill="#A84F2A"/>
+
+  <!-- Front pocket: sage mid, small rounded rect centered on main body -->
+  <!-- Pocket: 26×18, centered on body at roughly y=118 center -->
+  <rect x="107" y="113" width="26" height="18" rx="4" ry="4" fill="#8FA87A"/>
+
+  <!-- Pocket detail line -->
+  <line x1="107" y1="122" x2="133" y2="122" stroke="#7B9E6B" stroke-width="1" opacity="0.6"/>
+
+  <!-- Hip belt wings: small terracotta rectangles at bottom sides -->
+  <rect x="88" y="137" width="14" height="6" rx="3" ry="3" fill="#C4623A"/>
+  <rect x="138" y="137" width="14" height="6" rx="3" ry="3" fill="#C4623A"/>
+
+  <!-- Pack compression straps / side detail -->
+  <line x1="99" y1="108" x2="99" y2="118" stroke="#A84F2A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="141" y1="108" x2="141" y2="118" stroke="#A84F2A" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Sternum strap hint -->
+  <line x1="106" y1="120" x2="104" y2="120" stroke="#D4C5B0" stroke-width="2" stroke-linecap="round"/>
+  <line x1="134" y1="120" x2="136" y2="120" stroke="#D4C5B0" stroke-width="2" stroke-linecap="round"/>
+
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="140" viewBox="0 0 390 140">
+  <defs>
+    <!-- Bottom-only rounded corners r=24 -->
+    <clipPath id="clip">
+      <path d="M0,0 H390 V116 Q390,140 366,140 H24 Q0,140 0,116 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Background: warm cream -->
+    <rect width="390" height="140" fill="#F5F0E8"/>
+
+    <!-- Topographic contour lines: sage mid #8FA87A at ~25% opacity
+         Centered around x=240 y=70, 8 concentric rings expanding outward -->
+
+    <!-- Contour 1: innermost -->
+    <path d="M240,52 C248,51 258,55 263,62 C268,69 266,78 259,83 C252,88 241,88 234,83 C227,78 224,69 228,62 C231,56 236,53 240,52 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 2 -->
+    <path d="M239,40 C252,38 268,44 278,55 C287,65 286,80 276,89 C266,98 249,101 235,97 C221,93 212,81 213,68 C214,56 224,43 239,40 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 3 -->
+    <path d="M238,27 C256,24 279,31 294,47 C309,62 309,83 296,97 C283,111 262,117 243,113 C223,109 207,96 204,79 C201,62 211,38 238,27 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 4 -->
+    <path d="M238,14 C260,10 292,19 313,39 C333,58 334,85 318,103 C302,121 274,129 249,126 C224,122 200,107 194,87 C188,67 197,36 238,14 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 5: clips top and bottom -->
+    <path d="M214,0 C240,-4 308,8 340,36 C368,61 367,97 346,118 C326,138 293,145 259,141 C224,137 190,118 180,94 C170,70 180,30 214,0 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 6: off right edge -->
+    <path d="M187,-8 C218,-16 322,-4 368,30 C400,55 405,101 388,128 C372,152 328,158 275,152 C222,146 172,124 158,97 C143,69 152,18 187,-8 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 7: open outer -->
+    <path d="M150,-10 C180,-28 320,-22 390,18 L390,60 C390,60 370,100 340,120 C300,145 240,150 185,140 C130,130 80,104 60,78 C40,52 42,14 70,-4 C95,-18 125,-14 150,-10 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Contour 8: outermost, bleeds all edges -->
+    <path d="M0,30 C30,10 120,-20 220,-18 C320,-16 390,22 390,22 L390,90 C390,115 360,148 300,152 C240,156 160,140 100,118 C40,96 0,62 0,62 Z"
+          fill="none" stroke="#8FA87A" stroke-width="1.5" opacity="0.25"/>
+
+    <!-- Subtle Presidential Range hint: very faint, bottom of card -->
+    <path d="M0,115 L0,105 L20,98 L40,92 L60,88 L80,84 L100,88 L120,82 L140,88 L160,84 L180,90 L200,86 L220,90 L240,86 L260,90 L280,84 L300,88 L320,84 L340,90 L360,86 L380,92 L390,96 L390,115 Z"
+          fill="#8FA87A" opacity="0.10"/>
+  </g>
+</svg>

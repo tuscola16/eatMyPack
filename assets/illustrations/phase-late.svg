@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="100" viewBox="0 0 160 100">
+  <defs>
+    <!-- Top-right corner only r=16 -->
+    <clipPath id="clip">
+      <path d="M0,0 H144 Q160,0 160,16 V100 H0 Z"/>
+    </clipPath>
+    <!-- Golden hour sky: terracotta top → amber → warm gold -->
+    <linearGradient id="sky-late" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#C4623A"/>
+      <stop offset="50%"  stop-color="#E8A83A"/>
+      <stop offset="100%" stop-color="#F5C870"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Sky -->
+    <rect width="160" height="100" fill="url(#sky-late)"/>
+
+    <!-- Sun near horizon: low warm disk -->
+    <clipPath id="sc"><rect x="0" y="48" width="160" height="52"/></clipPath>
+    <circle cx="28" cy="48" r="14" fill="#FFE080" opacity="0.80" clip-path="url(#sc)"/>
+    <circle cx="28" cy="48" r="20" fill="#FFD060" opacity="0.20"/>
+
+    <!-- Long runner shadow — low sun casting extended shadow right -->
+    <polygon points="58,72 76,72 160,100 140,100"
+             fill="#3A2E22" opacity="0.28"/>
+
+    <!-- Presidential Range ridge: sage dark silhouette at golden hour -->
+    <polygon
+      points="0,78
+              8,60 18,52 26,57 35,44 44,50 52,38
+              60,44 68,34 76,40 84,46 90,38
+              98,50 106,40 114,54 122,47
+              130,57 140,50 150,58 160,62
+              160,78 0,78"
+      fill="#7B9E6B"/>
+
+    <!-- Summit silhouettes: rocky above treeline at golden light -->
+    <polygon points="52,38 60,44 68,34 76,40 72,46 60,48 54,44" fill="#C8A060" opacity="0.45"/>
+
+    <!-- Foreground ground: deep sage in shadow -->
+    <rect x="0" y="74" width="160" height="26" fill="#5E7A52"/>
+    <!-- Ground edge detail -->
+    <path d="M0,74 C30,72 80,75 130,73 C148,72 156,73 160,74"
+          stroke="#4A6640" stroke-width="1.5" fill="none"/>
+  </g>
+</svg>

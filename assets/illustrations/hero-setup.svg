@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="200" viewBox="0 0 390 200">
+  <defs>
+    <!-- Bottom-only rounded corners r=24 -->
+    <clipPath id="clip">
+      <path d="M0,0 H390 V176 Q390,200 366,200 H24 Q0,200 0,176 Z"/>
+    </clipPath>
+    <!-- Sky: soft sage-blue day sky -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#C8DCC8"/>
+      <stop offset="100%" stop-color="#F0EAE0"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Sky -->
+    <rect width="390" height="200" fill="url(#skyGrad)"/>
+
+    <!-- === PRESIDENTIAL RANGE: Mt Adams, Jefferson, Washington, Monroe, Eisenhower ===
+         Far layer, light sage, peaks y=30-80 -->
+    <path d="
+      M -5,110
+      L  0,100 L 18, 88 L 30, 72
+      L 42, 62 L 54, 68 L 62, 58
+      L 74, 44 L 86, 58 L 96, 66
+      L106, 52 L118, 40 L130, 46
+      L138, 38 L150, 42 L162, 56
+      L172, 48 L188, 52 L204, 44
+      L220, 56 L234, 50 L250, 46
+      L262, 52 L276, 58 L290, 48
+      L306, 54 L320, 62 L334, 70
+      L348, 66 L360, 72 L374, 80
+      L390, 88 L395,100 L395,115
+      Z"
+      fill="#8FA87A" opacity="0.85"/>
+
+    <!-- Exposed rocky summits (above treeline) — lighter granite tone -->
+    <polygon points="118,40 130,46 138,38 150,42 144,56 130,60 116,56" fill="#C8B898" opacity="0.60"/>
+    <polygon points="204,44 220,56 210,60 196,56 198,52" fill="#C8B898" opacity="0.55"/>
+
+    <!-- Atmospheric mist band -->
+    <path d="M -5,100 Q195,112 395,100 L395,112 Q195,124 -5,112 Z"
+          fill="rgba(245,240,230,0.35)"/>
+
+    <!-- === NEAR RIDGE — rockier, darker sage, y=112-145 === -->
+    <path d="
+      M -5,200 L -5,120 L  8,112 L 18,118
+      L 28,108 L 38,114 L 50,104
+      L 58,110 L 70,102 L 80,108
+      L 90,100 L100,106 L112, 96
+      L122,102 L134, 94 L144,100
+      L156, 92 L168, 98 L180, 90
+      L192, 96 L204, 92 L214, 98
+      L226, 90 L238, 96 L250, 88
+      L262, 94 L274, 90 L286, 96
+      L298, 88 L310, 94 L322, 98
+      L334, 92 L346,100 L358, 96
+      L370,104 L380,100 L395,108
+      L395,200 Z"
+      fill="#5E7A52"/>
+
+    <!-- === ELEVATION PROFILE LINE: terracotta overlay ===
+         A smooth profile curve matching the near ridge, with waypoints -->
+    <path d="
+      M   8,160 C 25,155  45,148  65,142
+      C  85,136 100,128 120,118
+      C 135,110 148, 98 165, 90
+      C 178, 84 192, 86 206, 94
+      C 220,102 235,110 255,116
+      C 272,121 290,118 312,112
+      C 330,107 352,110 375,115"
+      fill="none" stroke="#C4623A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Waypoint dots: trailhead, high point, descent -->
+    <circle cx="65"  cy="142" r="5.5" fill="#C4623A"/>
+    <circle cx="165" cy=" 90" r="5.5" fill="#C4623A"/>
+    <circle cx="312" cy="112" r="5.5" fill="#C4623A"/>
+
+    <!-- Drop lines from dots to baseline -->
+    <line x1=" 65" y1="147" x2=" 65" y2="162" stroke="#C4623A" stroke-width="1.5" stroke-dasharray="3,4" opacity="0.55"/>
+    <line x1="165" y1=" 95" x2="165" y2="162" stroke="#C4623A" stroke-width="1.5" stroke-dasharray="3,4" opacity="0.55"/>
+    <line x1="312" y1="117" x2="312" y2="162" stroke="#C4623A" stroke-width="1.5" stroke-dasharray="3,4" opacity="0.55"/>
+  </g>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <defs>
+    <!-- Subtle drop shadow filter for hand -->
+    <filter id="handShadow" x="-10%" y="-10%" width="130%" height="140%">
+      <feDropShadow dx="3" dy="4" stdDeviation="3" flood-color="#3A2E22" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="180" height="180" fill="#F5F0E8"/>
+
+  <!-- === HAND (upturned palm, flat design) === -->
+  <!-- Palm: sand #D4C5B0, rounded rect ~65×32, centered around x=88 y=145 -->
+  <g filter="url(#handShadow)">
+    <!-- Palm base -->
+    <rect x="55" y="133" width="68" height="30" rx="10" ry="10" fill="#D4C5B0"/>
+
+    <!-- Thumb: shorter, offset to left, angled slightly outward -->
+    <rect x="47" y="130" width="14" height="24" rx="7" ry="7" fill="#C4B8A8" transform="rotate(-10, 54, 142)"/>
+
+    <!-- Finger 1 (index): leftmost, slight left tilt -->
+    <rect x="62" y="98" width="13" height="42" rx="6.5" ry="6.5" fill="#C4B8A8" transform="rotate(-3, 68, 120)"/>
+
+    <!-- Finger 2 (middle): slightly taller, nearly vertical -->
+    <rect x="77" y="95" width="13" height="44" rx="6.5" ry="6.5" fill="#C4B8A8" transform="rotate(0, 83, 117)"/>
+
+    <!-- Finger 3 (ring): slight right tilt -->
+    <rect x="92" y="97" width="13" height="42" rx="6.5" ry="6.5" fill="#C4B8A8" transform="rotate(2, 98, 118)"/>
+
+    <!-- Finger 4 (pinky): shortest, more tilt -->
+    <rect x="107" y="101" width="11" height="38" rx="5.5" ry="5.5" fill="#C4B8A8" transform="rotate(5, 112, 120)"/>
+
+    <!-- Palm knuckle overlay to blend fingers into palm -->
+    <rect x="55" y="128" width="68" height="20" rx="8" ry="8" fill="#D4C5B0"/>
+
+    <!-- Palm crease lines -->
+    <path d="M 62 148 Q 88 144 116 148" stroke="#C4B8A8" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M 65 154 Q 88 151 114 154" stroke="#C4B8A8" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- === GEL PACKET (sitting in palm) === -->
+  <!-- Gel: terracotta #C4623A, 20×42px vertical, centered x=84 -->
+  <!-- x = 84 - 10 = 74, bottom sits around y=130, so top y=88 -->
+  <g transform="rotate(-4, 84, 109)">
+    <!-- Gel body -->
+    <rect x="74" y="87" width="20" height="42" rx="5" ry="5" fill="#C4623A"/>
+
+    <!-- Top tear-off tab: slightly darker terracotta -->
+    <rect x="74" y="87" width="20" height="10" rx="5" ry="5" fill="#A84F2A"/>
+    <!-- Bottom of tear tab overlap -->
+    <rect x="74" y="93" width="20" height="4" fill="#A84F2A"/>
+
+    <!-- Foil seam lines: sand/silver -->
+    <line x1="74" y1="102" x2="94" y2="102" stroke="#D4C5B0" stroke-width="1" opacity="0.7"/>
+    <line x1="74" y1="104" x2="94" y2="104" stroke="#D4C5B0" stroke-width="1" opacity="0.5"/>
+
+    <!-- Sage mid logo / stripe area in center of gel -->
+    <rect x="77" y="108" width="14" height="10" rx="2" ry="2" fill="#8FA87A"/>
+
+    <!-- Tiny highlight on gel body -->
+    <rect x="76" y="99" width="4" height="20" rx="2" ry="2" fill="#E07050" opacity="0.4"/>
+  </g>
+
+  <!-- === QUESTION MARK (drawn as path, no text) === -->
+  <!-- Positioned above gel, at roughly cx=112 cy=62, sage dark #7B9E6B -->
+  <!-- Q mark: the curve on top arcs right, descends, curves back left, then a gap, then dot -->
+  <g transform="translate(108, 38)">
+    <!-- The ? curve: starts top left, curves right and over, comes down, hooks left -->
+    <!-- Using a compound path for the ? body -->
+    <path d="
+      M 4 6
+      C 4 2, 8 0, 12 0
+      C 17 0, 21 3, 21 8
+      C 21 12, 18 14, 14 16
+      C 12 17, 11 18, 11 21
+      L 11 24
+    " stroke="#7B9E6B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Dot of the ? -->
+    <circle cx="11" cy="30" r="2.2" fill="#7B9E6B"/>
+  </g>
+
+</svg>
