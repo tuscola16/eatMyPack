@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <filter id="shadowSm" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#2C2118" flood-opacity="0.06"/>
+    </filter>
+    <filter id="shadowMd" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#2C2118" flood-opacity="0.08"/>
+    </filter>
+    <!-- Setup hero gradient (mountain silhouette) -->
+    <linearGradient id="setupSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C3D9B8"/>
+      <stop offset="60%" stop-color="#E8E0D4"/>
+      <stop offset="100%" stop-color="#F4EFE6"/>
+    </linearGradient>
+    <clipPath id="setupClip">
+      <path d="M0,0 H390 V176 Q390,200 366,200 H24 Q0,200 0,176 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Phone frame -->
+  <rect width="390" height="844" rx="40" fill="#F4EFE6"/>
+
+  <!-- Status bar -->
+  <text x="24" y="22" font-family="DM Sans, sans-serif" font-size="14" font-weight="500" fill="#2C2118">9:41</text>
+  <rect x="366" y="14" width="16" height="9" rx="2" stroke="#2C2118" stroke-width="1" fill="none"/>
+  <rect x="368" y="16" width="12" height="5" rx="1" fill="#2C2118"/>
+
+  <!-- ===== HERO BANNER (setup scene) ===== -->
+  <g clip-path="url(#setupClip)">
+    <rect width="390" height="200" fill="url(#setupSky)"/>
+    <!-- Mountain range silhouette -->
+    <path d="M0,180 C30,160 60,140 90,120 C110,105 130,115 150,100 C170,85 185,75 195,65 C205,75 215,85 235,100 C255,115 275,105 295,120 C325,140 355,155 390,170 L390,200 L0,200 Z" fill="#8FA87A" opacity="0.6"/>
+    <path d="M0,190 C40,175 80,160 120,145 C150,135 170,140 195,130 C220,140 240,135 270,145 C310,160 350,175 390,185 L390,200 L0,200 Z" fill="#4A6640" opacity="0.5"/>
+    <!-- Treeline small -->
+    <path d="M0,192 L10,182 L20,192 L28,184 L36,192 L44,180 L52,192 L60,185 L68,192 L76,178 L84,192 L92,184 L100,192 L108,180 L116,192 L124,186 L132,192 L140,178 L148,192 L156,184 L164,192 L172,180 L180,192 L188,186 L196,192 L204,180 L212,192 L220,184 L228,192 L236,178 L244,192 L252,184 L260,192 L268,180 L276,192 L284,186 L292,192 L300,180 L308,192 L316,184 L324,192 L332,178 L340,192 L348,184 L356,192 L364,180 L372,192 L380,186 L390,192 L390,200 L0,200 Z" fill="#3A5030"/>
+    <!-- Pack/backpack silhouette in foreground -->
+    <g transform="translate(160, 100)">
+      <path d="M20,60 L20,30 Q20,15 35,10 Q50,5 50,20 L50,30 Q60,25 65,30 L65,55 Q65,65 55,68 L15,68 Q5,65 5,55 L5,45 Q8,40 15,42 Z" fill="#3A2E22" opacity="0.7"/>
+      <rect x="22" y="15" width="26" height="6" rx="3" fill="#C4623A" opacity="0.8"/>
+    </g>
+  </g>
+
+  <!-- Back arrow (overlaid on hero) -->
+  <path d="M24,52 L16,60 L24,68" stroke="#2C2118" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ===== STEP INDICATOR ===== -->
+  <g transform="translate(165, 216)">
+    <circle cx="0" cy="0" r="5" fill="#7A9E6E"/>
+    <circle cx="24" cy="0" r="5" fill="#E0D5C5"/>
+    <circle cx="48" cy="0" r="5" fill="#E0D5C5"/>
+    <!-- Connecting lines -->
+    <line x1="6" y1="0" x2="18" y2="0" stroke="#E0D5C5" stroke-width="1.5"/>
+    <line x1="30" y1="0" x2="42" y2="0" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+
+  <!-- ===== STEP 1: CHOOSE DISTANCE ===== -->
+  <text x="24" y="258" font-family="Nunito, sans-serif" font-size="22" font-weight="700" fill="#2C2118">Choose Your Distance</text>
+  <text x="24" y="278" font-family="DM Sans, sans-serif" font-size="14" fill="#7A6855">Select a preset or enter a custom distance</text>
+
+  <!-- Distance cards grid (2×3) -->
+  <!-- Row 1 -->
+  <!-- 50K -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="296" width="112" height="72" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+  <text x="72" y="330" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">50K</text>
+  <text x="72" y="352" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">31 mi</text>
+
+  <!-- 50mi -->
+  <g filter="url(#shadowSm)">
+    <rect x="140" y="296" width="112" height="72" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+  <text x="196" y="330" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">50mi</text>
+  <text x="196" y="352" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">80 km</text>
+
+  <!-- 100K (SELECTED) -->
+  <g filter="url(#shadowSm)">
+    <rect x="264" y="296" width="112" height="72" rx="16" fill="#C3D9B8" stroke="#7A9E6E" stroke-width="2"/>
+  </g>
+  <text x="320" y="330" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#4A6B3E">100K</text>
+  <text x="320" y="352" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#4A6B3E">62 mi</text>
+  <!-- Checkmark -->
+  <circle cx="356" cy="308" r="10" fill="#7A9E6E"/>
+  <path d="M351,308 L355,312 L362,304" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Row 2 -->
+  <!-- 100mi -->
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="380" width="112" height="72" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+  <text x="72" y="414" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">100mi</text>
+  <text x="72" y="436" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">161 km</text>
+
+  <!-- 200mi -->
+  <g filter="url(#shadowSm)">
+    <rect x="140" y="380" width="112" height="72" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+  <text x="196" y="414" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">200mi</text>
+  <text x="196" y="436" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">322 km</text>
+
+  <!-- Custom -->
+  <g filter="url(#shadowSm)">
+    <rect x="264" y="380" width="112" height="72" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  </g>
+  <text x="320" y="420" text-anchor="middle" font-family="Nunito, sans-serif" font-size="18" font-weight="600" fill="#7A6855">Custom</text>
+
+  <!-- ===== DURATION INPUT ===== -->
+  <text x="24" y="490" font-family="Nunito, sans-serif" font-size="17" font-weight="600" fill="#2C2118">Estimated Duration</text>
+  <rect x="16" y="502" width="358" height="48" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  <text x="32" y="531" font-family="DM Sans, sans-serif" font-size="15" fill="#B0A090">e.g. 14 hours</text>
+  <!-- Clock icon -->
+  <circle cx="352" cy="526" r="10" stroke="#B0A090" stroke-width="1.5" fill="none"/>
+  <line x1="352" y1="520" x2="352" y2="526" stroke="#B0A090" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="352" y1="526" x2="357" y2="526" stroke="#B0A090" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ===== VOLUME INPUT ===== -->
+  <text x="24" y="580" font-family="Nunito, sans-serif" font-size="17" font-weight="600" fill="#2C2118">Target Volume (oz)</text>
+  <rect x="16" y="592" width="358" height="48" rx="16" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+  <text x="32" y="621" font-family="DM Sans, sans-serif" font-size="15" fill="#B0A090">e.g. 200 oz</text>
+
+  <!-- ===== CONDITIONS (preview of step 3) ===== -->
+  <text x="24" y="672" font-family="Nunito, sans-serif" font-size="17" font-weight="600" fill="#2C2118">Conditions</text>
+  <text x="24" y="692" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">Affects sodium and hydration targets</text>
+
+  <!-- Condition chips -->
+  <g transform="translate(16, 704)">
+    <!-- Cold -->
+    <rect x="0" y="0" width="100" height="44" rx="12" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="50" y="18" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="18">🥶</text>
+    <text x="50" y="36" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Cold</text>
+
+    <!-- Moderate (selected) -->
+    <rect x="112" y="0" width="100" height="44" rx="12" fill="#C3D9B8" stroke="#7A9E6E" stroke-width="1.5"/>
+    <text x="162" y="18" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="18">😊</text>
+    <text x="162" y="36" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#4A6B3E">Moderate</text>
+
+    <!-- Hot -->
+    <rect x="224" y="0" width="100" height="44" rx="12" fill="#FAF7F2" stroke="#E0D5C5" stroke-width="1.5"/>
+    <text x="274" y="18" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="18">🥵</text>
+    <text x="274" y="36" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#7A6855">Hot</text>
+  </g>
+
+  <!-- ===== PRIMARY CTA ===== -->
+  <rect x="16" y="772" width="358" height="50" rx="25" fill="#7A9E6E" filter="url(#shadowMd)"/>
+  <text x="195" y="802" text-anchor="middle" font-family="Nunito, sans-serif" font-size="16" font-weight="700" fill="#FAF7F2">Build My Pack</text>
+
+  <!-- Home indicator -->
+  <rect x="142" y="832" width="106" height="4" rx="2" fill="#2C2118" opacity="0.2"/>
+</svg>

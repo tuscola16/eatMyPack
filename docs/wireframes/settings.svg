@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <filter id="shadowSm" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#2C2118" flood-opacity="0.06"/>
+    </filter>
+    <clipPath id="settingsClip">
+      <path d="M0,0 H390 V116 Q390,140 366,140 H24 Q0,140 0,116 Z"/>
+    </clipPath>
+    <linearGradient id="settingsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C3D9B8"/>
+      <stop offset="100%" stop-color="#F4EFE6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Phone frame -->
+  <rect width="390" height="844" rx="40" fill="#F4EFE6"/>
+
+  <!-- Status bar -->
+  <text x="24" y="22" font-family="DM Sans, sans-serif" font-size="14" font-weight="500" fill="#2C2118">9:41</text>
+  <rect x="366" y="14" width="16" height="9" rx="2" stroke="#2C2118" stroke-width="1" fill="none"/>
+  <rect x="368" y="16" width="12" height="5" rx="1" fill="#2C2118"/>
+
+  <!-- ===== SETTINGS HEADER BANNER ===== -->
+  <g clip-path="url(#settingsClip)">
+    <rect width="390" height="140" fill="url(#settingsGrad)"/>
+    <!-- Topo line pattern (decorative) -->
+    <path d="M0,40 C40,35 80,42 120,38 C160,34 200,45 240,40 C280,35 320,42 360,38 L390,40" stroke="#8FA87A" stroke-width="1" fill="none" opacity="0.25"/>
+    <path d="M0,60 C50,54 100,62 150,57 C200,52 250,65 300,58 C340,52 370,60 390,56" stroke="#8FA87A" stroke-width="1" fill="none" opacity="0.20"/>
+    <path d="M0,80 C60,73 120,82 180,76 C240,70 300,84 360,78 L390,80" stroke="#8FA87A" stroke-width="1" fill="none" opacity="0.15"/>
+    <path d="M0,100 C40,93 80,102 120,96 C160,90 200,104 240,98 C280,92 320,102 360,96 L390,100" stroke="#8FA87A" stroke-width="1" fill="none" opacity="0.12"/>
+    <path d="M0,120 C50,114 100,122 150,117 C200,112 250,124 300,118 C350,112 380,120 390,118" stroke="#8FA87A" stroke-width="1" fill="none" opacity="0.10"/>
+    <!-- Small runner adjusting pack -->
+    <g transform="translate(300, 80)">
+      <circle cx="0" cy="0" r="4" fill="#3A2E22" opacity="0.5"/>
+      <line x1="0" y1="5" x2="0" y2="16" stroke="#3A2E22" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+      <path d="M-4,8 L0,6 L6,10" stroke="#3A2E22" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+      <path d="M0,16 L-3,24 M0,16 L4,23" stroke="#3A2E22" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+      <!-- Pack -->
+      <rect x="2" y="6" width="6" height="8" rx="2" fill="#C4623A" opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- Header title -->
+  <text x="24" y="60" font-family="Nunito, sans-serif" font-size="28" font-weight="700" fill="#2C2118">Settings</text>
+
+  <!-- ===== PREFERENCES SECTION ===== -->
+  <text x="24" y="172" font-family="Nunito, sans-serif" font-size="12" font-weight="600" fill="#7A6855" letter-spacing="0.8">PREFERENCES</text>
+
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="182" width="358" height="160" rx="16" fill="#FAF7F2"/>
+  </g>
+
+  <!-- Row 1: Default Distance -->
+  <text x="32" y="214" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">Default Distance</text>
+  <text x="342" y="214" text-anchor="end" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#7A9E6E">100mi</text>
+  <path d="M350,208 L356,214 L350,220" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <line x1="32" y1="232" x2="358" y2="232" stroke="#EDE5D8" stroke-width="1"/>
+
+  <!-- Row 2: Temperature Unit -->
+  <text x="32" y="258" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">Temperature Unit</text>
+  <!-- Toggle -->
+  <g transform="translate(300, 244)">
+    <rect x="0" y="0" width="64" height="28" rx="14" fill="#E0D5C5"/>
+    <!-- F selected -->
+    <rect x="2" y="2" width="30" height="24" rx="12" fill="#7A9E6E"/>
+    <text x="17" y="19" text-anchor="middle" font-family="Nunito, sans-serif" font-size="13" font-weight="700" fill="#FAF7F2">°F</text>
+    <text x="48" y="19" text-anchor="middle" font-family="Nunito, sans-serif" font-size="13" font-weight="600" fill="#7A6855">°C</text>
+  </g>
+  <line x1="32" y1="276" x2="358" y2="276" stroke="#EDE5D8" stroke-width="1"/>
+
+  <!-- Row 3: Weight Unit -->
+  <text x="32" y="302" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">Weight Unit</text>
+  <g transform="translate(300, 288)">
+    <rect x="0" y="0" width="64" height="28" rx="14" fill="#E0D5C5"/>
+    <rect x="2" y="2" width="30" height="24" rx="12" fill="#7A9E6E"/>
+    <text x="17" y="19" text-anchor="middle" font-family="Nunito, sans-serif" font-size="13" font-weight="700" fill="#FAF7F2">oz</text>
+    <text x="48" y="19" text-anchor="middle" font-family="Nunito, sans-serif" font-size="13" font-weight="600" fill="#7A6855">g</text>
+  </g>
+  <line x1="32" y1="320" x2="358" y2="320" stroke="#EDE5D8" stroke-width="1"/>
+
+  <!-- Row 4: Caffeine Sensitivity -->
+  <text x="32" y="340" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">Caffeine Sensitivity</text>
+  <text x="342" y="340" text-anchor="end" font-family="DM Sans, sans-serif" font-size="15" font-weight="500" fill="#7A9E6E">Normal</text>
+
+  <!-- ===== PANTRY SECTION ===== -->
+  <text x="24" y="378" font-family="Nunito, sans-serif" font-size="12" font-weight="600" fill="#7A6855" letter-spacing="0.8">PANTRY</text>
+
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="388" width="358" height="112" rx="16" fill="#FAF7F2"/>
+  </g>
+
+  <!-- Row 1: My Foods -->
+  <text x="32" y="420" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">My Foods</text>
+  <!-- Count badge -->
+  <rect x="302" y="406" width="48" height="22" rx="11" fill="#EBF3E6"/>
+  <text x="326" y="421" text-anchor="middle" font-family="Nunito, sans-serif" font-size="12" font-weight="600" fill="#4A6B3E">12</text>
+  <path d="M356,414 L362,420 L356,426" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <line x1="32" y1="438" x2="358" y2="438" stroke="#EDE5D8" stroke-width="1"/>
+
+  <!-- Row 2: Import Foods -->
+  <text x="32" y="464" font-family="DM Sans, sans-serif" font-size="15" fill="#2C2118">Import Foods</text>
+  <path d="M356,458 L362,464 L356,470" stroke="#B0A090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <line x1="32" y1="482" x2="358" y2="482" stroke="#EDE5D8" stroke-width="1"/>
+
+  <!-- Row 3: Clear Pantry -->
+  <text x="32" y="494" font-family="DM Sans, sans-serif" font-size="15" fill="#C4623A">Clear Pantry</text>
+
+  <!-- ===== ABOUT SECTION ===== -->
+  <text x="24" y="536" font-family="Nunito, sans-serif" font-size="12" font-weight="600" fill="#7A6855" letter-spacing="0.8">ABOUT</text>
+
+  <g filter="url(#shadowSm)">
+    <rect x="16" y="546" width="358" height="160" rx="16" fill="#FAF7F2"/>
+  </g>
+
+  <!-- App icon (eatMyPackIcon simplified) -->
+  <g transform="translate(160, 560)">
+    <rect x="0" y="0" width="70" height="64" rx="16" fill="#F4EFE6" stroke="#E0D5C5" stroke-width="1"/>
+    <!-- Mountain silhouette from eatMyPackIcon -->
+    <g transform="translate(5, 8) scale(0.058)">
+      <rect x="0.5" width="1010" height="917" fill="#222121" rx="40"/>
+      <path d="M0.500873 927.512C0.500873 927.512 0.935325 604.161 0.589897 578.185C0.524257 578.029 0.494366 577.804 0.500873 577.512C5.57357 590.1 216.637 215.279 351.001 60.512L401.501 63.512L636.501 359.012L737.501 271.012L1010 647.512L1014.5 925.012L0.500873 927.512Z" fill="#D9D9D9"/>
+    </g>
+  </g>
+
+  <!-- App name and version -->
+  <text x="195" y="644" text-anchor="middle" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#2C2118">eatMyPack</text>
+  <text x="195" y="664" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="13" fill="#7A6855">Version 1.0.0</text>
+  <text x="195" y="684" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#B0A090">Plan your race nutrition</text>
+
+  <!-- Feedback / Rate link -->
+  <text x="195" y="702" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" font-weight="500" fill="#7A9E6E" text-decoration="underline">Send Feedback</text>
+
+  <!-- ===== TAB BAR ===== -->
+  <g filter="url(#shadowSm)">
+    <rect x="0" y="790" width="390" height="54" rx="0" fill="#FAF7F2"/>
+  </g>
+  <!-- Home tab -->
+  <g transform="translate(65, 800)">
+    <path d="M10,14 L10,8 L2,14 L2,24 H8 V18 H12 V24 H18 V14 Z" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Home</text>
+  </g>
+  <!-- Foods tab -->
+  <g transform="translate(178, 800)">
+    <rect x="2" y="8" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="11" y="8" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="2" y="17" width="7" height="7" rx="1" fill="#B0A090"/>
+    <rect x="11" y="17" width="7" height="7" rx="1" fill="#B0A090"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#B0A090">Foods</text>
+  </g>
+  <!-- Settings tab (active) -->
+  <g transform="translate(290, 800)">
+    <circle cx="10" cy="16" r="5" stroke="#7A9E6E" stroke-width="1.5" fill="none"/>
+    <circle cx="10" cy="16" r="2" fill="#7A9E6E"/>
+    <text x="10" y="34" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" fill="#7A9E6E">Settings</text>
+  </g>
+
+  <!-- Home indicator -->
+  <rect x="142" y="832" width="106" height="4" rx="2" fill="#2C2118" opacity="0.2"/>
+</svg>
