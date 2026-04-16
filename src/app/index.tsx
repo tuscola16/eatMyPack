@@ -20,7 +20,7 @@ import { ONBOARDING_KEY } from './onboarding';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import AnimatedPressable from '@/components/common/AnimatedPressable';
 import { useStore } from '@/store/useStore';
-import { HeroTrail, EmptyPlans, ArrowIcon } from '@/components/illustrations';
+import { HeroTrail, EmptyPlans, ArrowIcon, FooterBackground } from '@/components/illustrations';
 import PantryCarousel from '@/components/home/PantryCarousel';
 import type { PackPlan } from '@/types';
 
@@ -93,7 +93,7 @@ export default function HomeScreen() {
             activeOpacity={0.6}
           >
             <Text style={styles.sectionTitle}>My Plans</Text>
-            <ArrowIcon width={8} height={16} />
+            <ArrowIcon width={7} height={14} />
           </TouchableOpacity>
           <AnimatedPressable
             style={styles.plansAddButton}
@@ -126,7 +126,7 @@ export default function HomeScreen() {
                   <Text style={styles.planCardWeight}>
                     {gramsToOz(plan.total_weight_g)} oz
                   </Text>
-                  <ArrowIcon width={6} height={12} />
+                  <ArrowIcon width={5} height={10} />
                 </View>
               </AnimatedPressable>
             ))}
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   sectionTitle: {
     ...typography.h3,

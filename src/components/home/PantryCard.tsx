@@ -34,9 +34,11 @@ export default function PantryCard({ food, cardWidth, cardHeight, weightUnit, on
           <CategoryIcon category={food.category} size={28} />
         </View>
 
-        <Text style={styles.name} numberOfLines={2}>
-          {food.name}
-        </Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.name} numberOfLines={2}>
+            {food.name}
+          </Text>
+        </View>
 
         <Text style={styles.calories}>{food.calories} cal</Text>
 
@@ -45,7 +47,7 @@ export default function PantryCard({ food, cardWidth, cardHeight, weightUnit, on
           <MacroRow label="Protein" value={`${food.protein_g} g`} percent={macros.protein} />
           <MacroRow label="Fat" value={`${food.fat_g} g`} percent={macros.fat} />
           <View style={styles.macroRow}>
-            <Text style={styles.macroLabel}>Sodium</Text>
+            <Text style={styles.macroLabel}>Na+</Text>
             <Text style={styles.macroValue}>{food.sodium_mg} mg</Text>
           </View>
         </View>
@@ -98,11 +100,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     transform: [{ rotate: '-8deg' }],
   },
+  nameContainer: {
+    minHeight: 44,
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: spacing.xs,
+  },
   name: {
     ...typography.bodyBold,
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: spacing.xs,
   },
   calories: {
     ...typography.h4,

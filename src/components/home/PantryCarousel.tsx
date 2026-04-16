@@ -82,11 +82,11 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
       <View style={styles.sectionHeader}>
         <TouchableOpacity
           style={styles.headerLeft}
-          onPress={() => router.push('/settings/pantry')}
+          onPress={() => router.push('/pantry')}
           activeOpacity={0.6}
         >
           <Text style={styles.sectionTitle}>My pantry</Text>
-          <ArrowIcon width={8} height={16} />
+          <ArrowIcon width={7} height={14} />
         </TouchableOpacity>
 
         {!isEmpty && (
@@ -132,9 +132,9 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
                 <AnimatedPressable
                   key="see_all"
                   style={styles.seeAllCard}
-                  onPress={() => router.push('/settings/pantry')}
+                  onPress={() => router.push('/pantry')}
                 >
-                  <PantryIcon width={32} height={32} />
+                  <PantryIcon width={40} height={40} />
                   <Text style={styles.seeAllText}>See all</Text>
                 </AnimatedPressable>
               ) : (
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   sectionTitle: {
     ...typography.h3,
