@@ -7,7 +7,8 @@ import {
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { PackEntry } from '@/types/plan';
-import { formatWeight } from '@/utils/formatters';
+import { formatWeight, formatWeightOz } from '@/utils/formatters';
+import { useStore } from '@/store/useStore';
 import CategoryIcon from '@/components/illustrations/CategoryIcon';
 import SwipeableRow from '@/components/common/SwipeableRow';
 
@@ -18,6 +19,7 @@ interface PackItemProps {
 }
 
 export default function PackItem({ entry, onReject, onPress }: PackItemProps) {
+  const weightUnit = useStore((s) => s.userPreferences.weightUnit);
   const { food, servings, total_calories, total_weight_g } = entry;
 
   const content = (
@@ -38,7 +40,9 @@ export default function PackItem({ entry, onReject, onPress }: PackItemProps) {
           <Text style={styles.servingsText}>×{servings}</Text>
         </View>
         <Text style={styles.calories}>{total_calories} cal</Text>
-        <Text style={styles.weight}>{formatWeight(total_weight_g)}</Text>
+        <Text style={styles.weight}>
+          {weightUnit === 'oz' ? formatWeightOz(total_weight_g) : formatWeight(total_weight_g)}
+        </Text>
       </View>
     </View>
   );

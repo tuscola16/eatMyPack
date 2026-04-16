@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '@/theme';
-import { FoodItem, CATEGORY_ICONS } from '@/types/food';
+import { FoodItem } from '@/types/food';
+import CategoryIcon from '@/components/illustrations/CategoryIcon';
 import {
   formatGutRating,
   getGutRatingColor,
@@ -11,18 +12,20 @@ import {
   formatWeightOz,
 } from '@/utils/formatters';
 import Badge from '@/components/common/Badge';
+import { useStore } from '@/store/useStore';
 
 interface FoodDetailProps {
   food: FoodItem;
 }
 
 const MACRO_COLORS = {
-  carbs: '#64B5F6',
-  protein: '#EF5350',
-  fat: '#FFD54F',
+  carbs: '#BC6039',
+  protein: '#E4A53B',
+  fat: '#AE7976',
 };
 
 const FoodDetail: React.FC<FoodDetailProps> = ({ food }) => {
+  const weightUnit = useStore((s) => s.userPreferences.weightUnit);
   const gutColor = getGutRatingColor(food.gut_friendliness);
   const densityColor = getCalDensityColor(food.cal_per_oz);
   const densityLabel = formatCalDensity(food.cal_per_oz);
@@ -39,7 +42,9 @@ const FoodDetail: React.FC<FoodDetailProps> = ({ food }) => {
     >
       {/* Hero Section */}
       <View style={styles.heroSection}>
-        <Text style={styles.heroIcon}>{CATEGORY_ICONS[food.category]}</Text>
+        <View style={styles.heroIcon}>
+          <CategoryIcon category={food.category} size={56} />
+        </View>
         <Text style={styles.heroName}>{food.name}</Text>
         <Text style={styles.heroBrand}>{food.brand}</Text>
       </View>
@@ -130,15 +135,21 @@ const FoodDetail: React.FC<FoodDetailProps> = ({ food }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Details</Text>
         <View style={styles.statsGrid}>
-          <StatItem label="Serving Size" value={formatWeight(food.serving_size_g)} />
-          <StatItem label="Serving (oz)" value={food.serving_size_oz.toFixed(1) + ' oz'} />
+          {weightUnit === 'g' ? (
+            <StatItem label="Serving" value={formatWeight(food.serving_size_g)} />
+          ) : (
+            <StatItem label="Serving" value={food.serving_size_oz.toFixed(1) + ' oz'} />
+          )}
           <StatItem label="Sodium" value={`${food.sodium_mg}mg`} />
           <StatItem
             label="Caffeine"
             value={food.is_caffeinated ? `${food.caffeine_mg}mg` : 'None'}
           />
-          <StatItem label="Cal/g" value={`${food.cal_per_g.toFixed(1)}`} />
-          <StatItem label="Cal/oz" value={`${food.cal_per_oz.toFixed(1)}`} />
+          {weightUnit === 'g' ? (
+            <StatItem label="Cal/g" value={`${food.cal_per_g.toFixed(1)}`} />
+          ) : (
+            <StatItem label="Cal/oz" value={`${food.cal_per_oz.toFixed(1)}`} />
+          )}
         </View>
       </View>
 
@@ -165,7 +176,7 @@ const FoodDetail: React.FC<FoodDetailProps> = ({ food }) => {
             {food.best_for.map((phase) => (
               <Badge
                 key={phase}
-                label={phase}
+                label={phase.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                 color={colors.primary}
                 variant="outline"
               />
@@ -245,7 +256,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   heroIcon: {
-    fontSize: 56,
     marginBottom: spacing.sm,
   },
   heroName: {

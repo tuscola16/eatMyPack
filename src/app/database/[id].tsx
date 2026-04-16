@@ -15,9 +15,9 @@ import EmptyState from '@/components/common/EmptyState';
 export default function FoodDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const food = useFoodById(id ?? '');
-  const pinnedFoodIds = useStore((s) => s.pinnedFoodIds);
-  const togglePinnedFood = useStore((s) => s.togglePinnedFood);
-  const isPinned = food ? pinnedFoodIds.includes(food.id) : false;
+  const pantryFoodIds = useStore((s) => s.pantryFoodIds);
+  const togglePantryFood = useStore((s) => s.togglePantryFood);
+  const isInPantry = food ? pantryFoodIds.includes(food.id) : false;
 
   if (!food) {
     return (
@@ -42,9 +42,9 @@ export default function FoodDetailScreen() {
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.textPrimary,
           headerRight: () => (
-            <TouchableOpacity onPress={() => togglePinnedFood(food.id)} style={styles.pinButton}>
-              <Text style={[styles.pinText, isPinned && styles.pinTextActive]}>
-                {isPinned ? '📌 Pinned' : '📌 Pin'}
+            <TouchableOpacity onPress={() => togglePantryFood(food.id)} style={styles.pinButton}>
+              <Text style={[styles.pinText, isInPantry && styles.pinTextActive]}>
+                {isInPantry ? 'In Pantry' : '+ Pantry'}
               </Text>
             </TouchableOpacity>
           ),

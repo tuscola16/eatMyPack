@@ -26,7 +26,7 @@ export function usePackBuilder() {
     };
   }, [categoryPreferences]);
 
-  const generatePack = useCallback((raceConfig: RaceConfig) => {
+  const generatePack = useCallback((raceConfig: RaceConfig, planName: string = '') => {
     // Merge pantry into pinned when "Build from Pantry" is on
     let effectivePinnedIds = pinnedFoodIds;
     if (useFromPantry && pantryFoodIds.length > 0) {
@@ -40,6 +40,7 @@ export function usePackBuilder() {
       rejectedFoodIds,
       effectivePinnedIds,
       getPackOptions(),
+      planName,
     );
     setCurrentPlan(plan);
     return plan;

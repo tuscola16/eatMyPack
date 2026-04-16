@@ -10,6 +10,7 @@ import Animated, {
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { PackPlan } from '@/types/plan';
 import { formatWeight, formatWeightOz, formatCalPerHour, formatVolume } from '@/utils/formatters';
+import { useStore } from '@/store/useStore';
 
 interface PackSummaryProps {
   plan: PackPlan;
@@ -94,6 +95,7 @@ const barStyles = StyleSheet.create({
 });
 
 export default function PackSummary({ plan }: PackSummaryProps) {
+  const weightUnit = useStore((s) => s.userPreferences.weightUnit);
   const avgCalPerHour = plan.race_config.expected_duration_hours > 0
     ? Math.round(plan.total_calories / plan.race_config.expected_duration_hours)
     : 0;
@@ -125,6 +127,31 @@ export default function PackSummary({ plan }: PackSummaryProps) {
     <View style={styles.container}>
       <Text style={styles.configLine}>{configLine}</Text>
 
+      {/* Volume progress bar */}
+      {hasVolumeLimit && (
+        <View style={styles.volumeSection}>
+          <View style={styles.volumeHeader}>
+            <Text style={styles.volumeLabel}>Volume</Text>
+            <Text style={styles.volumeValue}>
+              {formatVolume(totalVolume)} / {formatVolume(plan.race_config.max_volume_ml!)}
+            </Text>
+          </View>
+          <View style={styles.volumeTrack}>
+            <Animated.View
+              style={[
+                styles.volumeFill,
+                {
+                  width: `${Math.min((totalVolume / plan.race_config.max_volume_ml!) * 100, 100)}%`,
+                  backgroundColor: totalVolume > plan.race_config.max_volume_ml!
+                    ? colors.error
+                    : colors.primary,
+                },
+              ]}
+            />
+          </View>
+        </View>
+      )}
+
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: colors.calories }]}>
@@ -137,19 +164,9 @@ export default function PackSummary({ plan }: PackSummaryProps) {
 
         <View style={styles.statCard}>
           <Text style={styles.statValue}>
-            {formatWeight(plan.total_weight_g)}
+            {weightUnit === 'oz' ? formatWeightOz(plan.total_weight_g) : formatWeight(plan.total_weight_g)}
           </Text>
-          <Text style={styles.statSub}>{formatWeightOz(plan.total_weight_g)}</Text>
           <Text style={styles.statLabel}>Weight</Text>
-        </View>
-
-        <View style={styles.statDivider} />
-
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>
-            {plan.total_items}
-          </Text>
-          <Text style={styles.statLabel}>Items</Text>
         </View>
 
         <View style={styles.statDivider} />
@@ -160,19 +177,6 @@ export default function PackSummary({ plan }: PackSummaryProps) {
           </Text>
           <Text style={styles.statLabel}>Cal/hr</Text>
         </View>
-
-        {hasVolumeLimit && (
-          <>
-            <View style={styles.statDivider} />
-            <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: colors.sodium }]}>
-                {formatVolume(totalVolume)}
-              </Text>
-              <Text style={styles.statSub}>/ {formatVolume(plan.race_config.max_volume_ml!)}</Text>
-              <Text style={styles.statLabel}>Volume</Text>
-            </View>
-          </>
-        )}
       </View>
 
       {/* Animated macro fill bars */}
@@ -217,6 +221,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.md,
   },
+  volumeSection: {
+    marginBottom: spacing.md,
+  },
+  volumeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  volumeLabel: {
+    ...typography.small,
+    color: colors.textSecondary,
+  },
+  volumeValue: {
+    ...typography.small,
+    color: colors.textMuted,
+  },
+  volumeTrack: {
+    height: 8,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primarySubtle,
+    overflow: 'hidden',
+  },
+  volumeFill: {
+    height: 8,
+    borderRadius: borderRadius.full,
+  },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -234,11 +265,6 @@ const styles = StyleSheet.create({
   statValue: {
     ...typography.stat,
     color: colors.textPrimary,
-  },
-  statSub: {
-    ...typography.small,
-    color: colors.textMuted,
-    marginTop: 1,
   },
   statLabel: {
     ...typography.small,

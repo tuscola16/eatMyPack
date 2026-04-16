@@ -18,6 +18,18 @@ npx expo start -c  # Start with cache cleared
 
 No test runner or linter is currently configured.
 
+## Visual Iteration
+
+For any UI/styling changes, use the Expo web preview to verify visually before considering the work done:
+
+1. Start the web preview via `.claude/launch.json` (`expo-web` config on port 8082)
+2. Resize to mobile viewport (375x812)
+3. The onboarding screen shows on first load — click "Let's go" or set `localStorage.setItem('@AsyncStorage:hasSeenOnboarding_v1', 'true')` then reload
+4. Scroll the inner ScrollView to reach sections below the fold (use `preview_eval` to find the scrollable div and set `scrollTop`)
+5. To test with pantry data, set `localStorage.setItem('@eatmypack:pantry_food_ids', JSON.stringify([...ids]))` with food IDs from `src/data/foods.ts` and reload
+6. Take screenshots after each change and compare against the design mockup in `assets/`
+7. Iterate until the implementation matches the design — do not skip this step
+
 ## Architecture
 
 **Stack:** React Native 0.81 + Expo 54 (New Architecture) + Expo Router 6 (file-based routing) + Zustand 5 + expo-sqlite + TypeScript (strict)

@@ -40,7 +40,11 @@ export function useLocalStorage() {
       const data = await AsyncStorage.getItem(SAVED_PLANS_KEY);
       if (data) {
         const plans: PackPlan[] = JSON.parse(data);
-        plans.forEach(p => savePlan(p));
+        plans.forEach(p => {
+          // Migrate old plans that may not have a name
+          if (!p.name) p.name = '';
+          savePlan(p);
+        });
       }
     } catch (e) {
       console.warn('Failed to load saved plans:', e);

@@ -123,31 +123,30 @@ const FoodFilterBar: React.FC = () => {
         })}
       </ScrollView>
 
-      {/* Row 3: Gut rating + caffeine toggle */}
-      <View style={styles.extraFiltersRow}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.gutChipsContent}
-        >
-          {GUT_OPTIONS.map((opt) => {
-            const active =
-              opt.value === null
-                ? !filters.minGutRating
-                : filters.minGutRating === opt.value;
-            return (
-              <Pressable
-                key={opt.label}
-                style={[styles.gutChip, active && styles.gutChipActive]}
-                onPress={() => setGutRating(opt.value)}
-              >
-                <Text style={[styles.gutChipText, active && styles.gutChipTextActive]}>
-                  {opt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      {/* Row 3: Gut rating + caffeine toggle (all in one scrollable row) */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.gutChipsContent}
+        style={styles.extraFiltersRow}
+      >
+        {GUT_OPTIONS.map((opt) => {
+          const active =
+            opt.value === null
+              ? !filters.minGutRating
+              : filters.minGutRating === opt.value;
+          return (
+            <Pressable
+              key={opt.label}
+              style={[styles.gutChip, active && styles.gutChipActive]}
+              onPress={() => setGutRating(opt.value)}
+            >
+              <Text style={[styles.gutChipText, active && styles.gutChipTextActive]}>
+                {opt.label}
+              </Text>
+            </Pressable>
+          );
+        })}
 
         <Pressable
           style={[
@@ -166,7 +165,7 @@ const FoodFilterBar: React.FC = () => {
             Caffeine
           </Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -259,8 +258,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   extraFiltersRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: spacing.md,
   },
   gutChipsContent: {

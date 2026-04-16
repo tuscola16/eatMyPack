@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { colors, typography, spacing } from '@/theme';
 import { useFoodDatabase } from '@/hooks/useFoodDatabase';
+import { useStore } from '@/store/useStore';
 import FoodFilterBar from '@/components/food/FoodFilterBar';
 import FoodList from '@/components/food/FoodList';
 import type { FoodItem } from '@/types';
@@ -10,6 +11,8 @@ import type { FoodItem } from '@/types';
 export default function DatabaseScreen() {
   const router = useRouter();
   const { foods, filteredCount, totalCount } = useFoodDatabase();
+  const pantryFoodIds = useStore((s) => s.pantryFoodIds);
+  const togglePantryFood = useStore((s) => s.togglePantryFood);
 
   const handleFoodPress = (food: FoodItem) => {
     router.push({ pathname: '/database/[id]', params: { id: food.id } });
@@ -28,6 +31,8 @@ export default function DatabaseScreen() {
       <FoodList
         foods={foods}
         onPressFood={handleFoodPress}
+        pantryIds={pantryFoodIds}
+        onTogglePantry={togglePantryFood}
       />
     </View>
   );
@@ -47,10 +52,10 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontFamily: 'Nunito_700Bold',
     color: colors.textPrimary,
-    lineHeight: 34,
+    lineHeight: 28,
   },
   filterCount: {
     ...typography.caption,

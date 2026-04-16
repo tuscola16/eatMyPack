@@ -28,8 +28,9 @@ const SwipeableRow: React.FC<SwipeableRowProps> = ({
 
   const handleSwipeableOpen = (direction: 'left' | 'right') => {
     if (direction === 'right' && onSwipeLeft) {
-      onSwipeLeft();
       swipeableRef.current?.close();
+      // Delay callback so close animation completes before list re-render
+      setTimeout(() => onSwipeLeft(), 200);
     }
   };
 

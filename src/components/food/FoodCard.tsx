@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
-import { FoodItem, CATEGORY_ICONS } from '@/types/food';
+import { FoodItem } from '@/types/food';
 import {
   formatGutRating,
   getGutRatingColor,
   getCategoryColor,
 } from '@/utils/formatters';
 import Badge from '@/components/common/Badge';
+import CategoryIcon from '@/components/illustrations/CategoryIcon';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -19,7 +20,6 @@ interface FoodCardProps {
 }
 
 const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePin, isInPantry, onTogglePantry }) => {
-  const categoryIcon = CATEGORY_ICONS[food.category];
   const gutColor = getGutRatingColor(food.gut_friendliness);
   const categoryColor = getCategoryColor(food.category);
 
@@ -36,7 +36,9 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePi
       {/* Top Row: Info left, badges right */}
       <View style={styles.topRow}>
         <View style={styles.infoSection}>
-          <Text style={styles.categoryIcon}>{categoryIcon}</Text>
+          <View style={styles.categoryIcon}>
+            <CategoryIcon category={food.category} size={22} />
+          </View>
           <View style={styles.nameBlock}>
             <Text style={styles.name} numberOfLines={1}>
               {food.name}
@@ -154,7 +156,6 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   categoryIcon: {
-    fontSize: 22,
     marginRight: spacing.sm,
   },
   nameBlock: {

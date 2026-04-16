@@ -61,6 +61,12 @@ export const colors = {
   chipNutButter:    '#A08B5E',
   chipFreezeDried:  '#8FA87A',
 
+  // Pantry card palette
+  pantryCardBg:      '#F3EBE0',
+  pantryCardBorder:  '#CAAC86',
+  pantryHighlight:   '#FAD7A1',
+  pantryBrown:       '#553924',
+
   // Overlay
   overlay:          'rgba(44, 33, 24, 0.55)',
 

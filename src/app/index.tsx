@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,25 +20,14 @@ import { ONBOARDING_KEY } from './onboarding';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import AnimatedPressable from '@/components/common/AnimatedPressable';
 import { useStore } from '@/store/useStore';
-import { FOODS } from '@/data/foods';
-import { CATEGORY_ICONS } from '@/types/food';
 import HeroTrail from '@/components/illustrations/HeroTrail';
 import EmptyPlans from '@/components/illustrations/EmptyPlans';
+import PantryCarousel from '@/components/home/PantryCarousel';
 import type { PackPlan } from '@/types';
-import type { FoodItem } from '@/types/food';
-import type { RaceDistance } from '@/types/race';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (340 / 390);
 const MAX_PREVIEW_ITEMS = 6;
-
-const DISTANCE_CHIPS: { value: RaceDistance; label: string }[] = [
-  { value: '50K', label: '50K' },
-  { value: '50mi', label: '50mi' },
-  { value: '100K', label: '100K' },
-  { value: '100mi', label: '100mi' },
-  { value: '200mi', label: '200mi' },
-];
 
 function getPlanDisplayName(plan: PackPlan): string {
   if (plan.name) return plan.name;
@@ -56,6 +45,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const savedPlans = useStore((s) => s.savedPlans);
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
+  const weightUnit = useStore((s) => s.userPreferences.weightUnit);
 
   // First-launch: show onboarding if never seen
   useEffect(() => {
@@ -71,17 +61,6 @@ export default function HomeScreen() {
   }, []);
   const heroAnimStyle = useAnimatedStyle(() => ({ opacity: heroOpacity.value }));
 
-  const pantryFoods = useMemo(() => {
-    return pantryFoodIds
-      .slice(0, MAX_PREVIEW_ITEMS)
-      .map((id) => FOODS.find((f) => f.id === id))
-      .filter(Boolean) as FoodItem[];
-  }, [pantryFoodIds]);
-
-  const handleQuickStart = (distance: RaceDistance) => {
-    router.push({ pathname: '/race/setup', params: { mode: 'wizard', distance } });
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -93,44 +72,37 @@ export default function HomeScreen() {
         <Animated.View style={[styles.heroContainer, heroAnimStyle]}>
           <HeroTrail width={SCREEN_WIDTH} height={HERO_HEIGHT} />
 
-          {/* Distance chips overlaid on hero bottom */}
+          {/* "Add an adventure" button overlaid on hero bottom */}
           <View style={styles.chipOverlay} pointerEvents="box-none">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipRow}
+            <Pressable
+              style={({ pressed }) => [
+                styles.adventureButton,
+                pressed && styles.adventureButtonPressed,
+              ]}
+              onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'simple' } })}
             >
-              {DISTANCE_CHIPS.map((d) => (
-                <Pressable
-                  key={d.value}
-                  style={({ pressed }) => [
-                    styles.distanceChip,
-                    pressed && styles.chipPressed,
-                  ]}
-                  onPress={() => handleQuickStart(d.value)}
-                >
-                  <Text style={styles.distanceChipText}>{d.label}</Text>
-                </Pressable>
-              ))}
-              <Pressable
-                style={styles.distanceChipCustom}
-                onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'wizard' } })}
-              >
-                <Text style={styles.distanceChipText}>+</Text>
-              </Pressable>
-            </ScrollView>
+              <Text style={styles.adventureButtonText}>Add an adventure</Text>
+            </Pressable>
           </View>
         </Animated.View>
 
-        {/* Your Plans Section */}
-        <TouchableOpacity
-          style={styles.sectionHeader}
-          onPress={() => router.push('/race/plans')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.sectionTitle}>Your Plans</Text>
-          <Text style={styles.sectionChevron}>›</Text>
-        </TouchableOpacity>
+        {/* My Plans Section */}
+        <View style={styles.sectionHeader}>
+          <TouchableOpacity
+            style={styles.headerLeft}
+            onPress={() => router.push('/race/plans')}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.sectionTitle}>My Plans</Text>
+            <Text style={styles.sectionChevron}>{'>'}</Text>
+          </TouchableOpacity>
+          <AnimatedPressable
+            style={styles.plansAddButton}
+            onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'simple' } })}
+          >
+            <Text style={styles.plansAddButtonText}>+</Text>
+          </AnimatedPressable>
+        </View>
 
         {savedPlans.length > 0 ? (
           <View style={styles.planList}>
@@ -161,60 +133,24 @@ export default function HomeScreen() {
             ))}
           </View>
         ) : (
-          <View style={styles.emptyCard}>
-            <EmptyPlans width={240} height={240} />
-            <Text style={styles.emptyTitle}>No plans yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Tap a distance chip above or use + New Plan to build your first pack
-            </Text>
-          </View>
+          <AnimatedPressable
+            style={styles.emptyCard}
+            onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'simple' } })}
+          >
+            <View style={styles.emptySvgFill}>
+              <EmptyPlans width={SCREEN_WIDTH - spacing.lg * 2} height={200} />
+            </View>
+            <View style={styles.emptyOverlay}>
+              <Text style={styles.emptyTitle}>No plans yet</Text>
+              <Text style={styles.emptySubtitle}>Add an adventure</Text>
+            </View>
+          </AnimatedPressable>
         )}
 
         {/* My Pantry Section */}
-        <TouchableOpacity
-          style={styles.sectionHeader}
-          onPress={() => router.push('/settings/pantry')}
-          activeOpacity={0.6}
-        >
-          <Text style={styles.sectionTitle}>My Pantry</Text>
-          <Text style={styles.sectionChevron}>›</Text>
-        </TouchableOpacity>
-
-        {pantryFoods.length > 0 ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.pantryScroll}
-          >
-            {pantryFoods.map((food) => (
-              <View key={food.id} style={styles.pantryCard}>
-                <Text style={styles.pantryIcon}>
-                  {CATEGORY_ICONS[food.category] ?? '🍽️'}
-                </Text>
-                <Text style={styles.pantryName} numberOfLines={1}>
-                  {food.name}
-                </Text>
-                <Text style={styles.pantryCal}>{food.calories} cal</Text>
-              </View>
-            ))}
-          </ScrollView>
-        ) : (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Pantry is empty</Text>
-            <Text style={styles.emptySubtitle}>
-              Add foods from the Foods tab to restrict your pack to what you own
-            </Text>
-          </View>
-        )}
+        <PantryCarousel pantryFoodIds={pantryFoodIds} weightUnit={weightUnit} />
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <AnimatedPressable
-        style={styles.fab}
-        onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'wizard' } })}
-      >
-        <Text style={styles.fabText}>+ New Plan</Text>
-      </AnimatedPressable>
     </View>
   );
 }
@@ -228,7 +164,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: spacing.xxxl + spacing.xl,
+    paddingBottom: spacing.xl,
   },
 
   // Hero
@@ -243,36 +179,21 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  chipRow: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  distanceChip: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1.5,
+  adventureButton: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(250, 247, 242, 0.75)',
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
     borderColor: colors.border,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    ...shadows.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
-  distanceChipCustom: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    ...shadows.sm,
+  adventureButtonPressed: {
+    backgroundColor: 'rgba(250, 247, 242, 0.95)',
   },
-  chipPressed: {
-    transform: [{ scale: 0.95 }],
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.primary,
-  },
-  distanceChipText: {
+  adventureButtonText: {
     ...typography.captionBold,
-    color: colors.textPrimary,
+    color: colors.textSecondary,
   },
 
   // Section headers
@@ -284,6 +205,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginHorizontal: spacing.lg,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   sectionTitle: {
     ...typography.h3,
     color: colors.textPrimary,
@@ -292,6 +218,22 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colors.textMuted,
     lineHeight: 24,
+  },
+  plansAddButton: {
+    width: 32,
+    height: 32,
+    borderWidth: 1,
+    borderColor: colors.pantryCardBorder,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plansAddButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.pantryBrown,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 
   // Plan list — individual cards
@@ -341,73 +283,38 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Pantry — horizontal cards
-  pantryScroll: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-  },
-  pantryCard: {
-    width: 80,
-    height: 96,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    padding: spacing.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.sm,
-  },
-  pantryIcon: {
-    fontSize: 28,
-    marginBottom: spacing.xs,
-  },
-  pantryName: {
-    ...typography.small,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  pantryCal: {
-    ...typography.small,
-    color: colors.textSecondary,
-  },
-
   // Empty state card
   emptyCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#EFE7D5',
     borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
-    alignItems: 'center',
+    height: 200,
     marginHorizontal: spacing.lg,
     overflow: 'hidden',
     ...shadows.sm,
   },
+  emptySvgFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  emptyOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: spacing.md,
+  },
   emptyTitle: {
     ...typography.h4,
-    color: colors.textSecondary,
+    color: colors.textPrimary,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   emptySubtitle: {
     ...typography.caption,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 18,
   },
 
-  // FAB
-  fab: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    right: spacing.lg,
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.full,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    ...shadows.md,
-  },
-  fabText: {
-    ...typography.button,
-    color: colors.textInverse,
-  },
 });

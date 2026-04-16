@@ -27,6 +27,7 @@ export function buildPack(
   rejectedIds: string[] = [],
   pinnedIds: string[] = [],
   options?: PackOptions,
+  planName: string = '',
 ): PackPlan {
   // 1. Calculate phases
   const phases = calculatePhases(raceConfig);
@@ -50,17 +51,40 @@ export function buildPack(
   }
 
   // 3. Build each phase, threading global volume budget across phases
-  let remainingVolumeMl = raceConfig.max_volume_ml ?? Infinity;
+  const maxVolume = raceConfig.max_volume_ml ?? Infinity;
+  let remainingVolumeMl = maxVolume;
   const packPhases: PackPhase[] = [];
 
   const scoringOptions: ScoringOptions | undefined = options?.preferredCategories?.length
     ? { preferredCategories: options.preferredCategories }
     : undefined;
 
-  for (const phase of phases) {
-    const packPhase = fillPhase(phase, foodPool, availableFoods, remainingVolumeMl, scoringOptions);
+  // Pre-compute per-phase volume budgets for calorie spreading
+  const phaseVolumeBudgets = computePhaseVolumeBudgets(phases, raceConfig);
+
+  let prevPhaseRefill = false;
+  let prevWaystationId: string | undefined;
+
+  for (let i = 0; i < phases.length; i++) {
+    const phase = phases[i];
+
+    // Reset volume at pack refill points
+    if (prevPhaseRefill && raceConfig.waystations) {
+      const ws = raceConfig.waystations.find(w => w.id === prevWaystationId);
+      remainingVolumeMl = ws?.pack_volume_ml ?? maxVolume;
+    }
+
+    // Use per-phase budget if spreading is active, otherwise use remaining global volume
+    const volumeForPhase = phaseVolumeBudgets
+      ? Math.min(phaseVolumeBudgets[i], remainingVolumeMl)
+      : remainingVolumeMl;
+
+    const packPhase = fillPhase(phase, foodPool, availableFoods, volumeForPhase, scoringOptions);
     packPhases.push(packPhase);
     remainingVolumeMl -= packPhase.total_volume_ml;
+
+    prevPhaseRefill = phase.is_pack_refill ?? false;
+    prevWaystationId = phase.waystation_id;
   }
 
   // 4. Caffeine balancing
@@ -74,6 +98,7 @@ export function buildPack(
 
   return {
     id: generateId(),
+    name: planName,
     created_at: new Date().toISOString(),
     race_config: raceConfig,
     phases: packPhases,
@@ -84,6 +109,74 @@ export function buildPack(
     rejected_food_ids: rejectedIds,
     pinned_food_ids: pinnedIds,
   };
+}
+
+/**
+ * When pack volume is limited, spread the volume budget proportionally across phases
+ * (by duration) instead of filling greedily until empty. Returns undefined if no
+ * spreading is needed (infinite volume or budget exceeds needs).
+ *
+ * Handles pack refill points: each segment between refill points gets its own
+ * proportional budget from the available volume at that segment's start.
+ */
+function computePhaseVolumeBudgets(
+  phases: RacePhase[],
+  config: RaceConfig,
+): number[] | undefined {
+  if (!config.max_volume_ml) return undefined;
+
+  const waystations = config.waystations ?? [];
+  const budgets: number[] = [];
+
+  // Group phases into segments separated by pack refills
+  let segmentStart = 0;
+  const segments: { startIdx: number; endIdx: number; volume: number }[] = [];
+
+  for (let i = 0; i < phases.length; i++) {
+    if (phases[i].is_pack_refill) {
+      const ws = waystations.find(w => w.id === phases[i].waystation_id);
+      segments.push({
+        startIdx: segmentStart,
+        endIdx: i,
+        volume: segmentStart === 0
+          ? config.max_volume_ml
+          : (ws?.pack_volume_ml ?? config.max_volume_ml),
+      });
+      segmentStart = i + 1;
+    }
+  }
+  // Final segment (after last refill, or entire race if no refills)
+  segments.push({
+    startIdx: segmentStart,
+    endIdx: phases.length - 1,
+    volume: segmentStart === 0
+      ? config.max_volume_ml
+      : (() => {
+          // Look up the last refill waystation for volume
+          const lastRefillPhase = phases[segmentStart - 1];
+          const ws = waystations.find(w => w.id === lastRefillPhase?.waystation_id);
+          return ws?.pack_volume_ml ?? config.max_volume_ml;
+        })(),
+  });
+
+  // Allocate volume within each segment proportionally by duration
+  for (const seg of segments) {
+    const segPhases = phases.slice(seg.startIdx, seg.endIdx + 1);
+    const totalDuration = segPhases.reduce((s, p) => s + p.duration_hours, 0);
+
+    if (totalDuration <= 0) {
+      for (let i = seg.startIdx; i <= seg.endIdx; i++) {
+        budgets[i] = 0;
+      }
+      continue;
+    }
+
+    for (let i = seg.startIdx; i <= seg.endIdx; i++) {
+      budgets[i] = (phases[i].duration_hours / totalDuration) * seg.volume;
+    }
+  }
+
+  return budgets;
 }
 
 function fillPhase(
@@ -232,5 +325,6 @@ export function rejectAndRebuild(
     newRejections,
     currentPlan.pinned_food_ids,
     options,
+    currentPlan.name,
   );
 }

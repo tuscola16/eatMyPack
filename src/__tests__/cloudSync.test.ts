@@ -33,6 +33,7 @@ const TEST_UID = 'user-abc-123';
 
 const mockPlan: PackPlan = {
   id: 'plan-001',
+  name: 'Test 100K Plan',
   created_at: '2026-04-04T00:00:00.000Z',
   race_config: {
     distance: '100K',

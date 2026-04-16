@@ -4,12 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { PackPhase } from '@/types/plan';
 import { PHASE_COLORS } from '@/types/race';
-import { formatPercent } from '@/utils/formatters';
 import {
   PhaseEarly,
   PhaseMid,
@@ -33,17 +32,16 @@ interface PhaseBannerProps {
   onToggle: () => void;
 }
 
-const RING_SIZE = 40;
-const RING_STROKE = 3;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
-
 export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBannerProps) {
+  const { width: screenWidth } = useWindowDimensions();
   const phaseColor = PHASE_COLORS[phase.phase.type] ?? colors.primary;
-  const pct = Math.min(phase.target_met_pct, 100);
-  const strokeDashoffset = RING_CIRCUMFERENCE * (1 - pct / 100);
   const timeRange = `${phase.phase.start_hour}–${phase.phase.end_hour}h`;
   const PhaseIllustration = PHASE_ILLUSTRATIONS[phase.phase.type];
+
+  // Cap illustration at 40% of card width (card ~= screen - 2*padding)
+  const cardWidth = screenWidth - spacing.lg * 2;
+  const illustrationWidth = Math.min(160, cardWidth * 0.4);
+  const illustrationHeight = illustrationWidth * 0.625; // maintain ~160:100 ratio
 
   return (
     <TouchableOpacity
@@ -54,10 +52,10 @@ export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBanner
       {/* Left accent bar */}
       <View style={[styles.accentBar, { backgroundColor: phaseColor }]} />
 
-      {/* Phase illustration — top-right corner */}
+      {/* Phase illustration — top-right corner, capped at 40% width */}
       {PhaseIllustration && (
-        <View style={styles.illustration} pointerEvents="none">
-          <PhaseIllustration width={160} height={100} />
+        <View style={[styles.illustration, { width: illustrationWidth, height: illustrationHeight }]} pointerEvents="none">
+          <PhaseIllustration width={illustrationWidth} height={illustrationHeight} />
         </View>
       )}
 
@@ -72,36 +70,7 @@ export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBanner
           </Text>
         </View>
 
-        <View style={styles.right}>
-          <View style={styles.ringContainer}>
-            <Svg width={RING_SIZE} height={RING_SIZE}>
-              <Circle
-                cx={RING_SIZE / 2}
-                cy={RING_SIZE / 2}
-                r={RING_RADIUS}
-                stroke={colors.border}
-                strokeWidth={RING_STROKE}
-                fill="none"
-              />
-              <Circle
-                cx={RING_SIZE / 2}
-                cy={RING_SIZE / 2}
-                r={RING_RADIUS}
-                stroke={phaseColor}
-                strokeWidth={RING_STROKE}
-                fill="none"
-                strokeDasharray={`${RING_CIRCUMFERENCE}`}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                rotation="-90"
-                origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
-              />
-            </Svg>
-            <Text style={styles.ringText}>{formatPercent(pct)}</Text>
-          </View>
-
-          <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
-        </View>
+        <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -124,8 +93,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 160,
-    height: 100,
     opacity: 0.9,
   },
   inner: {
@@ -134,10 +101,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.lg,
   },
   left: {
     flex: 1,
+    paddingRight: spacing.md,
   },
   titleRow: {
     flexDirection: 'row',
@@ -156,26 +125,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 2,
   },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  ringContainer: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ringText: {
-    position: 'absolute',
-    fontSize: 9,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
   chevron: {
     fontSize: 11,
     color: colors.textMuted,
-    marginLeft: spacing.xs,
   },
 });

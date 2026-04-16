@@ -88,6 +88,11 @@ export default function RootLayout() {
                 <Text style={{ color, fontSize: 20 }}>📦</Text>
               ),
             }}
+            listeners={({ navigation }) => ({
+              tabPress: () => {
+                navigation.navigate('database', { screen: 'index' });
+              },
+            })}
           />
           <Tabs.Screen
             name="settings"
@@ -98,6 +103,11 @@ export default function RootLayout() {
                 <Text style={{ color, fontSize: 20 }}>⚙️</Text>
               ),
             }}
+            listeners={({ navigation }) => ({
+              tabPress: () => {
+                navigation.navigate('settings', { screen: 'index' });
+              },
+            })}
           />
           <Tabs.Screen
             name="race"

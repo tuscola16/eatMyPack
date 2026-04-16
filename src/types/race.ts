@@ -3,7 +3,22 @@ import { FoodCategory, GutRating } from './food';
 export type RaceDistance = '50K' | '50mi' | '100K' | '100mi' | '200mi' | 'custom';
 export type Conditions = 'hot' | 'moderate' | 'cool';
 export type PhaseType = 'early' | 'mid' | 'late' | 'night' | 'final_push';
-export type SetupMode = 'wizard' | 'witch';
+export type SetupMode = 'simple' | 'complex';
+
+export type WaystationType = 'aid_station' | 'pack_refill' | 'both';
+export type MarkerType = 'hour' | 'mile';
+
+export interface Waystation {
+  id: string;
+  type: WaystationType;
+  marker_type: MarkerType;
+  marker_value: number;
+  estimated_hour?: number;
+  calories_consumed?: number;
+  foods?: string[];
+  pack_volume_ml?: number;
+  notes?: string;
+}
 
 export interface RaceConfig {
   distance: RaceDistance;
@@ -13,6 +28,7 @@ export interface RaceConfig {
   max_volume_ml?: number;
   setup_mode?: SetupMode;
   cal_per_hour_override?: number;
+  waystations?: Waystation[];
 }
 
 export interface RacePhase {
@@ -29,7 +45,17 @@ export interface RacePhase {
   preferred_categories: FoodCategory[];
   min_gut_rating: GutRating;
   notes: string;
+  waystation_id?: string;
+  is_pack_refill?: boolean;
 }
+
+export const DISTANCE_TO_MILES: Record<Exclude<RaceDistance, 'custom'>, number> = {
+  '50K': 31,
+  '50mi': 50,
+  '100K': 62,
+  '100mi': 100,
+  '200mi': 200,
+};
 
 export const PHASE_LABELS: Record<PhaseType, string> = {
   early: 'Early Miles',

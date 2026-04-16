@@ -1,4 +1,4 @@
-import { RaceConfig, RacePhase, PhaseType, RaceDistance, Conditions } from '../types/race';
+import { RaceConfig, RacePhase, PhaseType, RaceDistance, Conditions, Waystation, DISTANCE_TO_MILES } from '../types/race';
 import { FoodCategory, GutRating } from '../types/food';
 import { RACE_DEFAULTS, CONDITIONS_ADJUSTMENTS, PHASE_TEMPLATES, DURATION_SUGGESTIONS } from '../data/raceDefaults';
 
@@ -78,7 +78,92 @@ export function calculatePhases(config: RaceConfig): RacePhase[] {
     phases.push(buildPhase('final_push', Math.max(current, duration * 0.8), duration, baseCal, baseCarb, baseSodium));
   }
 
+  // Split phases at waystation boundaries if waystations are configured
+  if (config.waystations && config.waystations.length > 0) {
+    return splitPhasesAtWaystations(phases, config);
+  }
+
   return phases;
+}
+
+/**
+ * Resolve mile markers to hour markers and split phases at waystation boundaries.
+ * A phase ends at a waystation and a new phase begins afterward.
+ */
+function splitPhasesAtWaystations(phases: RacePhase[], config: RaceConfig): RacePhase[] {
+  const duration = config.expected_duration_hours;
+
+  // Resolve total miles for mile-to-hour conversion
+  let totalMiles: number | undefined;
+  if (config.distance !== 'custom') {
+    totalMiles = DISTANCE_TO_MILES[config.distance];
+  } else if (config.custom_distance_km) {
+    totalMiles = config.custom_distance_km * 0.621371;
+  }
+
+  // Resolve waystation hours, sorted
+  const waystationHours: { hour: number; ws: Waystation }[] = config.waystations!
+    .map(ws => {
+      let hour: number;
+      if (ws.marker_type === 'mile' && totalMiles) {
+        hour = (ws.marker_value / totalMiles) * duration;
+      } else {
+        hour = ws.estimated_hour ?? ws.marker_value;
+      }
+      return { hour: Math.round(hour * 10) / 10, ws };
+    })
+    .sort((a, b) => a.hour - b.hour);
+
+  const result: RacePhase[] = [];
+  const MIN_PHASE_DURATION = 0.25; // 15 minutes minimum
+
+  for (const phase of phases) {
+    // Find waystations that fall within this phase
+    const splits = waystationHours.filter(
+      wh => wh.hour > phase.start_hour + MIN_PHASE_DURATION &&
+            wh.hour < phase.end_hour - MIN_PHASE_DURATION
+    );
+
+    if (splits.length === 0) {
+      result.push(phase);
+      continue;
+    }
+
+    // Split phase at each waystation boundary
+    let currentStart = phase.start_hour;
+    for (const split of splits) {
+      // Sub-phase before the waystation
+      const subPhase = buildPhaseFromParent(phase, currentStart, split.hour);
+      subPhase.waystation_id = split.ws.id;
+      subPhase.is_pack_refill = split.ws.type === 'pack_refill' || split.ws.type === 'both';
+      result.push(subPhase);
+      currentStart = split.hour;
+    }
+
+    // Remaining sub-phase after last waystation
+    if (currentStart < phase.end_hour - MIN_PHASE_DURATION) {
+      result.push(buildPhaseFromParent(phase, currentStart, phase.end_hour));
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Create a sub-phase from a parent phase with adjusted time bounds and targets.
+ */
+function buildPhaseFromParent(parent: RacePhase, startHour: number, endHour: number): RacePhase {
+  const duration = Math.round((endHour - startHour) * 10) / 10;
+  return {
+    ...parent,
+    start_hour: Math.round(startHour * 10) / 10,
+    end_hour: Math.round(endHour * 10) / 10,
+    duration_hours: duration,
+    total_cal_target: Math.round(parent.cal_per_hour_target * duration),
+    total_carb_target_g: Math.round(parent.carb_per_hour_target_g * duration),
+    waystation_id: undefined,
+    is_pack_refill: undefined,
+  };
 }
 
 function buildPhase(

@@ -25,7 +25,7 @@ export interface PackPhase {
 
 export interface PackPlan {
   id: string;
-  name?: string;
+  name: string;
   created_at: string;
   race_config: RaceConfig;
   phases: PackPhase[];
