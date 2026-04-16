@@ -44,13 +44,19 @@ const WS_TYPE_LABELS: Record<string, string> = {
   both: 'Aid + Refill',
 };
 
-function WaystationBar({ waystation }: { waystation: Waystation }) {
+function WaystationBar({
+  waystation,
+  onPress,
+}: {
+  waystation: Waystation;
+  onPress?: () => void;
+}) {
   const color = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
   const hour = waystation.estimated_hour ?? waystation.marker_value;
   const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
 
   return (
-    <View style={[styles.waystationBar, { borderLeftColor: color }]}>
+    <Pressable style={[styles.waystationBar, { borderLeftColor: color }]} onPress={onPress}>
       <View style={styles.waystationInfo}>
         <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
         <Text style={styles.waystationTime}>
@@ -65,7 +71,8 @@ function WaystationBar({ waystation }: { waystation: Waystation }) {
       {waystation.notes ? (
         <Text style={styles.waystationNotes} numberOfLines={1}>{waystation.notes}</Text>
       ) : null}
-    </View>
+      <Text style={styles.waystationChevron}>›</Text>
+    </Pressable>
   );
 }
 
@@ -274,7 +281,16 @@ export default function PackPlanScreen() {
                       />
                     ))}
                     {waystationsInPhase.map((ws) => (
-                      <WaystationBar key={ws.id} waystation={ws} />
+                      <WaystationBar
+                        key={ws.id}
+                        waystation={ws}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/race/waystation-detail',
+                            params: { wsId: ws.id, ...(id ? { planId: id } : {}) },
+                          })
+                        }
+                      />
                     ))}
                   </>
                 )}
@@ -509,5 +525,10 @@ const styles = StyleSheet.create({
     ...typography.small,
     color: colors.textMuted,
     maxWidth: 100,
+  },
+  waystationChevron: {
+    ...typography.body,
+    color: colors.textMuted,
+    marginLeft: spacing.xs,
   },
 });
