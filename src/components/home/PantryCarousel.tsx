@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AnimatedPressable from '@/components/common/AnimatedPressable';
-import EmptyFoods from '@/components/illustrations/EmptyFoods';
+import { EmptyFoods, ArrowIcon, PantryIcon } from '@/components/illustrations';
 import PantryCard from './PantryCard';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { FOODS } from '@/data/foods';
@@ -32,9 +32,12 @@ const CARD_WIDTH = Math.floor((CONTENT_WIDTH - CARD_GAP * (CARDS_PER_PAGE - 1)) 
 const PAGE_WIDTH = SCREEN_WIDTH;
 const CARD_HEIGHT = 270;
 
+const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
+
 export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCarouselProps) {
   const router = useRouter();
-  const [activePage, setActivePage] = useState(0);
+  const [activeDot, setActiveDot] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
 
   const foods = useMemo(() => {
     return pantryFoodIds
@@ -45,28 +48,29 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
 
   const showSeeAll = pantryFoodIds.length > MAX_FOOD_ITEMS;
   const totalCards = foods.length + (showSeeAll ? 1 : 0);
-  const totalPages = Math.ceil(totalCards / CARDS_PER_PAGE);
-
   const dotCount = totalCards <= 3 ? 0 : totalCards <= 6 ? 2 : 3;
 
-  const pages = useMemo(() => {
-    const result: (FoodItem | 'see_all')[][] = [];
-    for (let i = 0; i < totalPages; i++) {
-      const start = i * CARDS_PER_PAGE;
-      const pageItems: (FoodItem | 'see_all')[] = foods.slice(start, start + CARDS_PER_PAGE);
-      if (showSeeAll && i === totalPages - 1) {
-        pageItems.push('see_all');
-      }
-      result.push(pageItems);
-    }
+  const items: (FoodItem | 'see_all')[] = useMemo(() => {
+    const result: (FoodItem | 'see_all')[] = [...foods];
+    if (showSeeAll) result.push('see_all');
     return result;
-  }, [foods, totalPages, showSeeAll]);
+  }, [foods, showSeeAll]);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (dotCount === 0) return;
       const offsetX = event.nativeEvent.contentOffset.x;
-      const page = Math.round(offsetX / PAGE_WIDTH);
-      setActivePage(page);
+      const cardIndex = Math.round(offsetX / SNAP_INTERVAL);
+      const dot = Math.min(Math.floor(cardIndex / CARDS_PER_PAGE), dotCount - 1);
+      setActiveDot(dot);
+    },
+    [dotCount],
+  );
+
+  const handleDotPress = useCallback(
+    (dotIndex: number) => {
+      const scrollX = dotIndex * CARDS_PER_PAGE * SNAP_INTERVAL;
+      scrollRef.current?.scrollTo({ x: scrollX, animated: true });
     },
     [],
   );
@@ -75,7 +79,6 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
 
   return (
     <View>
-      {/* Section Header */}
       <View style={styles.sectionHeader}>
         <TouchableOpacity
           style={styles.headerLeft}
@@ -83,7 +86,7 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
           activeOpacity={0.6}
         >
           <Text style={styles.sectionTitle}>My pantry</Text>
-          <Text style={styles.sectionChevron}>{'>'}</Text>
+          <ArrowIcon width={8} height={16} />
         </TouchableOpacity>
 
         {!isEmpty && (
@@ -96,7 +99,6 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
         )}
       </View>
 
-      {/* Carousel or Empty State */}
       {isEmpty ? (
         <AnimatedPressable
           style={styles.emptyCard}
@@ -115,52 +117,56 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
       ) : (
         <>
           <ScrollView
+            ref={scrollRef}
             horizontal
-            pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
             decelerationRate="fast"
+            snapToInterval={SNAP_INTERVAL}
+            snapToAlignment="start"
+            contentContainerStyle={styles.carouselContent}
           >
-            {pages.map((pageItems, pageIndex) => (
-              <View key={pageIndex} style={styles.page}>
-                {pageItems.map((item) =>
-                  item === 'see_all' ? (
-                    <AnimatedPressable
-                      key="see_all"
-                      style={styles.seeAllCard}
-                      onPress={() => router.push('/settings/pantry')}
-                    >
-                      <Text style={styles.seeAllText}>See all</Text>
-                    </AnimatedPressable>
-                  ) : (
-                    <PantryCard
-                      key={item.id}
-                      food={item}
-                      cardWidth={CARD_WIDTH}
-                      cardHeight={CARD_HEIGHT}
-                      weightUnit={weightUnit}
-                      onPress={() =>
-                        router.push({ pathname: '/database/[id]', params: { id: item.id } })
-                      }
-                    />
-                  ),
-                )}
-              </View>
-            ))}
+            {items.map((item) =>
+              item === 'see_all' ? (
+                <AnimatedPressable
+                  key="see_all"
+                  style={styles.seeAllCard}
+                  onPress={() => router.push('/settings/pantry')}
+                >
+                  <PantryIcon width={32} height={32} />
+                  <Text style={styles.seeAllText}>See all</Text>
+                </AnimatedPressable>
+              ) : (
+                <PantryCard
+                  key={item.id}
+                  food={item}
+                  cardWidth={CARD_WIDTH}
+                  cardHeight={CARD_HEIGHT}
+                  weightUnit={weightUnit}
+                  onPress={() =>
+                    router.push({ pathname: '/database/[id]', params: { id: item.id } })
+                  }
+                />
+              ),
+            )}
           </ScrollView>
 
-          {/* Dot Indicators */}
           {dotCount > 0 && (
             <View style={styles.dotContainer}>
               {Array.from({ length: dotCount }).map((_, i) => (
-                <View
+                <TouchableOpacity
                   key={i}
-                  style={[
-                    styles.dot,
-                    i === activePage ? styles.dotActive : styles.dotInactive,
-                  ]}
-                />
+                  onPress={() => handleDotPress(i)}
+                  hitSlop={8}
+                >
+                  <View
+                    style={[
+                      styles.dot,
+                      i === activeDot ? styles.dotActive : styles.dotInactive,
+                    ]}
+                  />
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -189,11 +195,6 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.textPrimary,
   },
-  sectionChevron: {
-    fontSize: 22,
-    color: colors.textMuted,
-    lineHeight: 24,
-  },
   addButton: {
     width: 32,
     height: 32,
@@ -204,17 +205,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addButtonText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '600',
-    color: colors.pantryBrown,
+    color: colors.pantryCardBorder,
     includeFontPadding: false,
     textAlignVertical: 'center',
+    lineHeight: 24,
   },
 
-  // Carousel pages
-  page: {
-    width: PAGE_WIDTH,
-    flexDirection: 'row',
+  // Carousel flat layout
+  carouselContent: {
     paddingHorizontal: HORIZONTAL_PADDING,
     gap: CARD_GAP,
   },
@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.sm,
   },
   seeAllText: {
     ...typography.captionBold,

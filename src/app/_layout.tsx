@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import {
   DMSans_500Medium,
 } from '@expo-google-fonts/dm-sans';
 import { colors, shadows } from '@/theme';
+import { HomeIcon, FoodsIcon, SettingsIcon, FooterBackground } from '@/components/illustrations';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -74,8 +75,10 @@ export default function RootLayout() {
             options={{
               title: 'Home',
               headerShown: false,
-              tabBarIcon: ({ color }) => (
-                <Text style={{ color, fontSize: 20 }}>🏠</Text>
+              tabBarIcon: ({ focused }) => (
+                <View style={{ opacity: focused ? 1 : 0.4 }}>
+                  <HomeIcon width={24} height={24} />
+                </View>
               ),
             }}
           />
@@ -84,8 +87,10 @@ export default function RootLayout() {
             options={{
               title: 'Foods',
               headerShown: false,
-              tabBarIcon: ({ color }) => (
-                <Text style={{ color, fontSize: 20 }}>📦</Text>
+              tabBarIcon: ({ focused }) => (
+                <View style={{ opacity: focused ? 1 : 0.4 }}>
+                  <FoodsIcon width={24} height={24} />
+                </View>
               ),
             }}
             listeners={({ navigation }) => ({
@@ -99,8 +104,10 @@ export default function RootLayout() {
             options={{
               title: 'Settings',
               headerShown: false,
-              tabBarIcon: ({ color }) => (
-                <Text style={{ color, fontSize: 20 }}>⚙️</Text>
+              tabBarIcon: ({ focused }) => (
+                <View style={{ opacity: focused ? 1 : 0.4 }}>
+                  <SettingsIcon width={24} height={24} />
+                </View>
               ),
             }}
             listeners={({ navigation }) => ({

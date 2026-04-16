@@ -55,5 +55,6 @@ const styles = StyleSheet.create({
   heroContainer: {
     width: SCREEN_WIDTH,
     height: HERO_HEIGHT,
+    alignItems: 'center',
   },
 });

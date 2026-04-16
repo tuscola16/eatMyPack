@@ -1,16 +1,19 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
-import { colors, typography, spacing } from '@/theme';
-import { useFoodDatabase } from '@/hooks/useFoodDatabase';
+import React, { useMemo } from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { colors, typography, spacing, borderRadius } from '@/theme';
 import { useStore } from '@/store/useStore';
-import FoodFilterBar from '@/components/food/FoodFilterBar';
 import FoodList from '@/components/food/FoodList';
+import { FOODS } from '@/data/foods';
 
 export default function PantryScreen() {
-  const { foods } = useFoodDatabase();
+  const router = useRouter();
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const togglePantryFood = useStore((s) => s.togglePantryFood);
+
+  const pantryFoods = useMemo(() => {
+    return FOODS.filter(f => pantryFoodIds.includes(f.id));
+  }, [pantryFoodIds]);
 
   return (
     <View style={styles.container}>
@@ -26,13 +29,18 @@ export default function PantryScreen() {
           ),
         }}
       />
-      <FoodFilterBar />
       <FoodList
-        foods={foods}
+        foods={pantryFoods}
         pantryIds={pantryFoodIds}
         onTogglePantry={togglePantryFood}
-        emptyMessage="No foods found. Try adjusting your filters."
+        emptyMessage="Your pantry is empty. Add foods from the Foods tab."
       />
+      <Pressable
+        style={styles.addFoodsButton}
+        onPress={() => router.push('/database')}
+      >
+        <Text style={styles.addFoodsText}>+ Add new foods</Text>
+      </Pressable>
     </View>
   );
 }
@@ -47,5 +55,17 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
     marginRight: spacing.md,
+  },
+  addFoodsButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    alignItems: 'center',
+  },
+  addFoodsText: {
+    ...typography.button,
+    color: colors.textInverse,
   },
 });

@@ -50,13 +50,13 @@ The user has provided 24 specific UI/UX changes across 5 areas (Foods page, Home
 - `src/components/illustrations/PantryIcon.tsx` - wraps `assets/illustrations/pantry-icon.svg`
 - `src/components/illustrations/index.ts` - updated with barrel exports
 
-### 1B. Fix CategoryIcon freeze-dried - PENDING
+### 1B. Fix CategoryIcon freeze-dried - DONE
 **File:** `src/components/illustrations/CategoryIcon.tsx`
 - Import `FreezeDriedSvg from '../../../assets/freeze_dried.svg'`
 - Replace hand-coded `FreezeDriedIcon` with SVG import
 - Add `freeze_dried: FreezeDriedSvg` to `SVG_CATEGORY_MAP`
 
-### 1C. Fix phase SVG triangle artifacts - PENDING
+### 1C. Fix phase SVG triangle artifacts - DONE
 **Files:** `assets/illustrations/phase-early.svg`, `phase-mid.svg`, `phase-late.svg`
 - Remove `<g clip-path="url(#clipX)">` wrapper (keep inner content)
 - Remove `<defs>` section entirely
@@ -64,7 +64,7 @@ The user has provided 24 specific UI/UX changes across 5 areas (Foods page, Home
 
 ---
 
-## Phase 2: Home Page Changes - PENDING
+## Phase 2: Home Page Changes - DONE
 
 ### 2A. Update tab bar with SVG icons and footer background
 **File:** `src/app/_layout.tsx`
@@ -107,7 +107,7 @@ The user has provided 24 specific UI/UX changes across 5 areas (Foods page, Home
 
 ---
 
-## Phase 3: Pantry Page Overhaul - PENDING
+## Phase 3: Pantry Page Overhaul - DONE
 
 ### 3A. Filter pantry to only show owned foods
 **File:** `src/app/settings/pantry.tsx`
@@ -120,7 +120,7 @@ The user has provided 24 specific UI/UX changes across 5 areas (Foods page, Home
 
 ---
 
-## Phase 4: Race Setup Changes - PENDING
+## Phase 4: Race Setup Changes - DONE
 
 ### 4A. Remove race header bar
 **File:** `src/app/race/_layout.tsx`
@@ -156,7 +156,7 @@ The user has provided 24 specific UI/UX changes across 5 areas (Foods page, Home
 
 ---
 
-## Phase 5: Race Details Changes - PENDING
+## Phase 5: Race Details Changes - DONE
 
 ### 5A. Display waystations in plan view
 **File:** `src/app/race/plan.tsx`

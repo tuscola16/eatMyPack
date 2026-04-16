@@ -9,6 +9,7 @@ import {
 } from '@/utils/formatters';
 import Badge from '@/components/common/Badge';
 import CategoryIcon from '@/components/illustrations/CategoryIcon';
+import PantryIcon from '@/components/illustrations/PantryIcon';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -97,9 +98,9 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePi
               accessibilityLabel={isInPantry ? 'Remove from pantry' : 'Add to pantry'}
               accessibilityRole="button"
             >
-              <Text style={[styles.pantryIcon, isInPantry && styles.pantryIconActive]}>
-                {isInPantry ? '\u2705' : '\u{1F6D2}'}
-              </Text>
+              <View style={{ opacity: isInPantry ? 1 : 0.3 }}>
+                <PantryIcon width={20} height={20} />
+              </View>
             </Pressable>
           )}
           {isPinned && <Text style={styles.pinIndicator}>&#x2713;</Text>}

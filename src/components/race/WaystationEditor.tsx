@@ -173,10 +173,10 @@ export default function WaystationEditor({
           </View>
 
           {/* Notes */}
-          <View style={styles.inputRow}>
+          <View style={styles.notesSection}>
             <Text style={styles.inputLabel}>Notes</Text>
             <TextInput
-              style={[styles.smallInput, { minHeight: 40 }]}
+              style={styles.notesInput}
               value={ws.notes ?? ''}
               onChangeText={(val) => updateWaystation(ws.id, { notes: val })}
               placeholder="Optional notes"
@@ -313,6 +313,23 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textPrimary,
     textAlign: 'right',
+  },
+  notesSection: {
+    marginBottom: spacing.xs,
+  },
+  notesInput: {
+    width: '100%',
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    ...typography.body,
+    color: colors.textPrimary,
+    minHeight: 60,
+    textAlignVertical: 'top',
+    marginTop: spacing.xs,
   },
   removeButton: {
     alignSelf: 'flex-end',

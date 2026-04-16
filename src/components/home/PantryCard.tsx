@@ -24,7 +24,7 @@ export default function PantryCard({ food, cardWidth, cardHeight, weightUnit, on
   }, [food.calories, food.carbs_g, food.protein_g, food.fat_g]);
 
   return (
-    <View style={[styles.shadowWrapper, { width: cardWidth + 6, height: cardHeight + 6 }]}>
+    <View style={[styles.shadowWrapper, { width: cardWidth + 4, height: cardHeight + 4 }]}>
       <View style={[styles.shadowLayer, { width: cardWidth, height: cardHeight, borderRadius: borderRadius.lg }]} />
       <AnimatedPressable
         style={[styles.card, { width: cardWidth, height: cardHeight }]}
@@ -76,13 +76,13 @@ const styles = StyleSheet.create({
   },
   shadowLayer: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     backgroundColor: '#CAAC86',
   },
   card: {
-    marginTop: 6,
-    marginLeft: 6,
+    marginBottom: 4,
+    marginLeft: 4,
     backgroundColor: colors.pantryCardBg,
     borderWidth: 1,
     borderColor: colors.pantryCardBorder,
