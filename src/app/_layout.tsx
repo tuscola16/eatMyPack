@@ -129,24 +129,28 @@ export default function RootLayout() {
             name="race"
             options={{
               href: null,
+              headerShown: false,
             }}
           />
           <Tabs.Screen
             name="pantry"
             options={{
               href: null,
+              headerShown: false,
             }}
           />
           <Tabs.Screen
             name="auth"
             options={{
               href: null,
+              headerShown: false,
             }}
           />
           <Tabs.Screen
             name="onboarding"
             options={{
               href: null,
+              headerShown: false,
             }}
           />
         </Tabs>
