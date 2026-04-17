@@ -1,10 +1,25 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  Modal,
+} from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { colors, typography, spacing, borderRadius } from '@/theme';
+import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { useStore } from '@/store/useStore';
+import { usePackBuilder } from '@/hooks/usePackBuilder';
 import { FOODS } from '@/data/foods';
-import type { Waystation } from '@/types/race';
+import type {
+  Waystation,
+  WaystationType,
+  MarkerType,
+  RaceConfig,
+} from '@/types/race';
+import { DISTANCE_TO_MILES } from '@/types/race';
 
 const WS_TYPE_COLORS: Record<string, string> = {
   aid_station: '#8EA778',
@@ -18,13 +33,56 @@ const WS_TYPE_LABELS: Record<string, string> = {
   both: 'Aid + Refill',
 };
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
+const TYPE_OPTIONS: { value: WaystationType; label: string }[] = [
+  { value: 'aid_station', label: 'Aid Station' },
+  { value: 'pack_refill', label: 'Pack Refill' },
+  { value: 'both', label: 'Both' },
+];
+
+const MARKER_OPTIONS: { value: MarkerType; label: string }[] = [
+  { value: 'hour', label: 'Hour' },
+  { value: 'mile', label: 'Mile' },
+];
+
+// Fields whose edits require regenerating the pack plan.
+const REPACK_TRIGGER_KEYS: (keyof Waystation)[] = [
+  'type',
+  'marker_type',
+  'marker_value',
+  'estimated_hour',
+  'calories_consumed',
+  'pack_volume_ml',
+];
+
+function getTotalDistanceMiles(config: RaceConfig): number | undefined {
+  if (config.distance === 'custom') {
+    return config.custom_distance_km != null
+      ? config.custom_distance_km / 1.609344
+      : undefined;
+  }
+  return DISTANCE_TO_MILES[config.distance];
+}
+
+function recomputeEstimatedHour(
+  ws: Waystation,
+  totalDistanceMiles: number | undefined,
+  totalDurationHours: number,
+): Waystation {
+  if (ws.marker_type === 'hour') {
+    return { ...ws, estimated_hour: ws.marker_value };
+  }
+  if (ws.marker_type === 'mile' && totalDistanceMiles && totalDistanceMiles > 0) {
+    return {
+      ...ws,
+      estimated_hour:
+        Math.round((ws.marker_value / totalDistanceMiles) * totalDurationHours * 10) / 10,
+    };
+  }
+  return ws;
+}
+
+function hasTriggerChange(original: Waystation, edited: Waystation): boolean {
+  return REPACK_TRIGGER_KEYS.some((k) => original[k] !== edited[k]);
 }
 
 export default function WaystationDetailScreen() {
@@ -33,16 +91,44 @@ export default function WaystationDetailScreen() {
 
   const savedPlans = useStore((s) => s.savedPlans);
   const currentPlan = useStore((s) => s.currentPlan);
+  const savePlan = useStore((s) => s.savePlan);
+  const setCurrentPlan = useStore((s) => s.setCurrentPlan);
+  const pendingWaystationFoods = useStore((s) => s.pendingWaystationFoods);
+  const setPendingWaystationFoods = useStore((s) => s.setPendingWaystationFoods);
+  const { rebuildFromConfig } = usePackBuilder();
 
   const plan = planId
     ? savedPlans.find((p) => p.id === planId) ?? null
     : currentPlan;
 
-  const waystation: Waystation | undefined = plan?.race_config?.waystations?.find(
+  const originalWaystation: Waystation | undefined = plan?.race_config?.waystations?.find(
     (ws) => ws.id === wsId,
   );
 
-  if (!waystation) {
+  const [edited, setEdited] = useState<Waystation | null>(originalWaystation ?? null);
+  const [showRepackModal, setShowRepackModal] = useState(false);
+
+  // When the underlying waystation changes (e.g. re-pack), refresh local state.
+  useEffect(() => {
+    if (originalWaystation) setEdited(originalWaystation);
+  }, [originalWaystation?.id]);
+
+  // Apply pending food-picker selections into the edited waystation.
+  useEffect(() => {
+    if (!pendingWaystationFoods || !pendingWaystationFoods.committed) return;
+    if (pendingWaystationFoods.waystationId !== wsId) return;
+    setEdited((prev) =>
+      prev ? { ...prev, foods: pendingWaystationFoods.foodIds } : prev,
+    );
+    setPendingWaystationFoods(null);
+  }, [pendingWaystationFoods, wsId, setPendingWaystationFoods]);
+
+  const totalDistanceMiles = useMemo(
+    () => (plan ? getTotalDistanceMiles(plan.race_config) : undefined),
+    [plan?.race_config],
+  );
+
+  if (!plan || !originalWaystation || !edited) {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
@@ -56,19 +142,92 @@ export default function WaystationDetailScreen() {
     );
   }
 
-  const typeColor = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
-  const typeLabel = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
-  const hour = waystation.estimated_hour ?? waystation.marker_value;
+  const typeColor = WS_TYPE_COLORS[edited.type] ?? colors.primary;
+  const typeLabel = WS_TYPE_LABELS[edited.type] ?? edited.type;
+  const hour = edited.estimated_hour ?? edited.marker_value;
+  const isDirty = JSON.stringify(originalWaystation) !== JSON.stringify(edited);
 
-  const packedFoods =
-    waystation.foods && waystation.foods.length > 0
-      ? waystation.foods.map((id) => FOODS.find((f) => f.id === id)).filter(Boolean)
-      : [];
+  const updateField = <K extends keyof Waystation>(key: K, value: Waystation[K]) => {
+    setEdited((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, [key]: value };
+      if (key === 'marker_type' || key === 'marker_value') {
+        return recomputeEstimatedHour(
+          next,
+          totalDistanceMiles,
+          plan.race_config.expected_duration_hours,
+        );
+      }
+      return next;
+    });
+  };
 
-  const foodCalories = packedFoods.reduce((sum, f) => sum + (f?.calories ?? 0), 0);
-  const totalCalories =
-    waystation.calories_consumed != null
-      ? waystation.calories_consumed
+  const openFoodPicker = () => {
+    setPendingWaystationFoods({
+      waystationId: edited.id,
+      foodIds: edited.foods ?? [],
+      committed: false,
+    });
+    router.push('/database');
+  };
+
+  const removeFood = (foodId: string) => {
+    setEdited((prev) =>
+      prev
+        ? { ...prev, foods: (prev.foods ?? []).filter((id) => id !== foodId) }
+        : prev,
+    );
+  };
+
+  const buildUpdatedConfig = (): RaceConfig => ({
+    ...plan.race_config,
+    waystations: (plan.race_config.waystations ?? [])
+      .map((ws) => (ws.id === edited.id ? edited : ws))
+      .sort(
+        (a, b) =>
+          (a.estimated_hour ?? a.marker_value ?? 0) -
+          (b.estimated_hour ?? b.marker_value ?? 0),
+      ),
+  });
+
+  const saveWithoutRepack = () => {
+    const updatedConfig = buildUpdatedConfig();
+    savePlan({ ...plan, race_config: updatedConfig });
+    setShowRepackModal(false);
+    router.back();
+  };
+
+  const saveWithRepack = () => {
+    const updatedConfig = buildUpdatedConfig();
+    const rebuilt = rebuildFromConfig(updatedConfig, plan);
+    savePlan(rebuilt);
+    if (!planId) setCurrentPlan(rebuilt);
+    setShowRepackModal(false);
+    router.back();
+  };
+
+  const handleSave = () => {
+    if (!isDirty) {
+      router.back();
+      return;
+    }
+    if (hasTriggerChange(originalWaystation, edited)) {
+      setShowRepackModal(true);
+      return;
+    }
+    // Only notes/foods changed — save silently.
+    saveWithoutRepack();
+  };
+
+  const packedFoodItems =
+    (edited.foods ?? [])
+      .map((id) => FOODS.find((f) => f.id === id))
+      .filter((f): f is NonNullable<typeof f> => Boolean(f));
+
+  const foodCalories = packedFoodItems.reduce((sum, f) => sum + (f.calories ?? 0), 0);
+  const displayedTotalCalories =
+    edited.calories_consumed != null
+      ? edited.calories_consumed
       : foodCalories > 0
         ? foodCalories
         : null;
@@ -85,78 +244,229 @@ export default function WaystationDetailScreen() {
           <View style={styles.headerInfo}>
             <Text style={[styles.typeLabel, { color: typeColor }]}>{typeLabel}</Text>
             <Text style={styles.timeLabel}>
-              {waystation.marker_type === 'mile'
-                ? `Mile ${waystation.marker_value}${hour != null ? ` (~${hour}h)` : ''}`
+              {edited.marker_type === 'mile'
+                ? `Mile ${edited.marker_value}${hour != null ? ` (~${hour}h)` : ''}`
                 : `Hour ${hour}`}
             </Text>
           </View>
+          {isDirty && (
+            <Pressable style={styles.saveBtn} onPress={handleSave}>
+              <Text style={styles.saveBtnText}>Save</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.body}>
-          {/* Key stats */}
+          {/* Type pills */}
           <View style={styles.card}>
-            <InfoRow label="Type" value={typeLabel} />
-            <InfoRow
-              label="Position"
-              value={
-                waystation.marker_type === 'mile'
-                  ? `Mile ${waystation.marker_value}`
-                  : `Hour ${waystation.marker_value}`
-              }
-            />
-            {waystation.estimated_hour != null && waystation.marker_type === 'mile' && (
-              <InfoRow label="Estimated Time" value={`~${waystation.estimated_hour}h`} />
-            )}
-            {totalCalories != null && (
-              <InfoRow label="Calories Consumed" value={`${totalCalories} kcal`} />
-            )}
-            {waystation.pack_volume_ml != null && (
-              <InfoRow
-                label="Pack Volume"
-                value={`${(waystation.pack_volume_ml / 1000).toFixed(1)} L`}
+            <Text style={styles.sectionTitle}>Type</Text>
+            <View style={styles.pillRow}>
+              {TYPE_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt.value}
+                  style={[styles.pill, edited.type === opt.value && styles.pillActive]}
+                  onPress={() => updateField('type', opt.value)}
+                >
+                  <Text
+                    style={[
+                      styles.pillText,
+                      edited.type === opt.value && styles.pillTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* Position: marker_type + marker_value */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Position</Text>
+            <View style={styles.markerRow}>
+              <View style={styles.markerToggle}>
+                {MARKER_OPTIONS.map((opt) => (
+                  <Pressable
+                    key={opt.value}
+                    style={[
+                      styles.markerPill,
+                      edited.marker_type === opt.value && styles.markerPillActive,
+                    ]}
+                    onPress={() => updateField('marker_type', opt.value)}
+                  >
+                    <Text
+                      style={[
+                        styles.markerPillText,
+                        edited.marker_type === opt.value && styles.markerPillTextActive,
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <TextInput
+                style={styles.markerInput}
+                value={edited.marker_value ? edited.marker_value.toString() : ''}
+                onChangeText={(val) => {
+                  const num = parseFloat(val);
+                  updateField('marker_value', isNaN(num) ? 0 : num);
+                }}
+                keyboardType="numeric"
+                placeholder={edited.marker_type === 'hour' ? 'Hour' : 'Mile'}
+                placeholderTextColor={colors.textMuted}
               />
+              {edited.marker_type === 'mile' && edited.estimated_hour != null && (
+                <Text style={styles.estimatedHour}>~{edited.estimated_hour}h</Text>
+              )}
+            </View>
+          </View>
+
+          {/* Calories consumed */}
+          <View style={styles.card}>
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Calories consumed here</Text>
+              <TextInput
+                style={styles.smallInput}
+                value={edited.calories_consumed != null ? edited.calories_consumed.toString() : ''}
+                onChangeText={(val) => {
+                  const num = parseInt(val, 10);
+                  updateField('calories_consumed', isNaN(num) ? undefined : num);
+                }}
+                keyboardType="numeric"
+                placeholder="Optional"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            {displayedTotalCalories != null && (
+              <Text style={styles.helperText}>Showing {displayedTotalCalories} kcal</Text>
             )}
           </View>
 
-          {/* Notes */}
-          {waystation.notes ? (
+          {/* Pack volume (refill/both only) */}
+          {(edited.type === 'pack_refill' || edited.type === 'both') && (
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Notes</Text>
-              <Text style={styles.notesText}>{waystation.notes}</Text>
+              <View style={styles.inputRow}>
+                <Text style={styles.inputLabel}>Pack volume (L)</Text>
+                <TextInput
+                  style={styles.smallInput}
+                  value={
+                    edited.pack_volume_ml != null
+                      ? (edited.pack_volume_ml / 1000).toString()
+                      : ''
+                  }
+                  onChangeText={(val) => {
+                    const num = parseFloat(val);
+                    updateField(
+                      'pack_volume_ml',
+                      isNaN(num) ? undefined : Math.round(num * 1000),
+                    );
+                  }}
+                  keyboardType="decimal-pad"
+                  placeholder="3.0"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
             </View>
-          ) : null}
+          )}
+
+          {/* Notes */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Notes</Text>
+            <TextInput
+              style={styles.notesInput}
+              value={edited.notes ?? ''}
+              onChangeText={(val) => updateField('notes', val)}
+              placeholder="Optional notes"
+              placeholderTextColor={colors.textMuted}
+              multiline
+            />
+          </View>
 
           {/* Packed foods */}
-          {packedFoods.length > 0 && (
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Packed Foods</Text>
-              {packedFoods.map((food) =>
-                food ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Packed Foods</Text>
+            {packedFoodItems.length > 0 && (
+              <View style={styles.foodChipRow}>
+                {packedFoodItems.map((food) => (
                   <Pressable
                     key={food.id}
-                    style={styles.foodRow}
-                    onPress={() =>
-                      router.push({ pathname: '/database/[id]', params: { id: food.id } })
-                    }
+                    style={styles.foodChip}
+                    onPress={() => removeFood(food.id)}
                   >
-                    <View style={styles.foodInfo}>
-                      <Text style={styles.foodName}>{food.name}</Text>
-                      <Text style={styles.foodBrand}>{food.brand}</Text>
-                    </View>
-                    <Text style={styles.foodCals}>{food.calories} cal</Text>
+                    <Text style={styles.foodChipText}>{food.name}</Text>
+                    <Text style={styles.foodChipRemove}>✕</Text>
                   </Pressable>
-                ) : null,
-              )}
-              {packedFoods.length > 0 && (
-                <View style={styles.foodTotalRow}>
-                  <Text style={styles.foodTotalLabel}>Total</Text>
-                  <Text style={styles.foodTotalValue}>{foodCalories} cal</Text>
-                </View>
-              )}
+                ))}
+              </View>
+            )}
+            <Pressable style={styles.addFoodsButton} onPress={openFoodPicker}>
+              <Text style={styles.addFoodsButtonText}>
+                {packedFoodItems.length > 0 ? 'Edit foods →' : 'Add foods →'}
+              </Text>
+            </Pressable>
+            {packedFoodItems.length > 0 && (
+              <View style={styles.foodTotalRow}>
+                <Text style={styles.foodTotalLabel}>Total</Text>
+                <Text style={styles.foodTotalValue}>{foodCalories} cal</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Save / Cancel footer */}
+          {isDirty && (
+            <View style={styles.footerActions}>
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setEdited(originalWaystation);
+                }}
+              >
+                <Text style={styles.cancelBtnText}>Discard</Text>
+              </Pressable>
+              <Pressable style={styles.primaryBtn} onPress={handleSave}>
+                <Text style={styles.primaryBtnText}>Save Changes</Text>
+              </Pressable>
             </View>
           )}
         </View>
       </ScrollView>
+
+      {/* Re-pack warning modal */}
+      <Modal
+        visible={showRepackModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRepackModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowRepackModal(false)}
+        >
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>This change affects your pack</Text>
+            <Text style={styles.modalBody}>
+              You edited a field (type, position, calories, or pack volume) that changes how
+              your nutrition pack is built. Re-pack now to get a fresh plan, or keep your
+              current pack and save the waystation change only.
+            </Text>
+            <Pressable style={styles.modalOption} onPress={saveWithRepack}>
+              <Text style={styles.modalOptionTitle}>Re-pack & Save</Text>
+              <Text style={styles.modalOptionSub}>Rebuild phases with the new values</Text>
+            </Pressable>
+            <Pressable style={styles.modalOption} onPress={saveWithoutRepack}>
+              <Text style={styles.modalOptionTitle}>Save without re-pack</Text>
+              <Text style={styles.modalOptionSub}>Keep the current pack as is</Text>
+            </Pressable>
+            <Pressable
+              style={styles.modalCancelBtn}
+              onPress={() => setShowRepackModal(false)}
+            >
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -201,6 +511,16 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 2,
   },
+  saveBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
+  },
+  saveBtnText: {
+    ...typography.captionBold,
+    color: colors.textInverse,
+  },
   body: {
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
@@ -220,54 +540,151 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  infoRow: {
+  pillRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
+    gap: spacing.xs,
   },
-  infoLabel: {
+  pill: {
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  pillActive: {
+    backgroundColor: colors.primarySubtle,
+    borderColor: colors.primary,
+  },
+  pillText: {
     ...typography.caption,
     color: colors.textSecondary,
   },
-  infoValue: {
-    ...typography.captionBold,
-    color: colors.textPrimary,
+  pillTextActive: {
+    color: colors.primaryDark,
+    fontWeight: '600',
   },
-  notesText: {
+  markerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  markerToggle: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  markerPill: {
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.background,
+  },
+  markerPillActive: {
+    backgroundColor: colors.primary,
+  },
+  markerPillText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  markerPillTextActive: {
+    color: colors.textInverse,
+    fontWeight: '600',
+  },
+  markerInput: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     ...typography.body,
     color: colors.textPrimary,
-    lineHeight: 22,
   },
-  foodRow: {
+  estimatedHour: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
   },
-  foodInfo: {
-    flex: 1,
-  },
-  foodName: {
-    ...typography.bodyBold,
-    color: colors.textPrimary,
-  },
-  foodBrand: {
+  inputLabel: {
     ...typography.caption,
     color: colors.textSecondary,
+    flex: 1,
   },
-  foodCals: {
+  smallInput: {
+    width: 100,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    ...typography.body,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  helperText: {
+    ...typography.small,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
+  notesInput: {
+    width: '100%',
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    ...typography.body,
+    color: colors.textPrimary,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  foodChipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  foodChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.primarySubtle,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  foodChipText: {
+    ...typography.caption,
+    color: colors.primaryDark,
+    fontWeight: '600',
+  },
+  foodChipRemove: {
+    ...typography.caption,
+    color: colors.primaryDark,
+  },
+  addFoodsButton: {
+    alignSelf: 'flex-start',
+  },
+  addFoodsButtonText: {
     ...typography.captionBold,
-    color: colors.calories,
+    color: colors.primary,
   },
   foodTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: spacing.sm,
+    marginTop: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderLight,
   },
   foodTotalLabel: {
     ...typography.captionBold,
@@ -276,6 +693,79 @@ const styles = StyleSheet.create({
   foodTotalValue: {
     ...typography.captionBold,
     color: colors.calories,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  cancelBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  cancelBtnText: {
+    ...typography.captionBold,
+    color: colors.textSecondary,
+  },
+  primaryBtn: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.full,
+  },
+  primaryBtnText: {
+    ...typography.captionBold,
+    color: colors.textInverse,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  modalCard: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    width: '100%',
+    maxWidth: 360,
+    ...shadows.lg,
+  },
+  modalTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  modalBody: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+    lineHeight: 20,
+  },
+  modalOption: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  modalOptionTitle: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+  },
+  modalOptionSub: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  modalCancelBtn: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  modalCancelText: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
   },
   errorState: {
     flex: 1,

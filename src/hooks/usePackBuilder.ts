@@ -3,6 +3,7 @@ import { FOODS } from '../data/foods';
 import { useStore } from '../store/useStore';
 import { buildPack, rejectAndRebuild, PackOptions } from '../services/packAlgorithm';
 import { RaceConfig } from '../types/race';
+import { PackPlan } from '../types/plan';
 
 export function usePackBuilder() {
   const {
@@ -59,10 +60,37 @@ export function usePackBuilder() {
     setCurrentPlan(null);
   }, [clearRejections, setCurrentPlan]);
 
+  const rebuildFromConfig = useCallback(
+    (updatedConfig: RaceConfig, existingPlan: PackPlan): PackPlan => {
+      let effectivePinnedIds = pinnedFoodIds;
+      if (useFromPantry && pantryFoodIds.length > 0) {
+        effectivePinnedIds = Array.from(new Set([...pinnedFoodIds, ...pantryFoodIds]));
+      }
+      const generated = buildPack(
+        updatedConfig,
+        FOODS,
+        rejectedFoodIds,
+        effectivePinnedIds,
+        getPackOptions(),
+        existingPlan.name,
+      );
+      return {
+        ...generated,
+        id: existingPlan.id,
+        name: existingPlan.name,
+        created_at: existingPlan.created_at,
+        race_date: existingPlan.race_date,
+        start_time: existingPlan.start_time,
+      };
+    },
+    [rejectedFoodIds, pinnedFoodIds, pantryFoodIds, useFromPantry, getPackOptions],
+  );
+
   return {
     currentPlan,
     generatePack,
     rejectItem,
     resetPlan,
+    rebuildFromConfig,
   };
 }

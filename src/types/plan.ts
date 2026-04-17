@@ -27,6 +27,8 @@ export interface PackPlan {
   id: string;
   name: string;
   created_at: string;
+  race_date?: string; // ISO calendar date, e.g. "2026-04-20"
+  start_time?: string; // 24h "HH:MM"
   race_config: RaceConfig;
   phases: PackPhase[];
   total_calories: number;
