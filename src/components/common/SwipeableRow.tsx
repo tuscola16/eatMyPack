@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { colors, typography, spacing } from '@/theme';
+import { colors, typography, spacing, borderRadius } from '@/theme';
 
 interface SwipeableRowProps {
   children: React.ReactNode;
@@ -18,6 +18,27 @@ const SwipeableRow: React.FC<SwipeableRowProps> = ({
 }) => {
   const swipeableRef = useRef<Swipeable>(null);
 
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webRow}>
+        <View style={styles.webChildren}>{children}</View>
+        {onSwipeLeft && (
+          <Pressable
+            onPress={onSwipeLeft}
+            accessibilityLabel={leftLabel}
+            style={({ pressed }) => [
+              styles.webRejectBtn,
+              { backgroundColor: leftColor },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Text style={styles.webRejectBtnText}>✕</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  }
+
   const renderRightActions = () => {
     return (
       <View style={[styles.rightAction, { backgroundColor: leftColor }]}>
@@ -29,7 +50,6 @@ const SwipeableRow: React.FC<SwipeableRowProps> = ({
   const handleSwipeableOpen = (direction: 'left' | 'right') => {
     if (direction === 'right' && onSwipeLeft) {
       swipeableRef.current?.close();
-      // Delay callback so close animation completes before list re-render
       setTimeout(() => onSwipeLeft(), 200);
     }
   };
@@ -57,6 +77,26 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.white,
     paddingHorizontal: spacing.lg,
+  },
+  webRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  webChildren: {
+    flex: 1,
+  },
+  webRejectBtn: {
+    width: 36,
+    marginLeft: spacing.xs,
+    marginBottom: spacing.xs,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webRejectBtnText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
 

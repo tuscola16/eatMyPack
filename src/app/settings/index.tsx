@@ -18,6 +18,7 @@ import { TempUnit, WeightUnit, CaffeineSensitivity } from '@/types/preferences';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useCloudSync } from '@/hooks/useCloudSync';
+import { confirmDestructive } from '@/utils/confirm';
 import { CategoryToggleChip } from '@/components/common/CategoryToggleChip';
 import { SettingsHeader } from '@/components/illustrations';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,7 +42,6 @@ const DISTANCES: { value: RaceDistance; label: string }[] = [
 export default function SettingsScreen() {
   const savedPlans = useStore((s) => s.savedPlans);
   const user = useStore((s) => s.user);
-  const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const categoryPreferences = useStore((s) => s.categoryPreferences);
   const toggleExcludedCategory = useStore((s) => s.toggleExcludedCategory);
   const togglePreferredCategory = useStore((s) => s.togglePreferredCategory);
@@ -52,46 +52,33 @@ export default function SettingsScreen() {
   const { fullSync, syncStatus } = useCloudSync();
 
   const handleClearPlans = () => {
-    Alert.alert(
-      'Clear All Saved Plans',
-      'This will permanently delete all your saved plans. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete All',
-          style: 'destructive',
-          onPress: async () => {
-            savedPlans.forEach((p) => useStore.getState().deletePlan(p.id));
-            await AsyncStorage.removeItem('@eatmypack:saved_plans');
-          },
-        },
-      ]
-    );
+    confirmDestructive({
+      title: 'Clear All Saved Plans',
+      message: 'This will permanently delete all your saved plans. This action cannot be undone.',
+      confirmLabel: 'Delete All',
+      onConfirm: async () => {
+        savedPlans.forEach((p) => useStore.getState().deletePlan(p.id));
+        await AsyncStorage.removeItem('@eatmypack:saved_plans');
+      },
+    });
   };
 
   const handleClearPantry = () => {
-    Alert.alert(
-      'Clear Pantry',
-      'This will remove all foods from your pantry. Your saved plans are not affected.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: clearPantry,
-        },
-      ]
-    );
+    confirmDestructive({
+      title: 'Clear Pantry',
+      message: 'This will remove all foods from your pantry. Your saved plans are not affected.',
+      confirmLabel: 'Clear',
+      onConfirm: clearPantry,
+    });
   };
 
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        onPress: () => signOut(),
-      },
-    ]);
+    confirmDestructive({
+      title: 'Sign Out',
+      message: 'Are you sure you want to sign out?',
+      confirmLabel: 'Sign Out',
+      onConfirm: () => signOut(),
+    });
   };
 
   const handleDefaultDistanceSelect = () => {
@@ -257,49 +244,6 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          {/* Pantry Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pantry</Text>
-            <View style={styles.card}>
-              {/* My Foods row */}
-              <Pressable
-                style={({ pressed }) => [styles.pantryRow, pressed && { opacity: 0.7 }]}
-                onPress={() => router.push('/settings/pantry')}
-              >
-                <Text style={styles.pantryLabel}>My Foods</Text>
-                <View style={styles.pantryRight}>
-                  <View style={styles.countBadge}>
-                    <Text style={styles.countBadgeText}>
-                      {pantryFoodIds.length} item{pantryFoodIds.length !== 1 ? 's' : ''}
-                    </Text>
-                  </View>
-                  <Text style={styles.pantryArrow}>›</Text>
-                </View>
-              </Pressable>
-
-              <View style={styles.rowDivider} />
-
-              {/* Import Foods row */}
-              <Pressable
-                style={({ pressed }) => [styles.pantryRow, pressed && { opacity: 0.7 }]}
-                onPress={() => Alert.alert('Import Foods', 'Coming soon — import from a CSV or share link.')}
-              >
-                <Text style={styles.pantryLabel}>Import Foods</Text>
-                <Text style={styles.pantryArrow}>›</Text>
-              </Pressable>
-
-              <View style={styles.rowDivider} />
-
-              {/* Clear Pantry row */}
-              <Pressable
-                style={({ pressed }) => [styles.pantryRow, pressed && { opacity: 0.7 }]}
-                onPress={handleClearPantry}
-              >
-                <Text style={styles.clearPantryLabel}>Clear Pantry</Text>
-              </Pressable>
-            </View>
-          </View>
-
           {/* About Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
@@ -331,6 +275,16 @@ export default function SettingsScreen() {
               onPress={handleClearPlans}
             >
               <Text style={styles.dangerButtonText}>Clear All Saved Plans</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.dangerButton,
+                styles.dangerButtonStacked,
+                pressed && { opacity: 0.8 },
+              ]}
+              onPress={handleClearPantry}
+            >
+              <Text style={styles.dangerButtonText}>Clear Pantry</Text>
             </Pressable>
           </View>
 
@@ -577,6 +531,9 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
     ...shadows.sm,
   },
+  dangerButtonStacked: {
+    marginTop: spacing.sm,
+  },
   dangerButtonText: {
     ...typography.button,
     color: colors.error,
@@ -662,40 +619,4 @@ const styles = StyleSheet.create({
     color: colors.textInverse,
   },
 
-  // Pantry rows
-  pantryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.xs,
-  },
-  pantryLabel: {
-    ...typography.body,
-    color: colors.textPrimary,
-  },
-  clearPantryLabel: {
-    ...typography.body,
-    color: colors.error,
-  },
-  pantryRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  countBadge: {
-    backgroundColor: colors.primarySubtle,
-    borderRadius: borderRadius.full,
-    paddingVertical: 2,
-    paddingHorizontal: spacing.sm,
-  },
-  countBadgeText: {
-    ...typography.small,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  pantryArrow: {
-    fontSize: 20,
-    color: colors.textMuted,
-    lineHeight: 24,
-  },
 });

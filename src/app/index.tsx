@@ -20,8 +20,7 @@ import { ONBOARDING_KEY } from './onboarding';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import AnimatedPressable from '@/components/common/AnimatedPressable';
 import { useStore } from '@/store/useStore';
-import HeroTrail from '@/components/illustrations/HeroTrail';
-import EmptyPlans from '@/components/illustrations/EmptyPlans';
+import { HeroTrail, EmptyPlans, ArrowIcon, FooterBackground } from '@/components/illustrations';
 import PantryCarousel from '@/components/home/PantryCarousel';
 import type { PackPlan } from '@/types';
 
@@ -94,7 +93,7 @@ export default function HomeScreen() {
             activeOpacity={0.6}
           >
             <Text style={styles.sectionTitle}>My Plans</Text>
-            <Text style={styles.sectionChevron}>{'>'}</Text>
+            <ArrowIcon width={5} height={10} />
           </TouchableOpacity>
           <AnimatedPressable
             style={styles.plansAddButton}
@@ -127,7 +126,7 @@ export default function HomeScreen() {
                   <Text style={styles.planCardWeight}>
                     {gramsToOz(plan.total_weight_g)} oz
                   </Text>
-                  <Text style={styles.planCardChevron}>›</Text>
+                  <ArrowIcon width={5} height={10} />
                 </View>
               </AnimatedPressable>
             ))}
@@ -139,9 +138,11 @@ export default function HomeScreen() {
           >
             <View style={styles.emptySvgFill}>
               <EmptyPlans width={SCREEN_WIDTH - spacing.lg * 2} height={200} />
+              <View style={styles.emptyTitleOverlay}>
+                <Text style={styles.emptyTitle}>No plans yet</Text>
+              </View>
             </View>
             <View style={styles.emptyOverlay}>
-              <Text style={styles.emptyTitle}>No plans yet</Text>
               <Text style={styles.emptySubtitle}>Add an adventure</Text>
             </View>
           </AnimatedPressable>
@@ -208,16 +209,11 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   sectionTitle: {
     ...typography.h3,
     color: colors.textPrimary,
-  },
-  sectionChevron: {
-    fontSize: 22,
-    color: colors.textMuted,
-    lineHeight: 24,
   },
   plansAddButton: {
     width: 32,
@@ -229,11 +225,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   plansAddButtonText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '600',
-    color: colors.pantryBrown,
+    color: colors.pantryCardBorder,
     includeFontPadding: false,
     textAlignVertical: 'center',
+    lineHeight: 24,
   },
 
   // Plan list — individual cards
@@ -277,11 +274,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textMuted,
   },
-  planCardChevron: {
-    fontSize: 18,
-    color: colors.textMuted,
-    lineHeight: 20,
-  },
 
   // Empty state card
   emptyCard: {
@@ -299,6 +291,15 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  emptyTitleOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyOverlay: {
     flex: 1,
     alignItems: 'center',
@@ -308,7 +309,6 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.h4,
     color: colors.textPrimary,
-    marginBottom: spacing.xs,
     textAlign: 'center',
   },
   emptySubtitle: {

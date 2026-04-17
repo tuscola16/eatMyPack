@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { colors } from '@/theme';
@@ -13,16 +13,29 @@ const HERO_HEIGHT = SCREEN_WIDTH * (200 / 390);
 
 export default function RaceSetupScreen() {
   const router = useRouter();
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { mode, existingPlanId, planName } = useLocalSearchParams<{
+    mode?: string;
+    existingPlanId?: string;
+    planName?: string;
+  }>();
   const { generatePack } = usePackBuilder();
   const savePlan = useStore((s) => s.savePlan);
+  const savedPlans = useStore((s) => s.savedPlans);
+
+  const existingPlan = useMemo(
+    () => (existingPlanId ? savedPlans.find((p) => p.id === existingPlanId) ?? null : null),
+    [existingPlanId, savedPlans],
+  );
 
   const setupMode = (mode === 'complex' || mode === 'witch' ? 'complex' : 'simple') as SetupMode;
 
   const handleSubmit = (config: RaceConfig, name: string) => {
-    const plan = generatePack(config, name);
+    const generated = generatePack(config, name);
+    const plan = existingPlan
+      ? { ...generated, id: existingPlan.id, name: name || existingPlan.name }
+      : generated;
     savePlan(plan);
-    router.push({ pathname: '/race/plan', params: { id: plan.id } });
+    router.replace({ pathname: '/race/plan', params: { id: plan.id } });
   };
 
   const heroElement = (
@@ -42,6 +55,8 @@ export default function RaceSetupScreen() {
         onSubmit={handleSubmit}
         mode={setupMode}
         heroComponent={heroElement}
+        initialConfig={existingPlan?.race_config}
+        initialPlanName={existingPlan ? (planName ?? existingPlan.name) : undefined}
       />
     </View>
   );
@@ -55,5 +70,6 @@ const styles = StyleSheet.create({
   heroContainer: {
     width: SCREEN_WIDTH,
     height: HERO_HEIGHT,
+    alignItems: 'center',
   },
 });

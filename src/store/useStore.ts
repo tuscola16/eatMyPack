@@ -70,6 +70,15 @@ interface AppState {
   // Build-from-pantry toggle (per-session, not persisted)
   useFromPantry: boolean;
   setUseFromPantry: (val: boolean) => void;
+
+  // Ephemeral: food picker handoff between WaystationEditor and /database
+  pendingWaystationFoods: {
+    waystationId: string;
+    foodIds: string[];
+    committed: boolean;
+  } | null;
+  setPendingWaystationFoods: (value: AppState['pendingWaystationFoods']) => void;
+  togglePendingWaystationFood: (foodId: string) => void;
 }
 
 const DEFAULT_FILTERS: FoodFilters = {
@@ -178,5 +187,17 @@ export const useStore = create<AppState>()(
     // Build-from-pantry toggle
     useFromPantry: false,
     setUseFromPantry: (val) => set({ useFromPantry: val }),
+
+    // Waystation food picker handoff
+    pendingWaystationFoods: null,
+    setPendingWaystationFoods: (value) => set({ pendingWaystationFoods: value }),
+    togglePendingWaystationFood: (foodId) => set((state) => {
+      const pending = state.pendingWaystationFoods;
+      if (!pending) return {};
+      const foodIds = pending.foodIds.includes(foodId)
+        ? pending.foodIds.filter((id) => id !== foodId)
+        : [...pending.foodIds, foodId];
+      return { pendingWaystationFoods: { ...pending, foodIds } };
+    }),
   }))
 );

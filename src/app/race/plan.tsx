@@ -5,7 +5,6 @@ import {
   ScrollView,
   TextInput,
   StyleSheet,
-  Alert,
   Pressable,
   Modal,
   Dimensions,
@@ -13,6 +12,7 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
+import { confirmDestructive } from '@/utils/confirm';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -27,10 +27,54 @@ import PackSummary from '@/components/race/PackSummary';
 import PhaseBanner from '@/components/race/PhaseBanner';
 import PackItem from '@/components/race/PackItem';
 import EmptyState from '@/components/common/EmptyState';
-import type { PackPlan } from '@/types';
+import type { PackPlan, Waystation } from '@/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (160 / 390);
+
+const WS_TYPE_COLORS: Record<string, string> = {
+  aid_station: '#8EA778',
+  pack_refill: '#BE5C35',
+  both: '#C4923A',
+};
+
+const WS_TYPE_LABELS: Record<string, string> = {
+  aid_station: 'Aid Station',
+  pack_refill: 'Pack Refill',
+  both: 'Aid + Refill',
+};
+
+function WaystationBar({
+  waystation,
+  onPress,
+}: {
+  waystation: Waystation;
+  onPress?: () => void;
+}) {
+  const color = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
+  const hour = waystation.estimated_hour ?? waystation.marker_value;
+  const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
+
+  return (
+    <Pressable style={styles.waystationBar} onPress={onPress}>
+      <View style={styles.waystationInfo}>
+        <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
+        <Text style={styles.waystationTime}>
+          {waystation.marker_type === 'mile'
+            ? `Mile ${waystation.marker_value} (~${hour}h)`
+            : `Hour ${hour}`}
+        </Text>
+      </View>
+      {waystation.calories_consumed != null && waystation.calories_consumed > 0 && (
+        <Text style={styles.waystationCals}>{waystation.calories_consumed} cal</Text>
+      )}
+      {waystation.notes ? (
+        <Text style={styles.waystationNotes} numberOfLines={1}>{waystation.notes}</Text>
+      ) : null}
+      <Text style={styles.waystationChevron}>›</Text>
+    </Pressable>
+  );
+}
 
 export default function PackPlanScreen() {
   const router = useRouter();
@@ -57,17 +101,15 @@ export default function PackPlanScreen() {
 
   const handleDelete = () => {
     if (!plan || !id) return;
-    Alert.alert('Delete Plan', 'Are you sure you want to delete this plan?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          deletePlan(id);
-          router.back();
-        },
+    confirmDestructive({
+      title: 'Delete Plan',
+      message: 'Are you sure you want to delete this plan?',
+      confirmLabel: 'Delete',
+      onConfirm: () => {
+        deletePlan(id);
+        router.back();
       },
-    ]);
+    });
   };
 
   const handleRejectItem = (foodId: string) => {
@@ -93,7 +135,11 @@ export default function PackPlanScreen() {
     if (!plan) return;
     router.push({
       pathname: '/race/setup',
-      params: { mode: plan.race_config.setup_mode ?? 'simple' },
+      params: {
+        mode: plan.race_config.setup_mode ?? 'simple',
+        existingPlanId: plan.id,
+        planName: plan.name ?? '',
+      },
     });
   };
 
@@ -113,14 +159,7 @@ export default function PackPlanScreen() {
   if (!plan) {
     return (
       <View style={styles.container}>
-        <Stack.Screen
-          options={{
-            title: 'Pack Plan',
-            headerStyle: { backgroundColor: colors.background },
-            headerTintColor: colors.textPrimary,
-            headerShadowVisible: false,
-          }}
-        />
+        <Stack.Screen options={{ headerShown: false }} />
         <EmptyState
           title="No plan yet"
           subtitle="Head to race setup to generate your nutrition pack."
@@ -215,6 +254,10 @@ export default function PackPlanScreen() {
 
           {plan.phases?.map((packPhase, phaseIndex) => {
             const isExpanded = expandedPhases[phaseIndex] !== false;
+            const waystationsInPhase = (plan.race_config.waystations ?? []).filter((ws) => {
+              const wsHour = ws.estimated_hour ?? ws.marker_value;
+              return wsHour >= packPhase.phase.start_hour && wsHour < packPhase.phase.end_hour;
+            });
             return (
               <View key={phaseIndex} style={styles.phaseSection}>
                 <PhaseBanner
@@ -222,15 +265,30 @@ export default function PackPlanScreen() {
                   isExpanded={isExpanded}
                   onToggle={() => togglePhase(phaseIndex)}
                 />
-                {isExpanded &&
-                  packPhase.entries.map((entry, itemIndex) => (
-                    <PackItem
-                      key={`${entry.food.id}-${itemIndex}`}
-                      entry={entry}
-                      onReject={(foodId) => handleRejectItem(foodId)}
-                      onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
-                    />
-                  ))}
+                {isExpanded && (
+                  <>
+                    {packPhase.entries.map((entry, itemIndex) => (
+                      <PackItem
+                        key={`${entry.food.id}-${itemIndex}`}
+                        entry={entry}
+                        onReject={(foodId) => handleRejectItem(foodId)}
+                        onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
+                      />
+                    ))}
+                    {waystationsInPhase.map((ws) => (
+                      <WaystationBar
+                        key={ws.id}
+                        waystation={ws}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/race/waystation-detail',
+                            params: { wsId: ws.id, ...(id ? { planId: id } : {}) },
+                          })
+                        }
+                      />
+                    ))}
+                  </>
+                )}
               </View>
             );
           })}
@@ -430,5 +488,41 @@ const styles = StyleSheet.create({
   modalCancelText: {
     ...typography.bodyBold,
     color: colors.textSecondary,
+  },
+
+  // Waystation bars
+  waystationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#d9d3c7',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    marginHorizontal: -spacing.lg,
+    gap: spacing.sm,
+  },
+  waystationInfo: {
+    flex: 1,
+  },
+  waystationLabel: {
+    ...typography.captionBold,
+  },
+  waystationTime: {
+    ...typography.small,
+    color: colors.textSecondary,
+  },
+  waystationCals: {
+    ...typography.captionBold,
+    color: colors.calories,
+  },
+  waystationNotes: {
+    ...typography.small,
+    color: colors.textMuted,
+    maxWidth: 100,
+  },
+  waystationChevron: {
+    ...typography.body,
+    color: colors.textMuted,
+    marginLeft: spacing.xs,
   },
 });

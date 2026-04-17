@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Switch,
   Pressable,
   Dimensions,
+  Modal,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { RaceConfig, RaceDistance, Conditions, SetupMode, Waystation, DISTANCE_TO_MILES } from '@/types/race';
@@ -19,6 +20,7 @@ import WaystationEditor from './WaystationEditor';
 interface RaceFormProps {
   onSubmit: (config: RaceConfig, name: string) => void;
   initialConfig?: Partial<RaceConfig>;
+  initialPlanName?: string;
   mode?: SetupMode;
   heroComponent?: React.ReactNode;
 }
@@ -40,8 +42,15 @@ const CONDITIONS: { value: Conditions; label: string; color: string }[] = [
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, heroComponent }: RaceFormProps) {
-  const [setupMode, setSetupMode] = useState<SetupMode>(initialMode ?? 'simple');
+export default function RaceForm({
+  onSubmit,
+  initialConfig,
+  initialPlanName,
+  mode: initialMode,
+  heroComponent,
+}: RaceFormProps) {
+  const isEditing = !!initialPlanName;
+  const [setupMode, setSetupMode] = useState<SetupMode>(initialMode ?? initialConfig?.setup_mode ?? 'simple');
   const [distance, setDistance] = useState<RaceDistance | null>(
     initialConfig?.distance ?? null
   );
@@ -63,8 +72,8 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
   const [waystations, setWaystations] = useState<Waystation[]>(
     initialConfig?.waystations ?? []
   );
-  const [planName, setPlanName] = useState('');
-  const [showNameStep, setShowNameStep] = useState(false);
+  const [planName, setPlanName] = useState(initialPlanName ?? '');
+  const [showNameModal, setShowNameModal] = useState(false);
 
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const useFromPantry = useStore((s) => s.useFromPantry);
@@ -74,12 +83,23 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
     ? DURATION_SUGGESTIONS[distance]
     : null;
 
+  const skipDurationAutoSetRef = useRef(!!initialConfig?.expected_duration_hours);
   useEffect(() => {
+    if (skipDurationAutoSetRef.current) {
+      skipDurationAutoSetRef.current = false;
+      return;
+    }
     if (distance && durationRange && setupMode === 'simple') {
       const mid = Math.round((durationRange[0] + durationRange[1]) / 2);
       setExpectedHours(mid);
     }
   }, [distance]);
+
+  useEffect(() => {
+    if (setupMode === 'complex') {
+      setDistance('custom');
+    }
+  }, [setupMode]);
 
   const handleDistanceSelect = (d: RaceDistance) => {
     setDistance(d);
@@ -95,16 +115,20 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
 
   const handleBuildMyPack = () => {
     if (!distance || !conditions) return;
-    setShowNameStep(true);
-    // Generate a default name
+    if (isEditing) {
+      handleSubmit();
+      return;
+    }
     const distLabel = distance === 'custom'
       ? `${customDistanceKm || '?'}km`
       : distance;
     setPlanName(`${distLabel} ${expectedHours}h`);
+    setShowNameModal(true);
   };
 
   const handleSubmit = () => {
     if (!distance || !conditions) return;
+    setShowNameModal(false);
     const config: RaceConfig = {
       distance,
       expected_duration_hours: expectedHours,
@@ -141,14 +165,14 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
   const totalSteps = isSimple ? 3 : 5;
 
   const getCompletedSteps = (): number => {
-    let steps = 1; // Step 1 (mode) always completed when toggle is selected
+    let steps = 1;
     if (distance !== null) steps++;
     if (isSimple) {
-      if (showNameStep) steps++;
+      if (conditions) steps++;
     } else {
-      if (expectedHours > 0 && distance !== null) steps++; // time filled
-      if (calPerHour) steps++; // cal/hr filled
-      if (showNameStep) steps++;
+      if (expectedHours > 0 && distance !== null) steps++;
+      if (calPerHour) steps++;
+      if (conditions) steps++;
     }
     return Math.min(steps, totalSteps);
   };
@@ -208,69 +232,95 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
         ))}
       </View>
 
-      {showNameStep ? (
-        /* Name step */
-        <View style={styles.stepContainer}>
-          <Text style={styles.stepTitle}>Name Your Plan</Text>
-          <TextInput
-            style={styles.textInput}
-            value={planName}
-            onChangeText={setPlanName}
-            placeholder="e.g. Western States 100"
-            placeholderTextColor={colors.textMuted}
-            autoFocus
-            selectTextOnFocus
-          />
-          <Pressable
-            style={({ pressed }) => [
-              styles.submitButton,
-              pressed ? { transform: [{ scale: 0.97 }] } : undefined,
-            ]}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.submitButtonText}>Create Plan</Text>
+      {/* Name Modal */}
+      <Modal
+        visible={showNameModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNameModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowNameModal(false)}
+        >
+          <Pressable style={styles.modalContent} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Name Your Plan</Text>
+            <TextInput
+              style={styles.textInput}
+              value={planName}
+              onChangeText={setPlanName}
+              placeholder="e.g. Western States 100"
+              placeholderTextColor={colors.textMuted}
+              autoFocus
+              selectTextOnFocus
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={styles.modalCancelButton}
+                onPress={() => setShowNameModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.submitButton,
+                  styles.modalSubmitButton,
+                  pressed ? { transform: [{ scale: 0.97 }] } : undefined,
+                ]}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.submitButtonText}>Create Plan</Text>
+              </Pressable>
+            </View>
           </Pressable>
-        </View>
-      ) : (
-        <>
+        </Pressable>
+      </Modal>
+
           {/* Step: Distance */}
           <View style={[styles.stepContainer, !distanceStepUnlocked && styles.locked]}>
-            <Text style={styles.stepTitle}>Choose Your Distance</Text>
-            <Text style={styles.stepSubtitle}>What are you racing?</Text>
-            <View style={styles.distanceGrid}>
-              {DISTANCES.map((d) => {
-                const isSelected = distance === d.value;
-                const range = d.value !== 'custom' ? DURATION_SUGGESTIONS[d.value] : null;
-                return (
-                  <Pressable
-                    key={d.value}
-                    style={({ pressed }) => [
-                      styles.distanceCard,
-                      isSelected && styles.distanceCardSelected,
-                      pressed && { transform: [{ scale: 0.97 }] },
-                    ]}
-                    onPress={() => handleDistanceSelect(d.value)}
-                  >
-                    {isSelected && (
-                      <View style={styles.checkmarkBubble}>
-                        <Text style={styles.checkmarkText}>✓</Text>
-                      </View>
-                    )}
-                    <Text style={[
-                      styles.distanceLabel,
-                      isSelected && styles.distanceLabelSelected,
-                    ]}>
-                      {d.label}
-                    </Text>
-                    {range && (
-                      <Text style={styles.distanceRange}>
-                        {formatRange(range)}
+            <Text style={styles.stepTitle}>
+              {isSimple ? 'Choose Your Distance' : 'Custom Distance'}
+            </Text>
+            <Text style={styles.stepSubtitle}>
+              {isSimple ? 'What are you racing?' : 'Enter your race distance'}
+            </Text>
+
+            {isSimple && (
+              <View style={styles.distanceGrid}>
+                {DISTANCES.map((d) => {
+                  const isSelected = distance === d.value;
+                  const range = d.value !== 'custom' ? DURATION_SUGGESTIONS[d.value] : null;
+                  return (
+                    <Pressable
+                      key={d.value}
+                      style={({ pressed }) => [
+                        styles.distanceCard,
+                        isSelected && styles.distanceCardSelected,
+                        pressed && { transform: [{ scale: 0.97 }] },
+                      ]}
+                      onPress={() => handleDistanceSelect(d.value)}
+                    >
+                      {isSelected && (
+                        <View style={styles.checkmarkBubble}>
+                          <Text style={styles.checkmarkText}>✓</Text>
+                        </View>
+                      )}
+                      <Text style={[
+                        styles.distanceLabel,
+                        isSelected && styles.distanceLabelSelected,
+                      ]}>
+                        {d.label}
                       </Text>
-                    )}
-                  </Pressable>
-                );
-              })}
-            </View>
+                      {range && (
+                        <Text style={styles.distanceRange}>
+                          {formatRange(range)}
+                        </Text>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
 
             {distance === 'custom' && (
               <View style={styles.inputRow}>
@@ -438,10 +488,8 @@ export default function RaceForm({ onSubmit, initialConfig, mode: initialMode, h
             onPress={handleBuildMyPack}
             disabled={!distance || !conditions}
           >
-            <Text style={styles.submitButtonText}>Build My Pack</Text>
+            <Text style={styles.submitButtonText}>{isEditing ? 'Update Pack' : 'Build My Pack'}</Text>
           </Pressable>
-        </>
-      )}
     </ScrollView>
   );
 }
@@ -710,5 +758,46 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.textInverse,
     fontSize: 17,
+  },
+
+  // Name modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    ...shadows.lg,
+  },
+  modalTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderRadius: borderRadius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  modalCancelText: {
+    ...typography.button,
+    color: colors.textSecondary,
+    fontSize: 15,
+  },
+  modalSubmitButton: {
+    flex: 1,
+    paddingVertical: spacing.sm,
   },
 });
