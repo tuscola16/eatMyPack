@@ -93,7 +93,7 @@ export default function HomeScreen() {
             activeOpacity={0.6}
           >
             <Text style={styles.sectionTitle}>My Plans</Text>
-            <ArrowIcon width={7} height={14} />
+            <ArrowIcon width={5} height={10} />
           </TouchableOpacity>
           <AnimatedPressable
             style={styles.plansAddButton}

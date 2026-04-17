@@ -12,27 +12,28 @@ export default function PantryScreen() {
   const togglePantryFood = useStore((s) => s.togglePantryFood);
 
   const pantryFoods = useMemo(() => {
-    return FOODS.filter(f => pantryFoodIds.includes(f.id));
+    return FOODS.filter((f) => pantryFoodIds.includes(f.id));
   }, [pantryFoodIds]);
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: 'My Pantry',
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.textPrimary,
-          headerRight: () => (
-            <Text style={styles.countBadge}>
-              {pantryFoodIds.length} item{pantryFoodIds.length !== 1 ? 's' : ''}
-            </Text>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.headerRow}>
+        <Pressable onPress={() => router.back()} style={styles.headerBtn}>
+          <Text style={styles.headerBtnText}>‹ Back</Text>
+        </Pressable>
+        <Text style={styles.headerTitle}>My Pantry</Text>
+        <Text style={styles.countBadge}>
+          {pantryFoodIds.length} item{pantryFoodIds.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
       <FoodList
         foods={pantryFoods}
         pantryIds={pantryFoodIds}
         onTogglePantry={togglePantryFood}
+        onPressFood={(food) =>
+          router.push({ pathname: '/database/[id]', params: { id: food.id } })
+        }
         emptyMessage="Your pantry is empty. Add foods from the Foods tab."
       />
       <Pressable
@@ -50,11 +51,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  headerBtn: {
+    minWidth: 64,
+    paddingVertical: spacing.xs,
+  },
+  headerBtnText: {
+    ...typography.bodyBold,
+    color: colors.primary,
+  },
+  headerTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+  },
   countBadge: {
     ...typography.caption,
     color: colors.primary,
     fontWeight: '600',
-    marginRight: spacing.md,
+    minWidth: 64,
+    textAlign: 'right',
   },
   addFoodsButton: {
     backgroundColor: colors.primary,

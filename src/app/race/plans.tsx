@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { colors, spacing } from '@/theme';
+import { colors, typography, spacing } from '@/theme';
 import { useStore } from '@/store/useStore';
 import PlanCard from '@/components/race/PlanCard';
 import EmptyState from '@/components/common/EmptyState';
+import { confirmDestructive } from '@/utils/confirm';
 
 export default function PlansListScreen() {
   const router = useRouter();
@@ -12,21 +13,24 @@ export default function PlansListScreen() {
   const deletePlan = useStore((s) => s.deletePlan);
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete Plan', 'Are you sure you want to delete this plan?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deletePlan(id) },
-    ]);
+    confirmDestructive({
+      title: 'Delete Plan',
+      message: 'Are you sure you want to delete this plan?',
+      confirmLabel: 'Delete',
+      onConfirm: () => deletePlan(id),
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: 'Saved Plans',
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.textPrimary,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.headerRow}>
+        <Pressable onPress={() => router.back()} style={styles.headerBtn}>
+          <Text style={styles.headerBtnText}>‹ Back</Text>
+        </Pressable>
+        <Text style={styles.headerTitle}>Saved Plans</Text>
+        <View style={styles.headerBtn} />
+      </View>
       <FlatList
         data={savedPlans}
         keyExtractor={(item) => item.id}
@@ -53,6 +57,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  headerBtn: {
+    minWidth: 56,
+    paddingVertical: spacing.xs,
+  },
+  headerBtnText: {
+    ...typography.bodyBold,
+    color: colors.primary,
+  },
+  headerTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
   },
   list: {
     padding: spacing.lg,

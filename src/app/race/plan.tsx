@@ -5,7 +5,6 @@ import {
   ScrollView,
   TextInput,
   StyleSheet,
-  Alert,
   Pressable,
   Modal,
   Dimensions,
@@ -13,6 +12,7 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
+import { confirmDestructive } from '@/utils/confirm';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -56,7 +56,7 @@ function WaystationBar({
   const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
 
   return (
-    <Pressable style={[styles.waystationBar, { borderLeftColor: color }]} onPress={onPress}>
+    <Pressable style={styles.waystationBar} onPress={onPress}>
       <View style={styles.waystationInfo}>
         <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
         <Text style={styles.waystationTime}>
@@ -101,17 +101,15 @@ export default function PackPlanScreen() {
 
   const handleDelete = () => {
     if (!plan || !id) return;
-    Alert.alert('Delete Plan', 'Are you sure you want to delete this plan?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          deletePlan(id);
-          router.back();
-        },
+    confirmDestructive({
+      title: 'Delete Plan',
+      message: 'Are you sure you want to delete this plan?',
+      confirmLabel: 'Delete',
+      onConfirm: () => {
+        deletePlan(id);
+        router.back();
       },
-    ]);
+    });
   };
 
   const handleRejectItem = (foodId: string) => {
@@ -137,7 +135,11 @@ export default function PackPlanScreen() {
     if (!plan) return;
     router.push({
       pathname: '/race/setup',
-      params: { mode: plan.race_config.setup_mode ?? 'simple' },
+      params: {
+        mode: plan.race_config.setup_mode ?? 'simple',
+        existingPlanId: plan.id,
+        planName: plan.name ?? '',
+      },
     });
   };
 
@@ -157,14 +159,7 @@ export default function PackPlanScreen() {
   if (!plan) {
     return (
       <View style={styles.container}>
-        <Stack.Screen
-          options={{
-            title: 'Pack Plan',
-            headerStyle: { backgroundColor: colors.background },
-            headerTintColor: colors.textPrimary,
-            headerShadowVisible: false,
-          }}
-        />
+        <Stack.Screen options={{ headerShown: false }} />
         <EmptyState
           title="No plan yet"
           subtitle="Head to race setup to generate your nutrition pack."
@@ -499,12 +494,11 @@ const styles = StyleSheet.create({
   waystationBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderLeftWidth: 4,
-    borderRadius: borderRadius.sm,
+    backgroundColor: '#d9d3c7',
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     marginTop: spacing.xs,
+    marginHorizontal: -spacing.lg,
     gap: spacing.sm,
   },
   waystationInfo: {

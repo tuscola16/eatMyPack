@@ -14,7 +14,13 @@ export default function DatabaseScreen() {
   const { foods, filteredCount, totalCount } = useFoodDatabase();
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const togglePantryFood = useStore((s) => s.togglePantryFood);
+  const pendingWaystationFoods = useStore((s) => s.pendingWaystationFoods);
+  const togglePendingWaystationFood = useStore((s) => s.togglePendingWaystationFood);
+  const setPendingWaystationFoods = useStore((s) => s.setPendingWaystationFoods);
   const [pantryOnly, setPantryOnly] = useState(false);
+
+  const inSelectionMode = !!pendingWaystationFoods && !pendingWaystationFoods.committed;
+  const selectedIds = inSelectionMode ? pendingWaystationFoods!.foodIds : [];
 
   const displayedFoods = pantryOnly
     ? foods.filter((f) => pantryFoodIds.includes(f.id))
@@ -24,31 +30,65 @@ export default function DatabaseScreen() {
     router.push({ pathname: '/database/[id]', params: { id: food.id } });
   };
 
+  const handleDone = () => {
+    if (!pendingWaystationFoods) {
+      router.back();
+      return;
+    }
+    setPendingWaystationFoods({ ...pendingWaystationFoods, committed: true });
+    router.back();
+  };
+
+  const handleCancel = () => {
+    setPendingWaystationFoods(null);
+    router.back();
+  };
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Foods</Text>
+        {inSelectionMode && (
+          <Pressable onPress={handleCancel} style={styles.selectionAction}>
+            <Text style={styles.selectionActionText}>Cancel</Text>
+          </Pressable>
+        )}
+        <Text style={styles.headerTitle}>
+          {inSelectionMode ? `Select Foods (${selectedIds.length})` : 'Foods'}
+        </Text>
         <View style={styles.headerRight}>
-          {filteredCount < totalCount && !pantryOnly && (
+          {!inSelectionMode && filteredCount < totalCount && !pantryOnly && (
             <Text style={styles.filterCount}>{filteredCount}/{totalCount}</Text>
           )}
-          {pantryOnly && (
+          {!inSelectionMode && pantryOnly && (
             <Text style={styles.filterCount}>{displayedFoods.length} in pantry</Text>
           )}
-          <Pressable onPress={() => setPantryOnly((v) => !v)} style={styles.pantryToggle}>
-            <View style={{ opacity: pantryOnly ? 1 : 0.3 }}>
-              <PantryIcon width={28} height={28} />
-            </View>
-          </Pressable>
+          {!inSelectionMode && (
+            <Pressable onPress={() => setPantryOnly((v) => !v)} style={styles.pantryToggle}>
+              <View style={{ opacity: pantryOnly ? 1 : 0.3 }}>
+                <PantryIcon width={28} height={28} />
+              </View>
+            </Pressable>
+          )}
+          {inSelectionMode && (
+            <Pressable onPress={handleDone} style={styles.selectionAction}>
+              <Text style={[styles.selectionActionText, styles.selectionActionPrimary]}>Done</Text>
+            </Pressable>
+          )}
         </View>
       </View>
       <FoodFilterBar />
       <FoodList
         foods={displayedFoods}
-        onPressFood={handleFoodPress}
-        pantryIds={pantryFoodIds}
-        onTogglePantry={togglePantryFood}
+        onPressFood={
+          inSelectionMode
+            ? (food) => togglePendingWaystationFood(food.id)
+            : handleFoodPress
+        }
+        pinnedIds={inSelectionMode ? selectedIds : undefined}
+        onTogglePin={inSelectionMode ? togglePendingWaystationFood : undefined}
+        pantryIds={inSelectionMode ? undefined : pantryFoodIds}
+        onTogglePantry={inSelectionMode ? undefined : togglePantryFood}
       />
     </View>
   );
@@ -66,12 +106,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.sm,
+    gap: spacing.sm,
   },
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Nunito_700Bold',
     color: colors.textPrimary,
     lineHeight: 28,
+    flex: 1,
   },
   headerRight: {
     flexDirection: 'row',
@@ -85,5 +127,16 @@ const styles = StyleSheet.create({
   },
   pantryToggle: {
     padding: 4,
+  },
+  selectionAction: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  selectionActionText: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+  },
+  selectionActionPrimary: {
+    color: colors.primary,
   },
 });

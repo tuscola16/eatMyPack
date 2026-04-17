@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -15,12 +15,15 @@ import {
   DMSans_400Regular,
   DMSans_500Medium,
 } from '@expo-google-fonts/dm-sans';
-import { colors, shadows } from '@/theme';
+import { colors } from '@/theme';
 import { HomeIcon, FoodsIcon, SettingsIcon, FooterBackground } from '@/components/illustrations';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from '@/hooks/useAuth';
 
 SplashScreen.preventAutoHideAsync();
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const TAB_BAR_HEIGHT = 64;
 
 export default function RootLayout() {
   useLocalStorage();
@@ -57,10 +60,16 @@ export default function RootLayout() {
               color: colors.textPrimary,
             },
             tabBarStyle: {
-              backgroundColor: colors.surface,
+              backgroundColor: 'transparent',
               borderTopWidth: 0,
-              ...shadows.sm,
+              height: TAB_BAR_HEIGHT,
+              elevation: 0,
             },
+            tabBarBackground: () => (
+              <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+                <FooterBackground width={SCREEN_WIDTH} height={TAB_BAR_HEIGHT} />
+              </View>
+            ),
             tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.textMuted,
             tabBarLabelStyle: {
@@ -118,6 +127,12 @@ export default function RootLayout() {
           />
           <Tabs.Screen
             name="race"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="pantry"
             options={{
               href: null,
             }}

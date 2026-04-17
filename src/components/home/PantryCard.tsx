@@ -48,7 +48,7 @@ export default function PantryCard({ food, cardWidth, cardHeight, weightUnit, on
           <MacroRow label="Fat" value={`${food.fat_g} g`} percent={macros.fat} />
           <View style={styles.macroRow}>
             <Text style={styles.macroLabel}>Na+</Text>
-            <Text style={styles.macroValue}>{food.sodium_mg} mg</Text>
+            <Text style={styles.macroValue}>{food.sodium_mg}mg</Text>
           </View>
         </View>
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-8deg' }],
   },
   nameContainer: {
-    minHeight: 44,
+    height: 44,
     justifyContent: 'center',
     width: '100%',
     marginBottom: spacing.xs,

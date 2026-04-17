@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,11 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { Waystation, WaystationType, MarkerType } from '@/types/race';
+import { useStore } from '@/store/useStore';
+import { FOODS } from '@/data/foods';
 
 interface WaystationEditorProps {
   waystations: Waystation[];
@@ -39,6 +42,45 @@ export default function WaystationEditor({
   totalDistanceMiles,
   defaultPackVolumeMl,
 }: WaystationEditorProps) {
+  const router = useRouter();
+  const pendingWaystationFoods = useStore((s) => s.pendingWaystationFoods);
+  const setPendingWaystationFoods = useStore((s) => s.setPendingWaystationFoods);
+
+  useEffect(() => {
+    if (!pendingWaystationFoods || !pendingWaystationFoods.committed) return;
+    const { waystationId, foodIds } = pendingWaystationFoods;
+    const target = waystations.find((w) => w.id === waystationId);
+    if (!target) {
+      setPendingWaystationFoods(null);
+      return;
+    }
+    onChange(
+      waystations.map((w) =>
+        w.id === waystationId ? { ...w, foods: foodIds } : w
+      )
+    );
+    setPendingWaystationFoods(null);
+  }, [pendingWaystationFoods, waystations, onChange, setPendingWaystationFoods]);
+
+  const openFoodPicker = (ws: Waystation) => {
+    setPendingWaystationFoods({
+      waystationId: ws.id,
+      foodIds: ws.foods ?? [],
+      committed: false,
+    });
+    router.push('/database');
+  };
+
+  const removeFoodFromWaystation = (wsId: string, foodId: string) => {
+    onChange(
+      waystations.map((w) =>
+        w.id === wsId
+          ? { ...w, foods: (w.foods ?? []).filter((id) => id !== foodId) }
+          : w
+      )
+    );
+  };
+
   const addWaystation = () => {
     const ws: Waystation = {
       id: generateId(),
@@ -47,7 +89,7 @@ export default function WaystationEditor({
       marker_value: 0,
       notes: '',
     };
-    onChange([...waystations, ws].sort((a, b) => (a.marker_value || 0) - (b.marker_value || 0)));
+    onChange([...waystations, ws]);
   };
 
   const updateWaystation = (id: string, updates: Partial<Waystation>) => {
@@ -170,6 +212,37 @@ export default function WaystationEditor({
               placeholder="Optional"
               placeholderTextColor={colors.textMuted}
             />
+          </View>
+
+          {/* Packed foods */}
+          <View style={styles.foodsSection}>
+            <Text style={styles.inputLabel}>Packed foods</Text>
+            {(ws.foods ?? []).length > 0 && (
+              <View style={styles.foodChipRow}>
+                {(ws.foods ?? []).map((foodId) => {
+                  const food = FOODS.find((f) => f.id === foodId);
+                  if (!food) return null;
+                  return (
+                    <Pressable
+                      key={foodId}
+                      style={styles.foodChip}
+                      onPress={() => removeFoodFromWaystation(ws.id, foodId)}
+                    >
+                      <Text style={styles.foodChipText}>{food.name}</Text>
+                      <Text style={styles.foodChipRemove}>✕</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+            <Pressable
+              style={styles.addFoodsButton}
+              onPress={() => openFoodPicker(ws)}
+            >
+              <Text style={styles.addFoodsButtonText}>
+                {(ws.foods ?? []).length > 0 ? 'Edit foods →' : 'Add foods →'}
+              </Text>
+            </Pressable>
           </View>
 
           {/* Notes */}
@@ -313,6 +386,44 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textPrimary,
     textAlign: 'right',
+  },
+  foodsSection: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  foodChipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  foodChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.primarySubtle,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  foodChipText: {
+    ...typography.caption,
+    color: colors.primaryDark,
+    fontWeight: '600',
+  },
+  foodChipRemove: {
+    ...typography.caption,
+    color: colors.primaryDark,
+  },
+  addFoodsButton: {
+    marginTop: spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  addFoodsButtonText: {
+    ...typography.captionBold,
+    color: colors.primary,
   },
   notesSection: {
     marginBottom: spacing.xs,

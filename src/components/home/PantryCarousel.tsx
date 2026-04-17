@@ -31,6 +31,9 @@ const CONTENT_WIDTH = SCREEN_WIDTH - HORIZONTAL_PADDING * 2;
 const CARD_WIDTH = Math.floor((CONTENT_WIDTH - CARD_GAP * (CARDS_PER_PAGE - 1)) / CARDS_PER_PAGE);
 const PAGE_WIDTH = SCREEN_WIDTH;
 const CARD_HEIGHT = 270;
+const EMPTY_FOODS_NATURAL_RATIO = 110 / 126;
+const EMPTY_FOODS_HEIGHT = 126;
+const EMPTY_FOODS_WIDTH = Math.round(EMPTY_FOODS_HEIGHT * EMPTY_FOODS_NATURAL_RATIO);
 
 const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
@@ -86,7 +89,7 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
           activeOpacity={0.6}
         >
           <Text style={styles.sectionTitle}>My pantry</Text>
-          <ArrowIcon width={7} height={14} />
+          <ArrowIcon width={5} height={10} />
         </TouchableOpacity>
 
         {!isEmpty && (
@@ -105,7 +108,7 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
           onPress={() => router.push('/database')}
         >
           <View style={styles.emptySvgFill}>
-            <EmptyFoods width={CONTENT_WIDTH} height={200} />
+            <EmptyFoods width={EMPTY_FOODS_WIDTH} height={EMPTY_FOODS_HEIGHT} />
           </View>
           <View style={styles.emptyOverlay}>
             <Text style={styles.emptyTitle}>Pantry is empty</Text>
@@ -134,8 +137,10 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
                   style={styles.seeAllCard}
                   onPress={() => router.push('/pantry')}
                 >
-                  <PantryIcon width={40} height={40} />
-                  <Text style={styles.seeAllText}>See all</Text>
+                  <View style={styles.seeAllContent}>
+                    <PantryIcon width={52} height={52} />
+                    <Text style={styles.seeAllText}>See all</Text>
+                  </View>
                 </AnimatedPressable>
               ) : (
                 <PantryCard
@@ -227,6 +232,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.pantryCardBorder,
     borderRadius: borderRadius.md,
+  },
+  seeAllContent: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
@@ -273,6 +281,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyOverlay: {
     flex: 1,
