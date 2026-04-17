@@ -28,6 +28,7 @@ import PhaseBanner from '@/components/race/PhaseBanner';
 import PackItem from '@/components/race/PackItem';
 import EmptyState from '@/components/common/EmptyState';
 import type { PackPlan, Waystation } from '@/types';
+import { sanitizeRaceTitle, RACE_TITLE_MAX_LENGTH } from '@/utils/validation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (160 / 390);
@@ -218,9 +219,10 @@ export default function PackPlanScreen() {
               <TextInput
                 style={styles.editInput}
                 value={editName}
-                onChangeText={setEditName}
+                onChangeText={(v) => setEditName(sanitizeRaceTitle(v))}
                 placeholder="Plan name"
                 placeholderTextColor={colors.textMuted}
+                maxLength={RACE_TITLE_MAX_LENGTH}
                 autoFocus
               />
               <View style={styles.editActions}>

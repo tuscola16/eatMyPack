@@ -70,7 +70,7 @@ export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBanner
           </Text>
         </View>
 
-        <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
+        {!isExpanded && <Text style={styles.chevron}>▼</Text>}
       </View>
     </TouchableOpacity>
   );

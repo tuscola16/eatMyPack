@@ -16,6 +16,7 @@ import { DURATION_SUGGESTIONS } from '@/data/raceDefaults';
 import { useStore } from '@/store/useStore';
 import Slider from '@react-native-community/slider';
 import WaystationEditor from './WaystationEditor';
+import { sanitizeRaceTitle, RACE_TITLE_MAX_LENGTH } from '@/utils/validation';
 
 interface RaceFormProps {
   onSubmit: (config: RaceConfig, name: string) => void;
@@ -248,9 +249,10 @@ export default function RaceForm({
             <TextInput
               style={styles.textInput}
               value={planName}
-              onChangeText={setPlanName}
+              onChangeText={(v) => setPlanName(sanitizeRaceTitle(v))}
               placeholder="e.g. Western States 100"
               placeholderTextColor={colors.textMuted}
+              maxLength={RACE_TITLE_MAX_LENGTH}
               autoFocus
               selectTextOnFocus
             />
