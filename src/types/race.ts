@@ -20,6 +20,8 @@ export interface Waystation {
   notes?: string;
 }
 
+export type DistanceUnit = 'km' | 'mi';
+
 export interface RaceConfig {
   distance: RaceDistance;
   custom_distance_km?: number;
@@ -29,6 +31,12 @@ export interface RaceConfig {
   setup_mode?: SetupMode;
   cal_per_hour_override?: number;
   waystations?: Waystation[];
+  /**
+   * Unit the user typed distances in. Affects custom-distance input and
+   * how 'mile' waystation markers are interpreted. Storage is still in km
+   * via `custom_distance_km`; this flag drives display + hour math.
+   */
+  distance_unit?: DistanceUnit;
 }
 
 export interface RacePhase {

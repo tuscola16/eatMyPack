@@ -11,17 +11,29 @@ import {
   Modal,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
-import { RaceConfig, RaceDistance, Conditions, SetupMode, Waystation, DISTANCE_TO_MILES } from '@/types/race';
+import { RaceConfig, RaceDistance, Conditions, SetupMode, Waystation, DistanceUnit, DISTANCE_TO_MILES } from '@/types/race';
 import { DURATION_SUGGESTIONS } from '@/data/raceDefaults';
 import { useStore } from '@/store/useStore';
 import Slider from '@react-native-community/slider';
 import WaystationEditor from './WaystationEditor';
-import { sanitizeRaceTitle, RACE_TITLE_MAX_LENGTH } from '@/utils/validation';
+import {
+  sanitizeRaceTitle,
+  RACE_TITLE_MAX_LENGTH,
+  isValidRaceDate,
+  isValidStartTime,
+} from '@/utils/validation';
 
 interface RaceFormProps {
-  onSubmit: (config: RaceConfig, name: string) => void;
+  onSubmit: (
+    config: RaceConfig,
+    name: string,
+    raceDate?: string,
+    startTime?: string,
+  ) => void;
   initialConfig?: Partial<RaceConfig>;
   initialPlanName?: string;
+  initialRaceDate?: string;
+  initialStartTime?: string;
   mode?: SetupMode;
   heroComponent?: React.ReactNode;
 }
@@ -47,6 +59,8 @@ export default function RaceForm({
   onSubmit,
   initialConfig,
   initialPlanName,
+  initialRaceDate,
+  initialStartTime,
   mode: initialMode,
   heroComponent,
 }: RaceFormProps) {
@@ -55,8 +69,15 @@ export default function RaceForm({
   const [distance, setDistance] = useState<RaceDistance | null>(
     initialConfig?.distance ?? null
   );
-  const [customDistanceKm, setCustomDistanceKm] = useState<string>(
-    initialConfig?.custom_distance_km?.toString() ?? ''
+  const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(
+    initialConfig?.distance_unit ?? 'mi',
+  );
+  const [customDistanceInput, setCustomDistanceInput] = useState<string>(
+    initialConfig?.custom_distance_km != null
+      ? (initialConfig.distance_unit === 'mi'
+          ? (initialConfig.custom_distance_km * 0.621371).toFixed(1)
+          : initialConfig.custom_distance_km.toString())
+      : ''
   );
   const [expectedHours, setExpectedHours] = useState<number>(
     initialConfig?.expected_duration_hours ?? 10
@@ -75,6 +96,17 @@ export default function RaceForm({
   );
   const [planName, setPlanName] = useState(initialPlanName ?? '');
   const [showNameModal, setShowNameModal] = useState(false);
+  const [raceDateInput, setRaceDateInput] = useState(initialRaceDate ?? '');
+  const [startTimeInput, setStartTimeInput] = useState(initialStartTime ?? '');
+  const [nameModalError, setNameModalError] = useState<string | null>(null);
+
+  // Custom distance typed in the user's unit, converted to canonical km.
+  const customDistanceKm: number | undefined = (() => {
+    if (!customDistanceInput) return undefined;
+    const n = parseFloat(customDistanceInput);
+    if (isNaN(n)) return undefined;
+    return distanceUnit === 'mi' ? n * 1.609344 : n;
+  })();
 
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const useFromPantry = useStore((s) => s.useFromPantry);
@@ -108,7 +140,7 @@ export default function RaceForm({
 
   const totalDistanceMiles = distance && distance !== 'custom'
     ? DISTANCE_TO_MILES[distance]
-    : customDistanceKm ? parseFloat(customDistanceKm) * 0.621371 : undefined;
+    : customDistanceKm != null ? customDistanceKm * 0.621371 : undefined;
 
   const packVolumeMl = packVolumeLiters
     ? Math.round(parseFloat(packVolumeLiters) * 1000) || undefined
@@ -121,23 +153,38 @@ export default function RaceForm({
       return;
     }
     const distLabel = distance === 'custom'
-      ? `${customDistanceKm || '?'}km`
+      ? (customDistanceInput
+          ? `${customDistanceInput}${distanceUnit}`
+          : `?${distanceUnit}`)
       : distance;
     setPlanName(`${distLabel} ${expectedHours}h`);
+    setNameModalError(null);
     setShowNameModal(true);
   };
 
   const handleSubmit = () => {
     if (!distance || !conditions) return;
+    const trimmedDate = raceDateInput.trim();
+    const trimmedTime = startTimeInput.trim();
+    if (trimmedDate && !isValidRaceDate(trimmedDate)) {
+      setNameModalError('Date must be YYYY-MM-DD');
+      return;
+    }
+    if (trimmedTime && !isValidStartTime(trimmedTime)) {
+      setNameModalError('Start time must be HH:MM (24h)');
+      return;
+    }
+    setNameModalError(null);
     setShowNameModal(false);
     const config: RaceConfig = {
       distance,
       expected_duration_hours: expectedHours,
       conditions,
       setup_mode: setupMode,
+      distance_unit: distanceUnit,
     };
-    if (distance === 'custom' && customDistanceKm) {
-      config.custom_distance_km = parseFloat(customDistanceKm);
+    if (distance === 'custom' && customDistanceKm != null) {
+      config.custom_distance_km = customDistanceKm;
     }
     if (packVolumeMl) {
       config.max_volume_ml = packVolumeMl;
@@ -153,7 +200,12 @@ export default function RaceForm({
         config.waystations = waystations;
       }
     }
-    onSubmit(config, planName || 'Unnamed Plan');
+    onSubmit(
+      config,
+      planName || 'Unnamed Plan',
+      trimmedDate || undefined,
+      trimmedTime || undefined,
+    );
   };
 
   const formatRange = (range: [number, number] | null) => {
@@ -256,6 +308,37 @@ export default function RaceForm({
               autoFocus
               selectTextOnFocus
             />
+            <View style={styles.modalInputRow}>
+              <View style={styles.modalInputCol}>
+                <Text style={styles.modalFieldLabel}>Race date (optional)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={raceDateInput}
+                  onChangeText={setRaceDateInput}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={colors.textMuted}
+                  maxLength={10}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+              <View style={styles.modalInputCol}>
+                <Text style={styles.modalFieldLabel}>Start time (optional)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={startTimeInput}
+                  onChangeText={setStartTimeInput}
+                  placeholder="HH:MM"
+                  placeholderTextColor={colors.textMuted}
+                  maxLength={5}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+            {nameModalError && (
+              <Text style={styles.modalError}>{nameModalError}</Text>
+            )}
             <View style={styles.modalButtons}>
               <Pressable
                 style={styles.modalCancelButton}
@@ -326,15 +409,53 @@ export default function RaceForm({
 
             {distance === 'custom' && (
               <View style={styles.inputRow}>
-                <Text style={styles.inputLabel}>Distance (km)</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={customDistanceKm}
-                  onChangeText={setCustomDistanceKm}
-                  keyboardType="numeric"
-                  placeholder="e.g. 160"
-                  placeholderTextColor={colors.textMuted}
-                />
+                <Text style={styles.inputLabel}>
+                  Distance ({distanceUnit})
+                </Text>
+                <View style={styles.distanceInputRow}>
+                  <TextInput
+                    style={[styles.textInput, styles.distanceInput]}
+                    value={customDistanceInput}
+                    onChangeText={setCustomDistanceInput}
+                    keyboardType="numeric"
+                    placeholder={distanceUnit === 'mi' ? 'e.g. 100' : 'e.g. 160'}
+                    placeholderTextColor={colors.textMuted}
+                  />
+                  <View style={styles.unitToggle}>
+                    <Pressable
+                      style={[
+                        styles.unitToggleButton,
+                        distanceUnit === 'mi' && styles.unitToggleButtonActive,
+                      ]}
+                      onPress={() => setDistanceUnit('mi')}
+                    >
+                      <Text
+                        style={[
+                          styles.unitToggleText,
+                          distanceUnit === 'mi' && styles.unitToggleTextActive,
+                        ]}
+                      >
+                        mi
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.unitToggleButton,
+                        distanceUnit === 'km' && styles.unitToggleButtonActive,
+                      ]}
+                      onPress={() => setDistanceUnit('km')}
+                    >
+                      <Text
+                        style={[
+                          styles.unitToggleText,
+                          distanceUnit === 'km' && styles.unitToggleTextActive,
+                        ]}
+                      >
+                        km
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
               </View>
             )}
 
@@ -459,6 +580,7 @@ export default function RaceForm({
               totalDurationHours={expectedHours}
               totalDistanceMiles={totalDistanceMiles}
               defaultPackVolumeMl={packVolumeMl}
+              distanceUnit={distanceUnit}
             />
           )}
 
@@ -801,5 +923,56 @@ const styles = StyleSheet.create({
   modalSubmitButton: {
     flex: 1,
     paddingVertical: spacing.sm,
+  },
+  modalInputRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  modalInputCol: {
+    flex: 1,
+  },
+  modalFieldLabel: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    fontWeight: '600',
+  },
+  modalError: {
+    ...typography.caption,
+    color: '#BE5C35',
+    marginTop: spacing.sm,
+  },
+
+  // Custom distance km/mi toggle
+  distanceInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  distanceInput: {
+    flex: 1,
+  },
+  unitToggle: {
+    flexDirection: 'row',
+    backgroundColor: colors.border,
+    borderRadius: borderRadius.full,
+    padding: 3,
+  },
+  unitToggleButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.full,
+  },
+  unitToggleButtonActive: {
+    backgroundColor: colors.surface,
+    ...shadows.sm,
+  },
+  unitToggleText: {
+    ...typography.captionBold,
+    color: colors.textSecondary,
+  },
+  unitToggleTextActive: {
+    color: colors.textPrimary,
   },
 });

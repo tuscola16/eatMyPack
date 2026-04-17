@@ -7,7 +7,10 @@ import {
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { PackPlan } from '@/types/plan';
-import { formatWeight } from '@/utils/formatters';
+import { Conditions } from '@/types/race';
+import { formatWeightAuto } from '@/utils/formatters';
+import { useStore } from '@/store/useStore';
+import { HotIcon, ColdIcon, ModerateIcon } from '@/components/illustrations';
 
 interface PlanCardProps {
   plan: PackPlan;
@@ -15,13 +18,15 @@ interface PlanCardProps {
   onDelete?: () => void;
 }
 
-const CONDITIONS_EMOJI: Record<string, string> = {
-  hot: '🔥',
-  moderate: '☀️',
-  cool: '❄️',
+const CONDITIONS_ICON: Record<Conditions, React.ComponentType<{ width?: number; height?: number }>> = {
+  hot: HotIcon,
+  moderate: ModerateIcon,
+  cool: ColdIcon,
 };
 
 export default function PlanCard({ plan, onPress, onDelete }: PlanCardProps) {
+  const weightUnit = useStore((s) => s.userPreferences.weightUnit);
+
   const distanceLabel = plan.race_config.distance === 'custom'
     ? `${plan.race_config.custom_distance_km ?? '?'}km`
     : plan.race_config.distance;
@@ -32,7 +37,7 @@ export default function PlanCard({ plan, onPress, onDelete }: PlanCardProps) {
     year: 'numeric',
   });
 
-  const conditionsEmoji = CONDITIONS_EMOJI[plan.race_config.conditions] ?? '';
+  const ConditionIcon = CONDITIONS_ICON[plan.race_config.conditions];
 
   return (
     <TouchableOpacity
@@ -50,11 +55,16 @@ export default function PlanCard({ plan, onPress, onDelete }: PlanCardProps) {
         </TouchableOpacity>
       )}
 
+      {plan.name ? (
+        <Text style={styles.title} numberOfLines={1}>{plan.name}</Text>
+      ) : null}
+
       <View style={styles.header}>
         <Text style={styles.distance}>{distanceLabel}</Text>
         <Text style={styles.duration}>
-          {plan.race_config.expected_duration_hours}h {conditionsEmoji}
+          {plan.race_config.expected_duration_hours}h
         </Text>
+        {ConditionIcon ? <ConditionIcon width={18} height={18} /> : null}
       </View>
 
       <Text style={styles.date}>{createdDate}</Text>
@@ -69,7 +79,7 @@ export default function PlanCard({ plan, onPress, onDelete }: PlanCardProps) {
           <Text style={styles.statLabel}>items</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statValue}>{formatWeight(plan.total_weight_g)}</Text>
+          <Text style={styles.statValue}>{formatWeightAuto(plan.total_weight_g, weightUnit)}</Text>
           <Text style={styles.statLabel}>weight</Text>
         </View>
       </View>
@@ -97,9 +107,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.error,
   },
+  title: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
   header: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     gap: spacing.sm,
     marginBottom: 2,
   },
@@ -127,7 +142,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...typography.body,
-    color: colors.primaryLight,
+    color: colors.primaryDark,
     fontWeight: '700',
   },
   statLabel: {

@@ -53,14 +53,17 @@ const WS_TYPE_LABELS: Record<string, string> = {
 
 function WaystationBar({
   waystation,
+  distanceUnit,
   onPress,
 }: {
   waystation: Waystation;
+  distanceUnit?: 'km' | 'mi';
   onPress?: () => void;
 }) {
   const color = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
   const hour = waystation.estimated_hour ?? waystation.marker_value;
   const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
+  const distLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
 
   return (
     <Pressable style={styles.waystationBar} onPress={onPress}>
@@ -68,7 +71,7 @@ function WaystationBar({
         <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
         <Text style={styles.waystationTime}>
           {waystation.marker_type === 'mile'
-            ? `Mile ${waystation.marker_value} (~${hour}h)`
+            ? `${distLabel} ${waystation.marker_value} (~${hour}h)`
             : `Hour ${hour}`}
         </Text>
       </View>
@@ -343,6 +346,7 @@ export default function PackPlanScreen() {
                       <WaystationBar
                         key={ws.id}
                         waystation={ws}
+                        distanceUnit={plan.race_config.distance_unit}
                         onPress={() =>
                           router.push({
                             pathname: '/race/waystation-detail',

@@ -39,10 +39,12 @@ const TYPE_OPTIONS: { value: WaystationType; label: string }[] = [
   { value: 'both', label: 'Both' },
 ];
 
-const MARKER_OPTIONS: { value: MarkerType; label: string }[] = [
-  { value: 'hour', label: 'Hour' },
-  { value: 'mile', label: 'Mile' },
-];
+function getMarkerOptions(distanceUnit: 'km' | 'mi'): { value: MarkerType; label: string }[] {
+  return [
+    { value: 'hour', label: 'Hour' },
+    { value: 'mile', label: distanceUnit === 'km' ? 'Km' : 'Mile' },
+  ];
+}
 
 // Fields whose edits require regenerating the pack plan.
 const REPACK_TRIGGER_KEYS: (keyof Waystation)[] = [
@@ -67,15 +69,18 @@ function recomputeEstimatedHour(
   ws: Waystation,
   totalDistanceMiles: number | undefined,
   totalDurationHours: number,
+  distanceUnit: 'km' | 'mi',
 ): Waystation {
   if (ws.marker_type === 'hour') {
     return { ...ws, estimated_hour: ws.marker_value };
   }
   if (ws.marker_type === 'mile' && totalDistanceMiles && totalDistanceMiles > 0) {
+    const markerMiles =
+      distanceUnit === 'km' ? ws.marker_value * 0.621371 : ws.marker_value;
     return {
       ...ws,
       estimated_hour:
-        Math.round((ws.marker_value / totalDistanceMiles) * totalDurationHours * 10) / 10,
+        Math.round((markerMiles / totalDistanceMiles) * totalDurationHours * 10) / 10,
     };
   }
   return ws;
@@ -146,6 +151,9 @@ export default function WaystationDetailScreen() {
   const typeLabel = WS_TYPE_LABELS[edited.type] ?? edited.type;
   const hour = edited.estimated_hour ?? edited.marker_value;
   const isDirty = JSON.stringify(originalWaystation) !== JSON.stringify(edited);
+  const distanceUnit = plan.race_config.distance_unit ?? 'mi';
+  const markerOptions = getMarkerOptions(distanceUnit);
+  const distLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
 
   const updateField = <K extends keyof Waystation>(key: K, value: Waystation[K]) => {
     setEdited((prev) => {
@@ -156,6 +164,7 @@ export default function WaystationDetailScreen() {
           next,
           totalDistanceMiles,
           plan.race_config.expected_duration_hours,
+          plan.race_config.distance_unit ?? 'mi',
         );
       }
       return next;
@@ -245,7 +254,7 @@ export default function WaystationDetailScreen() {
             <Text style={[styles.typeLabel, { color: typeColor }]}>{typeLabel}</Text>
             <Text style={styles.timeLabel}>
               {edited.marker_type === 'mile'
-                ? `Mile ${edited.marker_value}${hour != null ? ` (~${hour}h)` : ''}`
+                ? `${distLabel} ${edited.marker_value}${hour != null ? ` (~${hour}h)` : ''}`
                 : `Hour ${hour}`}
             </Text>
           </View>
@@ -285,7 +294,7 @@ export default function WaystationDetailScreen() {
             <Text style={styles.sectionTitle}>Position</Text>
             <View style={styles.markerRow}>
               <View style={styles.markerToggle}>
-                {MARKER_OPTIONS.map((opt) => (
+                {markerOptions.map((opt) => (
                   <Pressable
                     key={opt.value}
                     style={[
@@ -313,7 +322,7 @@ export default function WaystationDetailScreen() {
                   updateField('marker_value', isNaN(num) ? 0 : num);
                 }}
                 keyboardType="numeric"
-                placeholder={edited.marker_type === 'hour' ? 'Hour' : 'Mile'}
+                placeholder={edited.marker_type === 'hour' ? 'Hour' : distLabel}
                 placeholderTextColor={colors.textMuted}
               />
               {edited.marker_type === 'mile' && edited.estimated_hour != null && (

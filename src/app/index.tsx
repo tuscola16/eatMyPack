@@ -26,7 +26,7 @@ import type { PackPlan } from '@/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (340 / 390);
-const MAX_PREVIEW_ITEMS = 6;
+const MAX_PREVIEW_ITEMS = 4;
 
 function getPlanDisplayName(plan: PackPlan): string {
   if (plan.name) return plan.name;
@@ -130,6 +130,14 @@ export default function HomeScreen() {
                 </View>
               </AnimatedPressable>
             ))}
+            {savedPlans.length > MAX_PREVIEW_ITEMS && (
+              <Pressable
+                style={styles.moreLink}
+                onPress={() => router.push('/race/plans')}
+              >
+                <Text style={styles.moreLinkText}>More races →</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
           <AnimatedPressable
@@ -273,6 +281,15 @@ const styles = StyleSheet.create({
   planCardWeight: {
     ...typography.caption,
     color: colors.textMuted,
+  },
+  moreLink: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  moreLinkText: {
+    ...typography.caption,
+    color: colors.textSecondary,
   },
 
   // Empty state card

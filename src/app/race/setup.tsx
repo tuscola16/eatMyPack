@@ -29,11 +29,21 @@ export default function RaceSetupScreen() {
 
   const setupMode = (mode === 'complex' || mode === 'witch' ? 'complex' : 'simple') as SetupMode;
 
-  const handleSubmit = (config: RaceConfig, name: string) => {
+  const handleSubmit = (
+    config: RaceConfig,
+    name: string,
+    raceDate?: string,
+    startTime?: string,
+  ) => {
     const generated = generatePack(config, name);
-    const plan = existingPlan
+    const basePlan = existingPlan
       ? { ...generated, id: existingPlan.id, name: name || existingPlan.name }
       : generated;
+    const plan = {
+      ...basePlan,
+      race_date: raceDate ?? existingPlan?.race_date,
+      start_time: startTime ?? existingPlan?.start_time,
+    };
     savePlan(plan);
     router.replace({ pathname: '/race/plan', params: { id: plan.id } });
   };
@@ -57,6 +67,8 @@ export default function RaceSetupScreen() {
         heroComponent={heroElement}
         initialConfig={existingPlan?.race_config}
         initialPlanName={existingPlan ? (planName ?? existingPlan.name) : undefined}
+        initialRaceDate={existingPlan?.race_date}
+        initialStartTime={existingPlan?.start_time}
       />
     </View>
   );

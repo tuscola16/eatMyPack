@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '@/theme';
-import { Waystation, WaystationType, MarkerType } from '@/types/race';
+import { Waystation, WaystationType, MarkerType, DistanceUnit } from '@/types/race';
 import { useStore } from '@/store/useStore';
 import { FOODS } from '@/data/foods';
 
@@ -18,6 +18,7 @@ interface WaystationEditorProps {
   totalDurationHours: number;
   totalDistanceMiles?: number;
   defaultPackVolumeMl?: number;
+  distanceUnit?: DistanceUnit;
 }
 
 function generateId(): string {
@@ -30,10 +31,12 @@ const TYPE_OPTIONS: { value: WaystationType; label: string }[] = [
   { value: 'both', label: 'Both' },
 ];
 
-const MARKER_OPTIONS: { value: MarkerType; label: string }[] = [
-  { value: 'hour', label: 'Hour' },
-  { value: 'mile', label: 'Mile' },
-];
+function getMarkerOptions(distanceUnit: DistanceUnit): { value: MarkerType; label: string }[] {
+  return [
+    { value: 'hour', label: 'Hour' },
+    { value: 'mile', label: distanceUnit === 'km' ? 'Km' : 'Mile' },
+  ];
+}
 
 export default function WaystationEditor({
   waystations,
@@ -41,10 +44,13 @@ export default function WaystationEditor({
   totalDurationHours,
   totalDistanceMiles,
   defaultPackVolumeMl,
+  distanceUnit = 'mi',
 }: WaystationEditorProps) {
   const router = useRouter();
   const pendingWaystationFoods = useStore((s) => s.pendingWaystationFoods);
   const setPendingWaystationFoods = useStore((s) => s.setPendingWaystationFoods);
+  const markerOptions = getMarkerOptions(distanceUnit);
+  const distanceLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
 
   useEffect(() => {
     if (!pendingWaystationFoods || !pendingWaystationFoods.committed) return;
@@ -96,9 +102,12 @@ export default function WaystationEditor({
     const updated = waystations.map(ws => {
       if (ws.id !== id) return ws;
       const merged = { ...ws, ...updates };
-      // Auto-compute estimated_hour for mile markers
+      // Auto-compute estimated_hour for distance markers
       if (merged.marker_type === 'mile' && totalDistanceMiles && totalDistanceMiles > 0) {
-        merged.estimated_hour = Math.round((merged.marker_value / totalDistanceMiles) * totalDurationHours * 10) / 10;
+        const markerMiles = distanceUnit === 'km'
+          ? merged.marker_value * 0.621371
+          : merged.marker_value;
+        merged.estimated_hour = Math.round((markerMiles / totalDistanceMiles) * totalDurationHours * 10) / 10;
       } else if (merged.marker_type === 'hour') {
         merged.estimated_hour = merged.marker_value;
       }
@@ -144,7 +153,7 @@ export default function WaystationEditor({
           {/* Marker type + value */}
           <View style={styles.markerRow}>
             <View style={styles.markerToggle}>
-              {MARKER_OPTIONS.map(opt => (
+              {markerOptions.map(opt => (
                 <Pressable
                   key={opt.value}
                   style={[
@@ -170,7 +179,7 @@ export default function WaystationEditor({
                 updateWaystation(ws.id, { marker_value: isNaN(num) ? 0 : num });
               }}
               keyboardType="numeric"
-              placeholder={ws.marker_type === 'hour' ? 'Hour' : 'Mile'}
+              placeholder={ws.marker_type === 'hour' ? 'Hour' : distanceLabel}
               placeholderTextColor={colors.textMuted}
             />
             {ws.marker_type === 'mile' && ws.estimated_hour != null && (
