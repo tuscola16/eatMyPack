@@ -19,13 +19,15 @@ import { colors } from '@/theme';
 import { HomeIcon, FoodsIcon, SettingsIcon, FooterBackground } from '@/components/illustrations';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from '@/hooks/useAuth';
+import { initSentry, Sentry } from '@/services/sentry';
 
 SplashScreen.preventAutoHideAsync();
+initSentry();
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 64;
 
-export default function RootLayout() {
+function RootLayout() {
   useLocalStorage();
   useAuth();
 
@@ -165,3 +167,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 });
+
+export default Sentry.wrap(RootLayout);

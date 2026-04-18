@@ -8,6 +8,13 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "scheme": "eatmypack",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/00000000-0000-0000-0000-000000000000",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,7 +22,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.eatmypack.app"
+      "bundleIdentifier": "com.eatmypack.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +31,8 @@
         "backgroundColor": "#1A1F16"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.eatmypack.app"
+      "package": "com.eatmypack.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -33,7 +42,20 @@
       "expo-router",
       "expo-sqlite",
       "expo-web-browser",
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-updates",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "YOUR_SENTRY_ORG",
+          "project": "eatmypack"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
+    }
   }
 }
