@@ -8,14 +8,28 @@ export type SetupMode = 'simple' | 'complex';
 export type WaystationType = 'aid_station' | 'pack_refill' | 'both';
 export type MarkerType = 'hour' | 'mile';
 
+export interface WaystationFoodEntry {
+  foodId: string;
+  qty: number;
+}
+
+export function migrateWaystationFoods(raw: string[] | WaystationFoodEntry[] | undefined): WaystationFoodEntry[] {
+  if (!raw || raw.length === 0) return [];
+  if (typeof raw[0] === 'string') {
+    return (raw as string[]).map((id) => ({ foodId: id, qty: 1 }));
+  }
+  return raw as WaystationFoodEntry[];
+}
+
 export interface Waystation {
   id: string;
+  name?: string;
   type: WaystationType;
   marker_type: MarkerType;
   marker_value: number;
   estimated_hour?: number;
   calories_consumed?: number;
-  foods?: string[];
+  foods?: WaystationFoodEntry[];
   pack_volume_ml?: number;
   notes?: string;
 }

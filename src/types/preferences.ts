@@ -16,12 +16,14 @@ export const DEFAULT_CATEGORY_PREFERENCES: CategoryPreferences = {
 export type TempUnit = 'F' | 'C';
 export type WeightUnit = 'oz' | 'g';
 export type CaffeineSensitivity = 'low' | 'medium' | 'high';
+export type TimeFormat = '12h' | '24h';
 
 export interface UserPreferences {
   defaultDistance: RaceDistance | null;
   tempUnit: TempUnit;
   weightUnit: WeightUnit;
   caffeineSensitivity: CaffeineSensitivity;
+  timeFormat: TimeFormat;
 }
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
@@ -29,4 +31,5 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   tempUnit: 'F',
   weightUnit: 'oz',
   caffeineSensitivity: 'medium',
+  timeFormat: '12h',
 };

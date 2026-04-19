@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { FoodItem, FoodCategory, GutRating } from '../types/food';
-import { RaceConfig, RaceDistance, Conditions } from '../types/race';
+import { RaceConfig, RaceDistance, Conditions, WaystationFoodEntry } from '../types/race';
+import { FOODS as LOCAL_FOODS } from '../data/foods';
 import { PackPlan } from '../types/plan';
 import { AuthUser } from '../types/auth';
 import {
