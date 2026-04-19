@@ -47,8 +47,9 @@
       [
         "@sentry/react-native/expo",
         {
-          "organization": "YOUR_SENTRY_ORG",
-          "project": "eatmypack"
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "bagel-runs-technology"
         }
       ],
       "@sentry/react-native"
