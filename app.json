@@ -50,7 +50,8 @@
           "organization": "YOUR_SENTRY_ORG",
           "project": "eatmypack"
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "extra": {
       "eas": {
