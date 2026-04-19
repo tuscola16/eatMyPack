@@ -20,7 +20,7 @@ export default function DatabaseScreen() {
   const [pantryOnly, setPantryOnly] = useState(false);
 
   const inSelectionMode = !!pendingWaystationFoods && !pendingWaystationFoods.committed;
-  const selectedIds = inSelectionMode ? pendingWaystationFoods!.foodIds : [];
+  const selectedIds = inSelectionMode ? pendingWaystationFoods!.foods.map((e) => e.foodId) : [];
 
   const displayedFoods = pantryOnly
     ? foods.filter((f) => pantryFoodIds.includes(f.id))

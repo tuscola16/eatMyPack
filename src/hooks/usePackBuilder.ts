@@ -50,7 +50,15 @@ export function usePackBuilder() {
   const rejectItem = useCallback((foodId: string) => {
     rejectFood(foodId);
     if (currentPlan) {
-      const newPlan = rejectAndRebuild(currentPlan, foodId, FOODS, getPackOptions());
+      const rebuilt = rejectAndRebuild(currentPlan, foodId, FOODS, getPackOptions());
+      const newPlan = {
+        ...rebuilt,
+        id: currentPlan.id,
+        name: currentPlan.name,
+        created_at: currentPlan.created_at,
+        race_date: currentPlan.race_date,
+        start_time: currentPlan.start_time,
+      };
       setCurrentPlan(newPlan);
     }
   }, [currentPlan, rejectFood, getPackOptions, setCurrentPlan]);

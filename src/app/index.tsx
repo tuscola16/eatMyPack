@@ -109,7 +109,7 @@ export default function HomeScreen() {
               <AnimatedPressable
                 key={plan.id}
                 style={styles.planCard}
-                onPress={() => router.push({ pathname: '/race/plan', params: { id: plan.id } })}
+                onPress={() => router.push({ pathname: '/race/plan', params: { id: plan.id, source: 'home' } })}
               >
                 <View style={styles.planCardLeft}>
                   <Text style={styles.planCardName} numberOfLines={1}>
@@ -316,6 +316,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 8,
   },
   emptyOverlay: {
     flex: 1,

@@ -25,6 +25,10 @@ interface AppState {
   user: AuthUser | null;
   setUser: (user: AuthUser | null) => void;
 
+  // Food database (initialized from local data, augmented by Firebase async)
+  foods: FoodItem[];
+  setFoods: (foods: FoodItem[]) => void;
+
   // Food filters
   filters: FoodFilters;
   setFilters: (filters: Partial<FoodFilters>) => void;
@@ -72,10 +76,10 @@ interface AppState {
   useFromPantry: boolean;
   setUseFromPantry: (val: boolean) => void;
 
-  // Ephemeral: food picker handoff between WaystationEditor and /database
+  // Ephemeral: food picker handoff between WaystationEditor and /race/food-picker
   pendingWaystationFoods: {
     waystationId: string;
-    foodIds: string[];
+    foods: WaystationFoodEntry[];
     committed: boolean;
   } | null;
   setPendingWaystationFoods: (value: AppState['pendingWaystationFoods']) => void;
@@ -95,6 +99,10 @@ export const useStore = create<AppState>()(
     // Auth
     user: null,
     setUser: (user) => set({ user }),
+
+    // Food database
+    foods: LOCAL_FOODS,
+    setFoods: (foods) => set({ foods }),
 
     // Food filters
     filters: { ...DEFAULT_FILTERS },
@@ -195,10 +203,11 @@ export const useStore = create<AppState>()(
     togglePendingWaystationFood: (foodId) => set((state) => {
       const pending = state.pendingWaystationFoods;
       if (!pending) return {};
-      const foodIds = pending.foodIds.includes(foodId)
-        ? pending.foodIds.filter((id) => id !== foodId)
-        : [...pending.foodIds, foodId];
-      return { pendingWaystationFoods: { ...pending, foodIds } };
+      const exists = pending.foods.some((e) => e.foodId === foodId);
+      const foods = exists
+        ? pending.foods.filter((e) => e.foodId !== foodId)
+        : [...pending.foods, { foodId, qty: 1 }];
+      return { pendingWaystationFoods: { ...pending, foods } };
     }),
   }))
 );

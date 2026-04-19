@@ -12,14 +12,15 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { useStore } from '@/store/useStore';
 import { usePackBuilder } from '@/hooks/usePackBuilder';
-import { FOODS } from '@/data/foods';
 import type {
   Waystation,
   WaystationType,
   MarkerType,
   RaceConfig,
+  WaystationFoodEntry,
 } from '@/types/race';
-import { DISTANCE_TO_MILES } from '@/types/race';
+import { DISTANCE_TO_MILES, migrateWaystationFoods } from '@/types/race';
+import type { FoodItem } from '@/types/food';
 
 const WS_TYPE_COLORS: Record<string, string> = {
   aid_station: '#8EA778',
@@ -123,7 +124,7 @@ export default function WaystationDetailScreen() {
     if (!pendingWaystationFoods || !pendingWaystationFoods.committed) return;
     if (pendingWaystationFoods.waystationId !== wsId) return;
     setEdited((prev) =>
-      prev ? { ...prev, foods: pendingWaystationFoods.foodIds } : prev,
+      prev ? { ...prev, foods: pendingWaystationFoods.foods } : prev,
     );
     setPendingWaystationFoods(null);
   }, [pendingWaystationFoods, wsId, setPendingWaystationFoods]);
@@ -138,7 +139,10 @@ export default function WaystationDetailScreen() {
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.errorState}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Pressable
+            onPress={() => router.replace({ pathname: '/race/plan', params: { id: planId ?? '' } })}
+            style={styles.backBtn}
+          >
             <Text style={styles.backBtnText}>‹ Back</Text>
           </Pressable>
           <Text style={styles.errorText}>Waystation not found.</Text>
@@ -174,18 +178,40 @@ export default function WaystationDetailScreen() {
   const openFoodPicker = () => {
     setPendingWaystationFoods({
       waystationId: edited.id,
-      foodIds: edited.foods ?? [],
+      foods: migrateWaystationFoods(edited.foods),
       committed: false,
     });
-    router.push('/database');
+    router.push('/race/food-picker');
   };
 
   const removeFood = (foodId: string) => {
     setEdited((prev) =>
       prev
-        ? { ...prev, foods: (prev.foods ?? []).filter((id) => id !== foodId) }
+        ? { ...prev, foods: (prev.foods ?? []).filter((e) => e.foodId !== foodId) }
         : prev,
     );
+  };
+
+  const incrementQty = (foodId: string) => {
+    setEdited((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        foods: (prev.foods ?? []).map((e) =>
+          e.foodId === foodId ? { ...e, qty: e.qty + 1 } : e,
+        ),
+      };
+    });
+  };
+
+  const decrementQty = (foodId: string) => {
+    setEdited((prev) => {
+      if (!prev) return prev;
+      const next = (prev.foods ?? [])
+        .map((e) => (e.foodId === foodId ? { ...e, qty: e.qty - 1 } : e))
+        .filter((e) => e.qty > 0);
+      return { ...prev, foods: next };
+    });
   };
 
   const buildUpdatedConfig = (): RaceConfig => ({
@@ -228,12 +254,19 @@ export default function WaystationDetailScreen() {
     saveWithoutRepack();
   };
 
-  const packedFoodItems =
-    (edited.foods ?? [])
-      .map((id) => FOODS.find((f) => f.id === id))
-      .filter((f): f is NonNullable<typeof f> => Boolean(f));
+  const storeFoods = useStore((s) => s.foods);
+  const packedFoodEntries = useMemo(
+    () =>
+      migrateWaystationFoods(edited.foods)
+        .map((e) => {
+          const food = storeFoods.find((f) => f.id === e.foodId);
+          return food ? { food, qty: e.qty } : null;
+        })
+        .filter((x): x is { food: FoodItem; qty: number } => x !== null),
+    [edited.foods, storeFoods],
+  );
 
-  const foodCalories = packedFoodItems.reduce((sum, f) => sum + (f.calories ?? 0), 0);
+  const foodCalories = packedFoodEntries.reduce((sum, { food, qty }) => sum + (food.calories ?? 0) * qty, 0);
   const displayedTotalCalories =
     edited.calories_consumed != null
       ? edited.calories_consumed
@@ -266,6 +299,22 @@ export default function WaystationDetailScreen() {
         </View>
 
         <View style={styles.body}>
+          {/* Name (optional) */}
+          <View style={styles.card}>
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Name (optional)</Text>
+              <TextInput
+                style={[styles.smallInput, { width: 160 }]}
+                value={edited.name ?? ''}
+                onChangeText={(val) => updateField('name', val.slice(0, 50) || undefined)}
+                placeholder="e.g. Mile 42 Aid"
+                placeholderTextColor={colors.textMuted}
+                maxLength={50}
+                autoCorrect={false}
+              />
+            </View>
+          </View>
+
           {/* Type pills */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Type</Text>
@@ -395,26 +444,27 @@ export default function WaystationDetailScreen() {
           {/* Packed foods */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Packed Foods</Text>
-            {packedFoodItems.length > 0 && (
+            {packedFoodEntries.length > 0 && (
               <View style={styles.foodChipRow}>
-                {packedFoodItems.map((food) => (
-                  <Pressable
-                    key={food.id}
-                    style={styles.foodChip}
-                    onPress={() => removeFood(food.id)}
-                  >
-                    <Text style={styles.foodChipText}>{food.name}</Text>
-                    <Text style={styles.foodChipRemove}>✕</Text>
-                  </Pressable>
+                {packedFoodEntries.map(({ food, qty }) => (
+                  <View key={food.id} style={styles.foodChip}>
+                    <Pressable onPress={() => decrementQty(food.id)} style={styles.qtyBtn}>
+                      <Text style={styles.qtyBtnText}>−</Text>
+                    </Pressable>
+                    <Text style={styles.foodChipText}>{food.name}{qty > 1 ? ` ×${qty}` : ''}</Text>
+                    <Pressable onPress={() => incrementQty(food.id)} style={styles.qtyBtn}>
+                      <Text style={styles.qtyBtnText}>+</Text>
+                    </Pressable>
+                  </View>
                 ))}
               </View>
             )}
             <Pressable style={styles.addFoodsButton} onPress={openFoodPicker}>
               <Text style={styles.addFoodsButtonText}>
-                {packedFoodItems.length > 0 ? 'Edit foods →' : 'Add foods →'}
+                {packedFoodEntries.length > 0 ? 'Edit foods →' : 'Add foods →'}
               </Text>
             </Pressable>
-            {packedFoodItems.length > 0 && (
+            {packedFoodEntries.length > 0 && (
               <View style={styles.foodTotalRow}>
                 <Text style={styles.foodTotalLabel}>Total</Text>
                 <Text style={styles.foodTotalValue}>{foodCalories} cal</Text>
@@ -676,9 +726,13 @@ const styles = StyleSheet.create({
     color: colors.primaryDark,
     fontWeight: '600',
   },
-  foodChipRemove: {
+  qtyBtn: {
+    paddingHorizontal: 4,
+  },
+  qtyBtnText: {
     ...typography.caption,
     color: colors.primaryDark,
+    fontWeight: '700',
   },
   addFoodsButton: {
     alignSelf: 'flex-start',

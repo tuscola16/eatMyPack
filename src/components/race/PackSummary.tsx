@@ -8,9 +8,31 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
-import { PackPlan } from '@/types/plan';
+import { PackPlan, PackPhase } from '@/types/plan';
 import { formatWeight, formatWeightOz, formatCalPerHour, formatVolume } from '@/utils/formatters';
 import { useStore } from '@/store/useStore';
+
+function computeMaxFillVolume(plan: PackPlan): number {
+  const waystations = plan.race_config.waystations ?? [];
+  const refillHours = waystations
+    .filter((ws) => ws.type === 'pack_refill' || ws.type === 'both')
+    .map((ws) => ws.estimated_hour ?? ws.marker_value)
+    .sort((a, b) => a - b);
+
+  if (refillHours.length === 0) return plan.total_volume_ml ?? 0;
+
+  const boundaries = [0, ...refillHours, Infinity];
+  let maxFill = 0;
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    const start = boundaries[i];
+    const end = boundaries[i + 1];
+    const fillVolume = plan.phases
+      .filter((p: PackPhase) => p.phase.start_hour >= start && p.phase.end_hour <= end)
+      .reduce((s: number, p: PackPhase) => s + p.total_volume_ml, 0);
+    if (fillVolume > maxFill) maxFill = fillVolume;
+  }
+  return maxFill;
+}
 
 interface PackSummaryProps {
   plan: PackPlan;
@@ -101,11 +123,19 @@ export default function PackSummary({ plan }: PackSummaryProps) {
     : 0;
 
   const hasVolumeLimit = plan.race_config.max_volume_ml != null && plan.race_config.max_volume_ml > 0;
-  const totalVolume = plan.total_volume_ml ?? 0;
+  const waystations = plan.race_config.waystations ?? [];
+  const hasRefills = waystations.some((ws) => ws.type === 'pack_refill' || ws.type === 'both');
+  const displayVolume = hasRefills ? computeMaxFillVolume(plan) : (plan.total_volume_ml ?? 0);
+  const volumeLabel = hasRefills ? 'Volume (per fill)' : 'Volume';
 
-  const distanceLabel = plan.race_config.distance === 'custom'
-    ? `${plan.race_config.custom_distance_km ?? '?'}km`
-    : plan.race_config.distance;
+  const distanceLabel = (() => {
+    if (plan.race_config.distance !== 'custom') return plan.race_config.distance;
+    const km = plan.race_config.custom_distance_km;
+    if (km == null) return '?';
+    return plan.race_config.distance_unit === 'mi'
+      ? `${Math.round(km / 1.609344)}mi`
+      : `${km}km`;
+  })();
 
   const configLine = `${distanceLabel} · ${plan.race_config.expected_duration_hours}h · ${CONDITIONS_LABEL[plan.race_config.conditions] ?? plan.race_config.conditions}`;
 
@@ -131,9 +161,9 @@ export default function PackSummary({ plan }: PackSummaryProps) {
       {hasVolumeLimit && (
         <View style={styles.volumeSection}>
           <View style={styles.volumeHeader}>
-            <Text style={styles.volumeLabel}>Volume</Text>
+            <Text style={styles.volumeLabel}>{volumeLabel}</Text>
             <Text style={styles.volumeValue}>
-              {formatVolume(totalVolume)} / {formatVolume(plan.race_config.max_volume_ml!)}
+              {formatVolume(displayVolume)} / {formatVolume(plan.race_config.max_volume_ml!)}
             </Text>
           </View>
           <View style={styles.volumeTrack}>
@@ -141,8 +171,8 @@ export default function PackSummary({ plan }: PackSummaryProps) {
               style={[
                 styles.volumeFill,
                 {
-                  width: `${Math.min((totalVolume / plan.race_config.max_volume_ml!) * 100, 100)}%`,
-                  backgroundColor: totalVolume > plan.race_config.max_volume_ml!
+                  width: `${Math.min((displayVolume / plan.race_config.max_volume_ml!) * 100, 100)}%`,
+                  backgroundColor: displayVolume > plan.race_config.max_volume_ml!
                     ? colors.error
                     : colors.primary,
                 },

@@ -14,7 +14,7 @@ import { Stack, router } from 'expo-router';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
 import { FoodCategory } from '@/types/food';
 import { RaceDistance } from '@/types/race';
-import { TempUnit, WeightUnit, CaffeineSensitivity } from '@/types/preferences';
+import { TempUnit, WeightUnit, CaffeineSensitivity, TimeFormat } from '@/types/preferences';
 import { useStore } from '@/store/useStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useCloudSync } from '@/hooks/useCloudSync';
@@ -211,6 +211,32 @@ export default function SettingsScreen() {
                 </View>
               </View>
 
+              <View style={styles.rowDivider} />
+
+              {/* Time Format */}
+              <View style={styles.prefRow}>
+                <Text style={styles.prefRowLabel}>Time Display</Text>
+                <View style={styles.segmentedControl}>
+                  {(['12h', '24h'] as TimeFormat[]).map((fmt) => (
+                    <Pressable
+                      key={fmt}
+                      style={[
+                        styles.segmentOption,
+                        userPreferences.timeFormat === fmt && styles.segmentOptionActive,
+                      ]}
+                      onPress={() => setUserPreferences({ timeFormat: fmt })}
+                    >
+                      <Text style={[
+                        styles.segmentOptionText,
+                        userPreferences.timeFormat === fmt && styles.segmentOptionTextActive,
+                      ]}>
+                        {fmt}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+
               <View style={styles.prefDivider} />
 
               {/* Category preferences */}
@@ -381,10 +407,7 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     ...typography.h1,
-    color: colors.textInverse,
-    textShadowColor: 'rgba(0,0,0,0.25)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: colors.textPrimary,
   },
 
   body: {

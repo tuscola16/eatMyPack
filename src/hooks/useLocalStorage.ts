@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useStore } from '../store/useStore';
 import { PackPlan } from '../types/plan';
 import { CategoryPreferences } from '../types/preferences';
+import { migrateWaystationFoods } from '../types/race';
 
 const SAVED_PLANS_KEY = '@eatmypack:saved_plans';
 const PANTRY_KEY = '@eatmypack:pantry_food_ids';
@@ -41,8 +42,14 @@ export function useLocalStorage() {
       if (data) {
         const plans: PackPlan[] = JSON.parse(data);
         plans.forEach(p => {
-          // Migrate old plans that may not have a name
           if (!p.name) p.name = '';
+          // Migrate old string[] waystation foods to WaystationFoodEntry[]
+          if (p.race_config.waystations) {
+            p.race_config.waystations = p.race_config.waystations.map((ws) => ({
+              ...ws,
+              foods: migrateWaystationFoods(ws.foods),
+            }));
+          }
           savePlan(p);
         });
       }

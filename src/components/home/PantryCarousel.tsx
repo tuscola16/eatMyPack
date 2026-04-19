@@ -113,7 +113,7 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
           <View style={styles.emptyOverlay}>
             <Text style={styles.emptyTitle}>Pantry is empty</Text>
             <Text style={styles.emptySubtitle}>
-              Add foods from the Foods tab to restrict your pack to what you own
+              Add foods to restrict your pack
             </Text>
           </View>
         </AnimatedPressable>

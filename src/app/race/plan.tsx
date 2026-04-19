@@ -35,6 +35,7 @@ import {
   isValidStartTime,
   formatRaceDateTime,
 } from '@/utils/validation';
+import { formatWallClockTime } from '@/utils/timeUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (160 / 390);
@@ -54,10 +55,14 @@ const WS_TYPE_LABELS: Record<string, string> = {
 function WaystationBar({
   waystation,
   distanceUnit,
+  startTime,
+  timeFormat,
   onPress,
 }: {
   waystation: Waystation;
   distanceUnit?: 'km' | 'mi';
+  startTime?: string;
+  timeFormat?: '12h' | '24h';
   onPress?: () => void;
 }) {
   const color = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
@@ -65,15 +70,23 @@ function WaystationBar({
   const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
   const distLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
 
+  const timeLabel = (() => {
+    if (waystation.marker_type === 'mile') {
+      const approx = startTime
+        ? formatWallClockTime(startTime, hour, timeFormat ?? '12h')
+        : `~${hour}h`;
+      return `${distLabel} ${waystation.marker_value} (${approx})`;
+    }
+    return startTime
+      ? formatWallClockTime(startTime, hour, timeFormat ?? '12h')
+      : `Hour ${hour}`;
+  })();
+
   return (
     <Pressable style={styles.waystationBar} onPress={onPress}>
       <View style={styles.waystationInfo}>
-        <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
-        <Text style={styles.waystationTime}>
-          {waystation.marker_type === 'mile'
-            ? `${distLabel} ${waystation.marker_value} (~${hour}h)`
-            : `Hour ${hour}`}
-        </Text>
+        <Text style={[styles.waystationLabel, { color }]}>{waystation.name ?? label}</Text>
+        <Text style={styles.waystationTime}>{timeLabel}</Text>
       </View>
       {waystation.calories_consumed != null && waystation.calories_consumed > 0 && (
         <Text style={styles.waystationCals}>{waystation.calories_consumed} cal</Text>
@@ -88,11 +101,12 @@ function WaystationBar({
 
 export default function PackPlanScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, source } = useLocalSearchParams<{ id?: string; source?: string }>();
   const { currentPlan, rejectItem } = usePackBuilder();
   const savedPlans = useStore((s) => s.savedPlans);
   const deletePlan = useStore((s) => s.deletePlan);
   const savePlan = useStore((s) => s.savePlan);
+  const timeFormat = useStore((s) => s.userPreferences.timeFormat);
   const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -120,7 +134,7 @@ export default function PackPlanScreen() {
       confirmLabel: 'Delete',
       onConfirm: () => {
         deletePlan(id);
-        router.back();
+        source === 'plans' ? router.replace('/race/plans') : router.replace('/');
       },
     });
   };
@@ -233,7 +247,13 @@ export default function PackPlanScreen() {
 
         {/* Back + Edit + Delete header row */}
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={styles.headerBtn}>
+          <Pressable
+            onPress={() => id
+              ? (source === 'plans' ? router.replace('/race/plans') : router.replace('/'))
+              : router.back()
+            }
+            style={styles.headerBtn}
+          >
             <Text style={styles.headerBtnText}>‹ Back</Text>
           </Pressable>
           <View style={styles.headerActions}>
@@ -331,6 +351,8 @@ export default function PackPlanScreen() {
                   phase={packPhase}
                   isExpanded={isExpanded}
                   onToggle={() => togglePhase(phaseIndex)}
+                  startTime={plan.start_time}
+                  timeFormat={timeFormat}
                 />
                 {isExpanded && (
                   <>
@@ -347,6 +369,8 @@ export default function PackPlanScreen() {
                         key={ws.id}
                         waystation={ws}
                         distanceUnit={plan.race_config.distance_unit}
+                        startTime={plan.start_time}
+                        timeFormat={timeFormat}
                         onPress={() =>
                           router.push({
                             pathname: '/race/waystation-detail',

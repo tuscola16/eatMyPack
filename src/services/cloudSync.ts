@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { PackPlan } from '@/types/plan';
+import { migrateWaystationFoods } from '@/types/race';
 
 export async function uploadPlan(uid: string, plan: PackPlan): Promise<void> {
   await setDoc(doc(db, 'users', uid, 'savedPlans', plan.id), {
@@ -25,9 +26,15 @@ export async function fetchPlans(uid: string): Promise<PackPlan[]> {
   const snap = await getDocs(collection(db, 'users', uid, 'savedPlans'));
   return snap.docs.map((d) => {
     const data = d.data();
-    // Strip Firestore-specific fields
-    const { updatedAt, ...plan } = data;
-    return plan as PackPlan;
+    const { updatedAt, ...planData } = data;
+    const plan = planData as PackPlan;
+    if (plan.race_config.waystations) {
+      plan.race_config.waystations = plan.race_config.waystations.map((ws) => ({
+        ...ws,
+        foods: migrateWaystationFoods(ws.foods),
+      }));
+    }
+    return plan;
   });
 }
 

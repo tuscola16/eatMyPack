@@ -74,10 +74,8 @@ function RootLayout() {
             ),
             tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.textMuted,
-            tabBarLabelStyle: {
-              fontFamily: 'DMSans_400Regular',
-              fontSize: 11,
-            },
+            tabBarShowLabel: false,
+            tabBarIconStyle: { marginTop: 8 },
             headerShadowVisible: false,
           }}
         >
