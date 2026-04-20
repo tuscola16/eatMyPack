@@ -51,9 +51,29 @@ export async function uploadPreferences(
 
 export async function fetchPreferences(
   uid: string
-): Promise<{ pinnedFoodIds: string[] } | null> {
+): Promise<{ pinnedFoodIds: string[]; pantryFoodIds: string[] } | null> {
   const snap = await getDoc(doc(db, 'users', uid, 'preferences'));
   if (!snap.exists()) return null;
   const data = snap.data();
-  return { pinnedFoodIds: data.pinnedFoodIds ?? [] };
+  return {
+    pinnedFoodIds: data.pinnedFoodIds ?? [],
+    pantryFoodIds: data.pantryFoodIds ?? [],
+  };
+}
+
+export async function uploadPantry(
+  uid: string,
+  pantryFoodIds: string[]
+): Promise<void> {
+  await setDoc(
+    doc(db, 'users', uid, 'preferences'),
+    { pantryFoodIds, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}
+
+export async function fetchPantry(uid: string): Promise<string[]> {
+  const snap = await getDoc(doc(db, 'users', uid, 'preferences'));
+  if (!snap.exists()) return [];
+  return snap.data().pantryFoodIds ?? [];
 }

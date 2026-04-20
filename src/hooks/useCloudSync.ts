@@ -6,6 +6,7 @@ import {
   fetchPlans,
   uploadPreferences,
   fetchPreferences,
+  uploadPantry,
 } from '@/services/cloudSync';
 import { PackPlan } from '@/types/plan';
 
@@ -51,6 +52,20 @@ export function useCloudSync() {
     return unsub;
   }, [user]);
 
+  // Auto-sync pantryFoodIds changes
+  useEffect(() => {
+    if (!user) return;
+
+    const unsub = useStore.subscribe(
+      (state) => state.pantryFoodIds,
+      (pantryFoodIds) => {
+        uploadPantry(user.uid, pantryFoodIds).catch(console.warn);
+      }
+    );
+
+    return unsub;
+  }, [user]);
+
   const syncPlansToCloud = async (
     uid: string,
     plans: PackPlan[],
@@ -80,7 +95,7 @@ export function useCloudSync() {
         fetchPreferences(user.uid),
       ]);
 
-      const { savePlan, pinnedFoodIds } = useStore.getState();
+      const { savePlan, pinnedFoodIds, pantryFoodIds, togglePantryFood } = useStore.getState();
 
       // Merge remote plans into local (remote wins for same ID)
       remotePlans.forEach((plan) => savePlan(plan));
@@ -89,6 +104,14 @@ export function useCloudSync() {
       if (prefs?.pinnedFoodIds.length) {
         const merged = [...new Set([...pinnedFoodIds, ...prefs.pinnedFoodIds])];
         useStore.setState({ pinnedFoodIds: merged });
+      }
+
+      // Merge pantry if remote has data
+      if (prefs?.pantryFoodIds.length) {
+        const remotePantry = prefs.pantryFoodIds;
+        remotePantry.forEach((id) => {
+          if (!pantryFoodIds.includes(id)) togglePantryFood(id);
+        });
       }
 
       setSyncStatus('idle');
@@ -108,7 +131,7 @@ export function useCloudSync() {
         fetchPreferences(user.uid),
       ]);
 
-      const { savedPlans, savePlan, pinnedFoodIds } = useStore.getState();
+      const { savedPlans, savePlan, pinnedFoodIds, pantryFoodIds, togglePantryFood } = useStore.getState();
 
       // Merge: build map by ID, local plans win for same ID (user just saved them)
       const planMap = new Map<string, PackPlan>();
@@ -127,6 +150,14 @@ export function useCloudSync() {
       const mergedPinned = [...new Set([...pinnedFoodIds, ...remotePinned])];
       useStore.setState({ pinnedFoodIds: mergedPinned });
       await uploadPreferences(user.uid, mergedPinned);
+
+      // Merge pantry
+      const remotePantry = prefs?.pantryFoodIds ?? [];
+      remotePantry.forEach((id) => {
+        if (!pantryFoodIds.includes(id)) togglePantryFood(id);
+      });
+      const mergedPantry = useStore.getState().pantryFoodIds;
+      await uploadPantry(user.uid, mergedPantry);
 
       setSyncStatus('idle');
     } catch (e) {
