@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { FOODS } from '../data/foods';
 import { useStore } from '../store/useStore';
 import { buildPack, rejectAndRebuild, PackOptions } from '../services/packAlgorithm';
 import { RaceConfig } from '../types/race';
@@ -16,6 +15,7 @@ export function usePackBuilder() {
     pantryFoodIds,
     useFromPantry,
     categoryPreferences,
+    foods,
   } = useStore();
 
   const getPackOptions = useCallback((): PackOptions | undefined => {
@@ -37,7 +37,7 @@ export function usePackBuilder() {
 
     const plan = buildPack(
       raceConfig,
-      FOODS,
+      foods,
       rejectedFoodIds,
       effectivePinnedIds,
       getPackOptions(),
@@ -50,7 +50,7 @@ export function usePackBuilder() {
   const rejectItem = useCallback((foodId: string) => {
     rejectFood(foodId);
     if (currentPlan) {
-      const rebuilt = rejectAndRebuild(currentPlan, foodId, FOODS, getPackOptions());
+      const rebuilt = rejectAndRebuild(currentPlan, foodId, foods, getPackOptions());
       const newPlan = {
         ...rebuilt,
         id: currentPlan.id,
@@ -76,7 +76,7 @@ export function usePackBuilder() {
       }
       const generated = buildPack(
         updatedConfig,
-        FOODS,
+        foods,
         rejectedFoodIds,
         effectivePinnedIds,
         getPackOptions(),

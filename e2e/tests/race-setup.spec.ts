@@ -16,108 +16,97 @@ test.describe('Race Setup Wizard', () => {
   });
 
   test('step 2: shows duration after selecting distance', async ({ appPage: page }) => {
-    await page.getByText('50K', { exact: true }).click();
+    await page.getByText('50K', { exact: true }).first().evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(500);
 
     await expect(page.getByText('Expected Duration')).toBeVisible();
-    await expect(page.getByText('Next', { exact: true })).toBeVisible();
     await expect(page).toHaveScreenshot('setup-step2-duration.png');
   });
 
   test('step 2: custom distance shows km input', async ({ appPage: page }) => {
-    await page.getByText('Custom', { exact: true }).click();
+    await page.getByText('Custom', { exact: true }).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(500);
 
-    await expect(page.getByText('Distance (km)')).toBeVisible();
-    await expect(page.getByPlaceholder('e.g. 160')).toBeVisible();
+    await expect(page.getByText('Distance (mi)')).toBeVisible();
+    await expect(page.getByPlaceholder('e.g. 100')).toBeVisible();
     await expect(page).toHaveScreenshot('setup-step2-custom.png');
   });
 
-  test('step 3: shows condition buttons', async ({ appPage: page }) => {
-    await page.getByText('100K', { exact: true }).click();
-    await page.waitForTimeout(500);
-    await page.getByText('Next', { exact: true }).click();
-    await page.waitForTimeout(500);
-
+  test('step 1: shows condition buttons', async ({ appPage: page }) => {
+    // Conditions are in step 1 alongside distance — always visible
     await expect(page.getByText('Race Conditions')).toBeVisible();
     await expect(page.getByText('Hot', { exact: true })).toBeVisible();
     await expect(page.getByText('Moderate', { exact: true })).toBeVisible();
     await expect(page.getByText('Cool', { exact: true })).toBeVisible();
-    await expect(page).toHaveScreenshot('setup-step3-conditions.png');
+    await expect(page).toHaveScreenshot('setup-step1-conditions.png');
   });
 
-  test('step 3: Build My Pack disabled until condition selected', async ({ appPage: page }) => {
-    await page.getByText('50K', { exact: true }).click();
-    await page.waitForTimeout(500);
-    await page.getByText('Next', { exact: true }).click();
-    await page.waitForTimeout(500);
-
+  test('Build My Pack disabled until distance and condition selected', async ({ appPage: page }) => {
+    // Build My Pack is visible but disabled (opacity 0.4) until both are selected
     const buildButton = page.getByText('Build My Pack', { exact: true });
     await expect(buildButton).toBeVisible();
-    await expect(page).toHaveScreenshot('setup-step3-disabled.png');
+    await expect(page).toHaveScreenshot('setup-build-disabled.png');
 
-    await page.getByText('Moderate', { exact: true }).click();
+    // Select distance to unlock duration step
+    await page.getByText('50K', { exact: true }).first().evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(500);
+    // Still disabled — no condition selected
+    await expect(page).toHaveScreenshot('setup-build-dist-only.png');
+
+    // Select conditions — now enabled
+    await page.getByText('Moderate', { exact: true }).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(300);
-    await expect(page).toHaveScreenshot('setup-step3-enabled.png');
+    await expect(page).toHaveScreenshot('setup-build-enabled.png');
   });
 
-  test('step 3: pantry toggle hidden when pantry is empty', async ({ appPage: page }) => {
-    await page.getByText('50K', { exact: true }).click();
-    await page.waitForTimeout(500);
-    await page.getByText('Next', { exact: true }).click();
-    await page.waitForTimeout(500);
-
+  test('pantry toggle hidden when pantry is empty', async ({ appPage: page }) => {
     // Pantry toggle should NOT be visible when pantry is empty
     await expect(page.getByText('Build from My Pantry')).not.toBeVisible();
   });
 
-  test('step 3: pantry toggle visible when pantry has items', async ({ appPage: page }) => {
-    // First, add items to pantry via Settings
-    await navigateToTab(page, 'Settings');
-    await page.waitForTimeout(1000);
-    await page.getByText('No items in your pantry yet').click();
+  test('pantry toggle visible when pantry has items', async ({ appPage: page }) => {
+    // Add an item to pantry via the Foods database tab
+    await page.goto('/database');
     await page.waitForTimeout(1000);
 
-    // Add a food to pantry
-    const pantryToggle = page.getByLabel('Add to pantry').first();
-    if (await pantryToggle.isVisible().catch(() => false)) {
-      await pantryToggle.click();
-      await page.waitForTimeout(300);
+    const addButton = page.getByLabel('Add to pantry').first();
+    if (await addButton.isVisible().catch(() => false)) {
+      await addButton.evaluate((el) => (el as HTMLElement).click());
+      await page.waitForTimeout(500);
     }
 
-    // Navigate to race setup via home Wizard button
-    await navigateToTab(page, 'Home');
-    await page.waitForTimeout(500);
+    // Navigate back to race setup
     await navigateToSetupWizard(page);
 
-    await page.getByText('50K', { exact: true }).click();
-    await page.waitForTimeout(500);
-    await page.getByText('Next', { exact: true }).click();
+    await page.getByText('50K', { exact: true }).first().evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(500);
 
     // Pantry toggle should be visible
     await expect(page.getByText('Build from My Pantry')).toBeVisible();
     await expect(page.getByText('1 item', { exact: true }).first()).toBeVisible();
-    await expect(page).toHaveScreenshot('setup-step3-pantry-toggle.png');
+    await expect(page).toHaveScreenshot('setup-pantry-toggle.png');
   });
 });
 
-test.describe('Race Setup Witch Mode', () => {
-  test('shows calories per hour input in step 2', async ({ appPage: page }) => {
+test.describe('Race Setup Complex Mode', () => {
+  test('shows calories per hour input in complex mode', async ({ appPage: page }) => {
     await navigateToSetupWitch(page);
 
-    // Step 1: Select distance
-    await page.getByText('50K', { exact: true }).click();
-    await page.waitForTimeout(500);
+    // Complex mode shows distance input (not chips)
+    const distInput = page.getByPlaceholder(/e\.g\. 100/i).first();
+    if (await distInput.isVisible().catch(() => false)) {
+      await distInput.fill('80');
+      await page.waitForTimeout(500);
+    }
 
-    // Step 2: Should show target calories per hour input
-    await expect(page.getByText('Target calories per hour')).toBeVisible();
+    // Calories Per Hour section should unlock
+    await expect(page.getByText('Calories Per Hour')).toBeVisible();
     await expect(page.getByPlaceholder('e.g. 250')).toBeVisible();
     await expect(page).toHaveScreenshot('setup-witch-step2-cal-input.png');
   });
 
-  test('header shows Manual Setup for witch mode', async ({ appPage: page }) => {
+  test('shows Complex mode active for witch mode setup', async ({ appPage: page }) => {
     await navigateToSetupWitch(page);
-    await expect(page.getByText('Manual Setup')).toBeVisible();
+    await expect(page.getByText('Complex', { exact: true })).toBeVisible();
   });
 });

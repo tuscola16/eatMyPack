@@ -8,7 +8,7 @@ test.describe('Food Database', () => {
 
   test('renders filter bar and food list', async ({ appPage: page }) => {
     // Should see the food database content
-    await expect(page.getByText('Food Database').first()).toBeVisible();
+    await expect(page.getByText('Foods').first()).toBeVisible();
     await expect(page).toHaveScreenshot('database-overview.png');
   });
 

@@ -19,6 +19,7 @@ import { colors } from '@/theme';
 import { HomeIcon, FoodsIcon, SettingsIcon, FooterBackground } from '@/components/illustrations';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from '@/hooks/useAuth';
+import { useFoods } from '@/hooks/useFoods';
 import { initSentry, Sentry } from '@/services/sentry';
 
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +31,7 @@ const TAB_BAR_HEIGHT = 64;
 function RootLayout() {
   useLocalStorage();
   useAuth();
+  useFoods();
 
   const [fontsLoaded, fontError] = useFonts({
     Nunito_600SemiBold,

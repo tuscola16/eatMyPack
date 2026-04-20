@@ -13,21 +13,16 @@ test.describe('Settings Screen', () => {
     await expect(page).toHaveScreenshot('settings-guest.png');
   });
 
-  test('shows pantry section', async ({ appPage: page }) => {
-    await expect(page.getByText('My Pantry')).toBeVisible();
-    await expect(page.getByText('No items in your pantry yet')).toBeVisible();
-  });
-
   test('shows category preferences section', async ({ appPage: page }) => {
-    await expect(page.getByText('Category Preferences')).toBeVisible();
     await expect(page.getByText('Never use')).toBeVisible();
     await expect(page.getByText('Prefer', { exact: true })).toBeVisible();
   });
 
   test('shows about section', async ({ appPage: page }) => {
-    await expect(page.getByText('About eatMyPack')).toBeVisible();
+    await expect(page.getByText('About', { exact: true })).toBeVisible();
+    await expect(page.getByText('eatMyPack', { exact: true })).toBeVisible();
     await expect(
-      page.getByText('eatMyPack helps ultra trail runners', { exact: false })
+      page.getByText('Plan your race nutrition down to each phase', { exact: false })
     ).toBeVisible();
   });
 
@@ -37,8 +32,7 @@ test.describe('Settings Screen', () => {
   });
 
   test('shows version info', async ({ appPage: page }) => {
-    await expect(page.getByText('Version', { exact: true })).toBeVisible();
-    await expect(page.getByText('1.0.0', { exact: true })).toBeVisible();
+    await expect(page.getByText('Version 1.0.0', { exact: false })).toBeVisible();
   });
 
   test('shows footer', async ({ appPage: page }) => {

@@ -10,7 +10,6 @@ import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { Waystation, WaystationType, MarkerType, DistanceUnit } from '@/types/race';
 import { useStore } from '@/store/useStore';
-import { FOODS } from '@/data/foods';
 
 interface WaystationEditorProps {
   waystations: Waystation[];
@@ -49,6 +48,7 @@ export default function WaystationEditor({
   const router = useRouter();
   const pendingWaystationFoods = useStore((s) => s.pendingWaystationFoods);
   const setPendingWaystationFoods = useStore((s) => s.setPendingWaystationFoods);
+  const foods = useStore((s) => s.foods);
   const markerOptions = getMarkerOptions(distanceUnit);
   const distanceLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
 
@@ -229,7 +229,7 @@ export default function WaystationEditor({
             {(ws.foods ?? []).length > 0 && (
               <View style={styles.foodChipRow}>
                 {(ws.foods ?? []).map((foodId) => {
-                  const food = FOODS.find((f) => f.id === foodId);
+                  const food = foods.find((f) => f.id === foodId);
                   if (!food) return null;
                   return (
                     <Pressable

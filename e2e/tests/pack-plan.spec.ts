@@ -1,4 +1,4 @@
-import { test, expect, autoAcceptDialogs, navigateToSetupWizard, completeRaceSetup, savePlanWithName } from '../fixtures/app.fixture';
+import { test, expect, autoAcceptDialogs, navigateToSetupWizard, completeRaceSetup } from '../fixtures/app.fixture';
 
 test.describe('Pack Plan View', () => {
   test('shows plan after completing setup wizard', async ({ appPage: page }) => {
@@ -23,49 +23,52 @@ test.describe('Pack Plan View', () => {
     await expect(page).toHaveScreenshot('plan-phases.png', { fullPage: true });
   });
 
-  test('shows Start Over and Save Plan buttons', async ({ appPage: page }) => {
+  test('shows plan view navigation elements', async ({ appPage: page }) => {
     await navigateToSetupWizard(page);
     await completeRaceSetup(page);
 
-    await expect(page.getByText('Start Over', { exact: true })).toBeVisible();
-    await expect(page.getByText('Save Plan', { exact: true })).toBeVisible();
+    await expect(page.getByText('Total Cal').or(page.getByText('total cal'))).toBeVisible();
     await expect(page).toHaveScreenshot('plan-action-buttons.png');
   });
 
-  test('Save Plan shows naming modal', async ({ appPage: page }) => {
+  test('naming modal appears when Build My Pack is clicked', async ({ appPage: page }) => {
     autoAcceptDialogs(page);
 
     await navigateToSetupWizard(page);
-    await completeRaceSetup(page);
 
-    await page.getByText('Save Plan', { exact: true }).click();
+    // Select distance and conditions to enable Build My Pack
+    await page.getByText('50K', { exact: true }).first().evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(500);
+    await page.getByText('Moderate', { exact: true }).evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(300);
+
+    // Click Build My Pack
+    await page.getByText('Build My Pack', { exact: true }).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(500);
 
     // Naming modal should be visible
     await expect(page.getByText('Name Your Plan')).toBeVisible();
     await expect(page.getByPlaceholder('e.g. Western States 100')).toBeVisible();
-    await expect(page.getByText('Skip', { exact: true })).toBeVisible();
+    await expect(page.getByText('Create Plan', { exact: true })).toBeVisible();
     await expect(page).toHaveScreenshot('plan-naming-modal.png');
   });
 
-  test('Save Plan with custom name', async ({ appPage: page }) => {
+  test('plan saved with custom name', async ({ appPage: page }) => {
     autoAcceptDialogs(page);
 
     await navigateToSetupWizard(page);
-    await completeRaceSetup(page);
-    await savePlanWithName(page, 'My Test Race');
+    await completeRaceSetup(page, { planName: 'My Test Race' });
 
-    // After save, alert should have fired (auto-accepted)
-    // Plan should still be visible
     await expect(page.getByText('Total Cal').or(page.getByText('total cal'))).toBeVisible();
   });
 
-  test('Save Plan with skip (auto-generated name)', async ({ appPage: page }) => {
+  test('plan saved with auto-generated name', async ({ appPage: page }) => {
     autoAcceptDialogs(page);
 
     await navigateToSetupWizard(page);
     await completeRaceSetup(page);
-    await savePlanWithName(page); // no name = skip
+
+    await expect(page.getByText('Total Cal').or(page.getByText('total cal'))).toBeVisible();
   });
 
   test('empty plan state', async ({ appPage: page }) => {
