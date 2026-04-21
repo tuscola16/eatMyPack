@@ -28,7 +28,9 @@ export default function PlanCard({ plan, onPress, onDelete }: PlanCardProps) {
   const weightUnit = useStore((s) => s.userPreferences.weightUnit);
 
   const distanceLabel = plan.race_config.distance === 'custom'
-    ? `${plan.race_config.custom_distance_km ?? '?'}km`
+    ? plan.race_config.distance_unit === 'mi'
+      ? `${Math.round((plan.race_config.custom_distance_km ?? 0) / 1.609344)}mi`
+      : `${plan.race_config.custom_distance_km ?? '?'}km`
     : plan.race_config.distance;
 
   const createdDate = new Date(plan.created_at).toLocaleDateString(undefined, {

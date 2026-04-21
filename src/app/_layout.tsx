@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -25,8 +26,16 @@ import { initSentry, Sentry } from '@/services/sentry';
 SplashScreen.preventAutoHideAsync();
 initSentry();
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 64;
+
+function TabBarBackground() {
+  const { width } = useWindowDimensions();
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <FooterBackground width={width} height={TAB_BAR_HEIGHT} />
+    </View>
+  );
+}
 
 function RootLayout() {
   useLocalStorage();
@@ -69,11 +78,7 @@ function RootLayout() {
               height: TAB_BAR_HEIGHT,
               elevation: 0,
             },
-            tabBarBackground: () => (
-              <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-                <FooterBackground width={SCREEN_WIDTH} height={TAB_BAR_HEIGHT} />
-              </View>
-            ),
+            tabBarBackground: () => <TabBarBackground />,
             tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.textMuted,
             tabBarShowLabel: false,
@@ -105,8 +110,14 @@ function RootLayout() {
               ),
             }}
             listeners={({ navigation }) => ({
-              tabPress: () => {
-                navigation.navigate('database', { screen: 'index' });
+              tabPress: (e) => {
+                e.preventDefault();
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'database', state: { routes: [{ name: 'index' }] } }],
+                  })
+                );
               },
             })}
           />

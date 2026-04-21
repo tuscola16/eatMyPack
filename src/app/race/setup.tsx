@@ -21,6 +21,8 @@ export default function RaceSetupScreen() {
   const { generatePack } = usePackBuilder();
   const savePlan = useStore((s) => s.savePlan);
   const savedPlans = useStore((s) => s.savedPlans);
+  const clearRejections = useStore((s) => s.clearRejections);
+  const rejectFood = useStore((s) => s.rejectFood);
 
   const existingPlan = useMemo(
     () => (existingPlanId ? savedPlans.find((p) => p.id === existingPlanId) ?? null : null),
@@ -35,6 +37,13 @@ export default function RaceSetupScreen() {
     raceDate?: string,
     startTime?: string,
   ) => {
+    // Restore per-plan rejections so regenerated pack respects previous user exclusions.
+    if (existingPlan?.rejected_food_ids?.length) {
+      clearRejections();
+      existingPlan.rejected_food_ids.forEach((id) => rejectFood(id));
+    } else if (existingPlan) {
+      clearRejections();
+    }
     const generated = generatePack(config, name);
     const basePlan = existingPlan
       ? { ...generated, id: existingPlan.id, name: name || existingPlan.name }

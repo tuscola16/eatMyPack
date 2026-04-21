@@ -23,7 +23,13 @@ const GUT_OPTIONS = [
   { label: 'Excellent', value: 'excellent' },
 ] as const;
 
-const FoodFilterBar: React.FC = () => {
+interface FoodFilterBarProps {
+  showPantryToggle?: boolean;
+  pantryOnly?: boolean;
+  onTogglePantry?: () => void;
+}
+
+const FoodFilterBar: React.FC<FoodFilterBarProps> = ({ showPantryToggle, pantryOnly, onTogglePantry }) => {
   const filters = useStore((s) => s.filters);
   const setFilters = useStore((s) => s.setFilters);
   const resetFilters = useStore((s) => s.resetFilters);
@@ -165,6 +171,17 @@ const FoodFilterBar: React.FC = () => {
             Caffeine
           </Text>
         </Pressable>
+
+        {showPantryToggle && (
+          <Pressable
+            style={[styles.caffeineToggle, pantryOnly && styles.pantryToggleActive]}
+            onPress={onTogglePantry}
+          >
+            <Text style={[styles.caffeineText, pantryOnly && styles.pantryToggleText]}>
+              🎒 Pantry
+            </Text>
+          </Pressable>
+        )}
       </ScrollView>
     </View>
   );
@@ -309,6 +326,14 @@ const styles = StyleSheet.create({
   },
   caffeineTextActive: {
     color: colors.warning,
+    fontWeight: '600',
+  },
+  pantryToggleActive: {
+    backgroundColor: colors.primarySubtle,
+    borderColor: colors.primary,
+  },
+  pantryToggleText: {
+    color: colors.primaryDark,
     fontWeight: '600',
   },
 });

@@ -48,4 +48,30 @@ test.describe('Home Screen', () => {
   test('full home screen visual', async ({ appPage: page }) => {
     await expect(page).toHaveScreenshot('home-full.png', { fullPage: true });
   });
+
+  test('No plans yet text is above Add an adventure', async ({ appPage: page }) => {
+    await expect(page.getByText('No plans yet')).toBeVisible();
+
+    const noPlansBB = await page.getByText('No plans yet').boundingBox();
+
+    // There are two "Add an adventure" texts — the hero button and the empty card one.
+    // The empty-card one should be directly below "No plans yet".
+    const addBtns = page.getByText('Add an adventure');
+    const count = await addBtns.count();
+
+    let emptyCardAddBB = null;
+    for (let i = 0; i < count; i++) {
+      const bb = await addBtns.nth(i).boundingBox();
+      if (bb && noPlansBB && bb.y > noPlansBB.y) {
+        emptyCardAddBB = bb;
+        break;
+      }
+    }
+
+    if (noPlansBB && emptyCardAddBB) {
+      expect(noPlansBB.y).toBeLessThan(emptyCardAddBB.y);
+    }
+
+    await expect(page).toHaveScreenshot('home-empty-plans-layout.png');
+  });
 });

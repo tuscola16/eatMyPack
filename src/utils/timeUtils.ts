@@ -9,7 +9,7 @@ export function formatWallClockTime(
   const minutesInDay = ((totalMinutes % 1440) + 1440) % 1440;
   const h = Math.floor(minutesInDay / 60);
   const m = minutesInDay % 60;
-  const dayLabel = dayOffset > 0 ? ` Day ${dayOffset + 1}` : '';
+  const dayLabel = dayOffset > 0 ? ` D${dayOffset + 1}` : '';
   if (format === '24h') {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}${dayLabel}`;
   }

@@ -106,6 +106,7 @@ export default function PackPlanScreen() {
   const savedPlans = useStore((s) => s.savedPlans);
   const deletePlan = useStore((s) => s.deletePlan);
   const savePlan = useStore((s) => s.savePlan);
+  const setCurrentPlan = useStore((s) => s.setCurrentPlan);
   const timeFormat = useStore((s) => s.userPreferences.timeFormat);
   const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
   const [showEditModal, setShowEditModal] = useState(false);
@@ -140,14 +141,19 @@ export default function PackPlanScreen() {
   };
 
   const handleRejectItem = (foodId: string) => {
+    if (!plan) return;
+    // Ensure the store's currentPlan matches the plan being displayed before rejecting.
+    // Without this, viewing a saved plan while a different plan is in currentPlan would
+    // cause rejectAndRebuild to operate on the wrong plan.
+    const storeCurrentPlan = useStore.getState().currentPlan;
+    if (!storeCurrentPlan || storeCurrentPlan.id !== plan.id) {
+      setCurrentPlan(plan);
+    }
     rejectItem(foodId);
-    // Auto-save after rejection
-    if (plan && id) {
-      // rejectItem updates currentPlan in the hook; we need to save the updated version
-      // The store will be updated by rejectItem, so we defer the save
+    if (id) {
       setTimeout(() => {
         const updatedPlan = useStore.getState().currentPlan;
-        if (updatedPlan) savePlan(updatedPlan);
+        if (updatedPlan && updatedPlan.id === plan.id) savePlan(updatedPlan);
       }, 0);
     }
   };

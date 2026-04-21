@@ -1,4 +1,4 @@
-import { test, expect, navigateToTab, navigateToSetupWizard, navigateToSetupWitch } from '../fixtures/app.fixture';
+import { test, expect, navigateToTab, navigateToSetupWizard, navigateToSetupWitch, autoAcceptDialogs } from '../fixtures/app.fixture';
 
 test.describe('Race Setup Wizard', () => {
   test.beforeEach(async ({ appPage: page }) => {
@@ -85,6 +85,43 @@ test.describe('Race Setup Wizard', () => {
     await expect(page.getByText('Build from My Pantry')).toBeVisible();
     await expect(page.getByText('1 item', { exact: true }).first()).toBeVisible();
     await expect(page).toHaveScreenshot('setup-pantry-toggle.png');
+  });
+});
+
+test.describe('Custom Distance Display', () => {
+  test('custom miles race shown in miles on plan card', async ({ appPage: page }) => {
+    autoAcceptDialogs(page);
+    await navigateToSetupWizard(page);
+
+    // Select custom distance
+    await page.getByText('Custom', { exact: true }).evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(500);
+
+    // Enter 50 miles
+    const distInput = page.getByPlaceholder('e.g. 100').first();
+    if (await distInput.isVisible().catch(() => false)) {
+      await distInput.fill('50');
+      await distInput.blur();
+      await page.waitForTimeout(300);
+    }
+
+    // Select conditions
+    await page.getByText('Moderate', { exact: true }).evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(300);
+
+    // Build pack
+    await page.getByText('Build My Pack', { exact: true }).evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(500);
+    await page.getByText('Create Plan', { exact: true }).evaluate((el) => (el as HTMLElement).click());
+    await page.waitForTimeout(2000);
+
+    // Navigate to saved plans list — PlanCard renders distanceLabel directly
+    await page.goto('/race/plans');
+    await page.waitForTimeout(1000);
+
+    // Should show '50mi', not a km equivalent (exact:true avoids matching '50mi 10h' sibling)
+    await expect(page.getByText('50mi', { exact: true }).first()).toBeVisible();
+    await expect(page).toHaveScreenshot('plan-card-custom-miles.png');
   });
 });
 

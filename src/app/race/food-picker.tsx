@@ -5,7 +5,6 @@ import { colors, typography, spacing } from '@/theme';
 import { useStore } from '@/store/useStore';
 import FoodFilterBar from '@/components/food/FoodFilterBar';
 import FoodList from '@/components/food/FoodList';
-import { PantryIcon } from '@/components/illustrations';
 import type { FoodItem } from '@/types';
 
 export default function FoodPickerScreen() {
@@ -40,6 +39,10 @@ export default function FoodPickerScreen() {
     togglePendingWaystationFood(food.id);
   };
 
+  const handleToggleSelected = (foodId: string) => {
+    togglePendingWaystationFood(foodId);
+  };
+
   const handleDone = () => {
     if (!pendingWaystationFoods) {
       router.back();
@@ -65,22 +68,21 @@ export default function FoodPickerScreen() {
           {`Select Foods (${selectedIds.length})`}
         </Text>
         <View style={styles.headerRight}>
-          <Pressable onPress={() => setPantryOnly((v) => !v)} style={styles.pantryToggle}>
-            <View style={{ opacity: pantryOnly ? 1 : 0.3 }}>
-              <PantryIcon width={28} height={28} />
-            </View>
-          </Pressable>
           <Pressable onPress={handleDone} style={styles.headerAction}>
             <Text style={[styles.headerActionText, styles.headerActionPrimary]}>Done</Text>
           </Pressable>
         </View>
       </View>
-      <FoodFilterBar />
+      <FoodFilterBar
+        showPantryToggle
+        pantryOnly={pantryOnly}
+        onTogglePantry={() => setPantryOnly((v) => !v)}
+      />
       <FoodList
         foods={sortedFoods}
         onPressFood={handleFoodPress}
-        pantryIds={selectedIds}
-        onTogglePantry={handleFoodPress}
+        selectedIds={selectedIds}
+        onToggleSelected={handleToggleSelected}
       />
     </View>
   );
@@ -122,8 +124,5 @@ const styles = StyleSheet.create({
   },
   headerActionPrimary: {
     color: colors.primary,
-  },
-  pantryToggle: {
-    padding: spacing.xs,
   },
 });

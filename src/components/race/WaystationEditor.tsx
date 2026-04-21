@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '@/theme';
-import { Waystation, WaystationType, MarkerType, DistanceUnit } from '@/types/race';
+import { Waystation, WaystationType, MarkerType, DistanceUnit, WaystationFoodEntry } from '@/types/race';
 import { useStore } from '@/store/useStore';
 
 interface WaystationEditorProps {
@@ -51,10 +51,11 @@ export default function WaystationEditor({
   const foods = useStore((s) => s.foods);
   const markerOptions = getMarkerOptions(distanceUnit);
   const distanceLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
+  const [waystationErrors, setWaystationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!pendingWaystationFoods || !pendingWaystationFoods.committed) return;
-    const { waystationId, foodIds } = pendingWaystationFoods;
+    const { waystationId, foods: pickedFoods } = pendingWaystationFoods;
     const target = waystations.find((w) => w.id === waystationId);
     if (!target) {
       setPendingWaystationFoods(null);
@@ -62,7 +63,7 @@ export default function WaystationEditor({
     }
     onChange(
       waystations.map((w) =>
-        w.id === waystationId ? { ...w, foods: foodIds } : w
+        w.id === waystationId ? { ...w, foods: pickedFoods } : w
       )
     );
     setPendingWaystationFoods(null);
@@ -71,17 +72,17 @@ export default function WaystationEditor({
   const openFoodPicker = (ws: Waystation) => {
     setPendingWaystationFoods({
       waystationId: ws.id,
-      foodIds: ws.foods ?? [],
+      foods: ws.foods ?? [],
       committed: false,
     });
-    router.push('/database');
+    router.push('/race/food-picker');
   };
 
   const removeFoodFromWaystation = (wsId: string, foodId: string) => {
     onChange(
       waystations.map((w) =>
         w.id === wsId
-          ? { ...w, foods: (w.foods ?? []).filter((id) => id !== foodId) }
+          ? { ...w, foods: (w.foods ?? []).filter((e) => e.foodId !== foodId) }
           : w
       )
     );
@@ -102,6 +103,7 @@ export default function WaystationEditor({
     const updated = waystations.map(ws => {
       if (ws.id !== id) return ws;
       const merged = { ...ws, ...updates };
+
       // Auto-compute estimated_hour for distance markers
       if (merged.marker_type === 'mile' && totalDistanceMiles && totalDistanceMiles > 0) {
         const markerMiles = distanceUnit === 'km'
@@ -111,6 +113,28 @@ export default function WaystationEditor({
       } else if (merged.marker_type === 'hour') {
         merged.estimated_hour = merged.marker_value;
       }
+
+      // Validate bounds
+      const newErrors = { ...waystationErrors };
+      if (merged.marker_type === 'hour') {
+        const maxHours = totalDurationHours;
+        if (merged.marker_value > maxHours) {
+          newErrors[id] = `Cannot exceed race duration (${maxHours}h)`;
+        } else {
+          delete newErrors[id];
+        }
+      } else if (merged.marker_type === 'mile') {
+        const maxDist = distanceUnit === 'km'
+          ? (totalDistanceMiles ?? 0) / 0.621371
+          : (totalDistanceMiles ?? 0);
+        if (totalDistanceMiles && maxDist > 0 && merged.marker_value > maxDist) {
+          newErrors[id] = `Cannot exceed race distance (${Math.round(maxDist)} ${distanceLabel})`;
+        } else {
+          delete newErrors[id];
+        }
+      }
+      setWaystationErrors(newErrors);
+
       return merged;
     });
     onChange(updated.sort((a, b) => (a.estimated_hour || a.marker_value || 0) - (b.estimated_hour || b.marker_value || 0)));
@@ -118,6 +142,11 @@ export default function WaystationEditor({
 
   const removeWaystation = (id: string) => {
     onChange(waystations.filter(ws => ws.id !== id));
+    setWaystationErrors((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   return (
@@ -172,7 +201,7 @@ export default function WaystationEditor({
               ))}
             </View>
             <TextInput
-              style={styles.markerInput}
+              style={[styles.markerInput, waystationErrors[ws.id] ? styles.markerInputError : null]}
               value={ws.marker_value ? ws.marker_value.toString() : ''}
               onChangeText={(val) => {
                 const num = parseFloat(val);
@@ -186,6 +215,9 @@ export default function WaystationEditor({
               <Text style={styles.estimatedHour}>~{ws.estimated_hour}h</Text>
             )}
           </View>
+          {waystationErrors[ws.id] ? (
+            <Text style={styles.errorText}>{waystationErrors[ws.id]}</Text>
+          ) : null}
 
           {/* Pack volume (only for pack_refill or both) */}
           {(ws.type === 'pack_refill' || ws.type === 'both') && (
@@ -228,14 +260,14 @@ export default function WaystationEditor({
             <Text style={styles.inputLabel}>Packed foods</Text>
             {(ws.foods ?? []).length > 0 && (
               <View style={styles.foodChipRow}>
-                {(ws.foods ?? []).map((foodId) => {
-                  const food = foods.find((f) => f.id === foodId);
+                {(ws.foods ?? []).map((entry: WaystationFoodEntry) => {
+                  const food = foods.find((f) => f.id === entry.foodId);
                   if (!food) return null;
                   return (
                     <Pressable
-                      key={foodId}
+                      key={entry.foodId}
                       style={styles.foodChip}
-                      onPress={() => removeFoodFromWaystation(ws.id, foodId)}
+                      onPress={() => removeFoodFromWaystation(ws.id, entry.foodId)}
                     >
                       <Text style={styles.foodChipText}>{food.name}</Text>
                       <Text style={styles.foodChipRemove}>✕</Text>
@@ -335,7 +367,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   markerToggle: {
     flexDirection: 'row',
@@ -368,6 +400,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     ...typography.body,
     color: colors.textPrimary,
+  },
+  markerInputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.small,
+    color: colors.error,
+    marginBottom: spacing.xs,
   },
   estimatedHour: {
     ...typography.caption,

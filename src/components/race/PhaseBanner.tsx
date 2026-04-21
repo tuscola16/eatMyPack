@@ -39,8 +39,8 @@ export default function PhaseBanner({ phase, isExpanded, onToggle, startTime, ti
   const { width: screenWidth } = useWindowDimensions();
   const phaseColor = PHASE_COLORS[phase.phase.type] ?? colors.primary;
   const timeRange = startTime
-    ? `${formatWallClockTime(startTime, phase.phase.start_hour, timeFormat)}–${formatWallClockTime(startTime, phase.phase.end_hour, timeFormat)}`
-    : `${phase.phase.start_hour}–${phase.phase.end_hour}h`;
+    ? formatWallClockTime(startTime, phase.phase.start_hour, timeFormat)
+    : `${phase.phase.start_hour}h`;
   const PhaseIllustration = PHASE_ILLUSTRATIONS[phase.phase.type];
 
   // Cap illustration at 40% of card width (card ~= screen - 2*padding)

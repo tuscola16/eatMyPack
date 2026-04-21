@@ -18,9 +18,11 @@ interface FoodCardProps {
   onTogglePin?: () => void;
   isInPantry?: boolean;
   onTogglePantry?: () => void;
+  isSelected?: boolean;
+  onToggleSelected?: () => void;
 }
 
-const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePin, isInPantry, onTogglePantry }) => {
+const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePin, isInPantry, onTogglePantry, isSelected, onToggleSelected }) => {
   const gutColor = getGutRatingColor(food.gut_friendliness);
   const categoryColor = getCategoryColor(food.category);
 
@@ -30,6 +32,7 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePi
         styles.card,
         isPinned && styles.cardPinned,
         isInPantry && !isPinned && styles.cardPantry,
+        isSelected && !isPinned && !isInPantry && styles.cardSelected,
         pressed && styles.cardPressed,
       ]}
       onPress={onPress}
@@ -87,7 +90,21 @@ const FoodCard: React.FC<FoodCardProps> = ({ food, onPress, isPinned, onTogglePi
         </View>
 
         <View style={styles.pinArea}>
-          {onTogglePantry && (
+          {onToggleSelected && (
+            <Pressable
+              style={styles.pinButton}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onToggleSelected();
+              }}
+              hitSlop={8}
+              accessibilityLabel={isSelected ? 'Deselect' : 'Select'}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.checkIcon, isSelected && styles.checkIconActive]}>✓</Text>
+            </Pressable>
+          )}
+          {!onToggleSelected && onTogglePantry && (
             <Pressable
               style={styles.pinButton}
               onPress={(e) => {
@@ -143,6 +160,10 @@ const styles = StyleSheet.create({
   cardPantry: {
     borderWidth: 1.5,
     borderColor: colors.primaryLight,
+  },
+  cardSelected: {
+    borderWidth: 1.5,
+    borderColor: colors.primary,
   },
   topRow: {
     flexDirection: 'row',
@@ -215,6 +236,14 @@ const styles = StyleSheet.create({
   },
   pantryIconActive: {
     opacity: 1,
+  },
+  checkIcon: {
+    fontSize: 18,
+    color: colors.textMuted,
+    fontWeight: '700',
+  },
+  checkIconActive: {
+    color: colors.primary,
   },
 });
 
