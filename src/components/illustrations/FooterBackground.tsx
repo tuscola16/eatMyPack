@@ -7,5 +7,5 @@ interface FooterBackgroundProps {
 }
 
 export default function FooterBackground({ width = 1126, height = 135 }: FooterBackgroundProps) {
-  return <FooterBackgroundSvg width={width} height={height} />;
+  return <FooterBackgroundSvg width={width} height={height} preserveAspectRatio="none" />;
 }

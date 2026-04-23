@@ -3,7 +3,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { FoodItem, FoodCategory, GutRating } from '../types/food';
 import { RaceConfig, RaceDistance, Conditions, WaystationFoodEntry } from '../types/race';
 import { FOODS as LOCAL_FOODS } from '../data/foods';
-import { PackPlan } from '../types/plan';
+import { PackPlan, PinnedPhaseEntry } from '../types/plan';
 import { AuthUser } from '../types/auth';
 import {
   CategoryPreferences,
@@ -71,6 +71,11 @@ interface AppState {
   // User preferences (units, defaults)
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: Partial<UserPreferences>) => void;
+
+  // Phase-level pinned entries (food + serving locked into a phase across rebuilds)
+  pinnedPhaseEntries: PinnedPhaseEntry[];
+  togglePinnedPhaseEntry: (entry: PinnedPhaseEntry) => void;
+  clearPinnedPhaseEntries: () => void;
 
   // Build-from-pantry toggle (per-session, not persisted)
   useFromPantry: boolean;
@@ -192,6 +197,22 @@ export const useStore = create<AppState>()(
     setUserPreferences: (prefs) => set((state) => ({
       userPreferences: { ...state.userPreferences, ...prefs },
     })),
+
+    // Phase-level pinned entries
+    pinnedPhaseEntries: [],
+    togglePinnedPhaseEntry: (entry) => set((state) => {
+      const exists = state.pinnedPhaseEntries.some(
+        (p) => p.foodId === entry.foodId && p.phaseType === entry.phaseType,
+      );
+      return {
+        pinnedPhaseEntries: exists
+          ? state.pinnedPhaseEntries.filter(
+              (p) => !(p.foodId === entry.foodId && p.phaseType === entry.phaseType),
+            )
+          : [...state.pinnedPhaseEntries, entry],
+      };
+    }),
+    clearPinnedPhaseEntries: () => set({ pinnedPhaseEntries: [] }),
 
     // Build-from-pantry toggle
     useFromPantry: false,

@@ -23,6 +23,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eatmypack.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -33,7 +34,8 @@
         "backgroundColor": "#1A1F16"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.eatmypack.app"
+      "package": "com.eatmypack.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",

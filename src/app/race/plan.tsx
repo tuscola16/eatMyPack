@@ -102,11 +102,12 @@ function WaystationBar({
 export default function PackPlanScreen() {
   const router = useRouter();
   const { id, source } = useLocalSearchParams<{ id?: string; source?: string }>();
-  const { currentPlan, rejectItem } = usePackBuilder();
+  const { currentPlan, rejectItem, rejectFromPhase, adjustServings, togglePhaseLock } = usePackBuilder();
   const savedPlans = useStore((s) => s.savedPlans);
   const deletePlan = useStore((s) => s.deletePlan);
   const savePlan = useStore((s) => s.savePlan);
   const setCurrentPlan = useStore((s) => s.setCurrentPlan);
+  const pinnedPhaseEntries = useStore((s) => s.pinnedPhaseEntries);
   const timeFormat = useStore((s) => s.userPreferences.timeFormat);
   const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
   const [showEditModal, setShowEditModal] = useState(false);
@@ -140,22 +141,38 @@ export default function PackPlanScreen() {
     });
   };
 
-  const handleRejectItem = (foodId: string) => {
-    if (!plan) return;
-    // Ensure the store's currentPlan matches the plan being displayed before rejecting.
-    // Without this, viewing a saved plan while a different plan is in currentPlan would
-    // cause rejectAndRebuild to operate on the wrong plan.
+  // Ensure the store's currentPlan matches the displayed plan before any pack operation.
+  const ensurePlanIsCurrent = () => {
+    if (!plan) return false;
     const storeCurrentPlan = useStore.getState().currentPlan;
     if (!storeCurrentPlan || storeCurrentPlan.id !== plan.id) {
       setCurrentPlan(plan);
     }
-    rejectItem(foodId);
-    if (id) {
-      setTimeout(() => {
-        const updatedPlan = useStore.getState().currentPlan;
-        if (updatedPlan && updatedPlan.id === plan.id) savePlan(updatedPlan);
-      }, 0);
-    }
+    return true;
+  };
+
+  const persistIfSaved = () => {
+    if (!id) return;
+    setTimeout(() => {
+      const updatedPlan = useStore.getState().currentPlan;
+      if (updatedPlan && plan && updatedPlan.id === plan.id) savePlan(updatedPlan);
+    }, 0);
+  };
+
+  const handleRemoveFromPhase = (phaseIndex: number, foodId: string) => {
+    if (!ensurePlanIsCurrent()) return;
+    rejectFromPhase(phaseIndex, foodId);
+    persistIfSaved();
+  };
+
+  const handleToggleLock = (foodId: string, phaseType: string, servings: number) => {
+    togglePhaseLock(foodId, phaseType, servings);
+  };
+
+  const handleAdjustServings = (phaseIndex: number, foodId: string, delta: number) => {
+    if (!ensurePlanIsCurrent()) return;
+    adjustServings(phaseIndex, foodId, delta);
+    persistIfSaved();
   };
 
   const handleEdit = () => {
@@ -362,14 +379,27 @@ export default function PackPlanScreen() {
                 />
                 {isExpanded && (
                   <>
-                    {packPhase.entries.map((entry, itemIndex) => (
-                      <PackItem
-                        key={`${entry.food.id}-${itemIndex}`}
-                        entry={entry}
-                        onReject={(foodId) => handleRejectItem(foodId)}
-                        onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
-                      />
-                    ))}
+                    {packPhase.entries.map((entry, itemIndex) => {
+                      const isLocked = pinnedPhaseEntries.some(
+                        (p) => p.foodId === entry.food.id && p.phaseType === packPhase.phase.type,
+                      );
+                      return (
+                        <PackItem
+                          key={`${entry.food.id}-${itemIndex}`}
+                          entry={entry}
+                          phaseIndex={phaseIndex}
+                          isLocked={isLocked}
+                          onRemove={(foodId) => handleRemoveFromPhase(phaseIndex, foodId)}
+                          onToggleLock={(foodId) =>
+                            handleToggleLock(foodId, packPhase.phase.type, entry.servings)
+                          }
+                          onAdjustServings={(foodId, delta) =>
+                            handleAdjustServings(phaseIndex, foodId, delta)
+                          }
+                          onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
+                        />
+                      );
+                    })}
                     {waystationsInPhase.map((ws) => (
                       <WaystationBar
                         key={ws.id}

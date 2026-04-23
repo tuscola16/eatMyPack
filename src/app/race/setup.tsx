@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
-import { colors } from '@/theme';
+import { colors, spacing } from '@/theme';
 import { usePackBuilder } from '@/hooks/usePackBuilder';
 import { useStore } from '@/store/useStore';
 import { HeroSetup } from '@/components/illustrations';
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
   heroContainer: {
     width: SCREEN_WIDTH,
     height: HERO_HEIGHT,
-    alignItems: 'center',
+    marginLeft: -spacing.lg,
+    overflow: 'hidden',
   },
 });

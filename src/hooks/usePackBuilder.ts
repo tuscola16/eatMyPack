@@ -1,8 +1,14 @@
 import { useCallback } from 'react';
 import { useStore } from '../store/useStore';
-import { buildPack, rejectAndRebuild, PackOptions } from '../services/packAlgorithm';
+import {
+  buildPack,
+  rejectAndRebuild,
+  rebuildPhase,
+  adjustServingsInPhase,
+  PackOptions,
+} from '../services/packAlgorithm';
 import { RaceConfig } from '../types/race';
-import { PackPlan } from '../types/plan';
+import { PackPlan, PinnedPhaseEntry } from '../types/plan';
 
 export function usePackBuilder() {
   const {
@@ -16,6 +22,8 @@ export function usePackBuilder() {
     useFromPantry,
     categoryPreferences,
     foods,
+    pinnedPhaseEntries,
+    togglePinnedPhaseEntry,
   } = useStore();
 
   const getPackOptions = useCallback((): PackOptions | undefined => {
@@ -27,41 +35,101 @@ export function usePackBuilder() {
     };
   }, [categoryPreferences]);
 
-  const generatePack = useCallback((raceConfig: RaceConfig, planName: string = '') => {
-    // Merge pantry into pinned when "Build from Pantry" is on
-    let effectivePinnedIds = pinnedFoodIds;
+  const getEffectivePinnedIds = useCallback(() => {
     if (useFromPantry && pantryFoodIds.length > 0) {
-      const merged = new Set([...pinnedFoodIds, ...pantryFoodIds]);
-      effectivePinnedIds = Array.from(merged);
+      return Array.from(new Set([...pinnedFoodIds, ...pantryFoodIds]));
     }
+    return pinnedFoodIds;
+  }, [pinnedFoodIds, pantryFoodIds, useFromPantry]);
 
+  const generatePack = useCallback((raceConfig: RaceConfig, planName: string = '') => {
     const plan = buildPack(
       raceConfig,
       foods,
       rejectedFoodIds,
-      effectivePinnedIds,
+      getEffectivePinnedIds(),
       getPackOptions(),
       planName,
+      pinnedPhaseEntries,
     );
     setCurrentPlan(plan);
     return plan;
-  }, [rejectedFoodIds, pinnedFoodIds, pantryFoodIds, useFromPantry, getPackOptions, setCurrentPlan]);
+  }, [rejectedFoodIds, pinnedPhaseEntries, getEffectivePinnedIds, getPackOptions, setCurrentPlan, foods]);
 
+  /** Global reject — rebuilds entire plan, food excluded from all phases */
   const rejectItem = useCallback((foodId: string) => {
     rejectFood(foodId);
     if (currentPlan) {
       const rebuilt = rejectAndRebuild(currentPlan, foodId, foods, getPackOptions());
-      const newPlan = {
+      setCurrentPlan({
         ...rebuilt,
         id: currentPlan.id,
         name: currentPlan.name,
         created_at: currentPlan.created_at,
         race_date: currentPlan.race_date,
         start_time: currentPlan.start_time,
-      };
-      setCurrentPlan(newPlan);
+      });
     }
-  }, [currentPlan, rejectFood, getPackOptions, setCurrentPlan]);
+  }, [currentPlan, rejectFood, getPackOptions, setCurrentPlan, foods]);
+
+  /** Phase-scoped remove — rebuilds only the affected phase; food stays available in others */
+  const rejectFromPhase = useCallback((phaseIndex: number, foodId: string) => {
+    if (!currentPlan) return;
+    const rebuilt = rebuildPhase(
+      currentPlan,
+      phaseIndex,
+      foods,
+      foodId,
+      pinnedPhaseEntries,
+      getPackOptions(),
+    );
+    setCurrentPlan({
+      ...rebuilt,
+      id: currentPlan.id,
+      name: currentPlan.name,
+      created_at: currentPlan.created_at,
+      race_date: currentPlan.race_date,
+      start_time: currentPlan.start_time,
+    });
+  }, [currentPlan, foods, pinnedPhaseEntries, getPackOptions, setCurrentPlan]);
+
+  /** Adjust servings for a food in a phase, then rebuild the rest of that phase */
+  const adjustServings = useCallback((phaseIndex: number, foodId: string, delta: number) => {
+    if (!currentPlan) return;
+    const phase = currentPlan.phases[phaseIndex];
+    if (!phase) return;
+
+    const existingEntry = phase.entries.find(e => e.food.id === foodId);
+    const currentServings = existingEntry?.servings ?? 1;
+    const newServings = Math.max(1, currentServings + delta);
+
+    const rebuilt = adjustServingsInPhase(
+      currentPlan,
+      phaseIndex,
+      foodId,
+      newServings,
+      foods,
+      pinnedPhaseEntries,
+      getPackOptions(),
+    );
+    setCurrentPlan({
+      ...rebuilt,
+      id: currentPlan.id,
+      name: currentPlan.name,
+      created_at: currentPlan.created_at,
+      race_date: currentPlan.race_date,
+      start_time: currentPlan.start_time,
+    });
+  }, [currentPlan, foods, pinnedPhaseEntries, getPackOptions, setCurrentPlan]);
+
+  /** Toggle the phase-level lock for a food entry */
+  const togglePhaseLock = useCallback((foodId: string, phaseType: string, servings: number) => {
+    togglePinnedPhaseEntry({
+      foodId,
+      phaseType: phaseType as PinnedPhaseEntry['phaseType'],
+      servings,
+    });
+  }, [togglePinnedPhaseEntry]);
 
   const resetPlan = useCallback(() => {
     clearRejections();
@@ -70,17 +138,14 @@ export function usePackBuilder() {
 
   const rebuildFromConfig = useCallback(
     (updatedConfig: RaceConfig, existingPlan: PackPlan): PackPlan => {
-      let effectivePinnedIds = pinnedFoodIds;
-      if (useFromPantry && pantryFoodIds.length > 0) {
-        effectivePinnedIds = Array.from(new Set([...pinnedFoodIds, ...pantryFoodIds]));
-      }
       const generated = buildPack(
         updatedConfig,
         foods,
         rejectedFoodIds,
-        effectivePinnedIds,
+        getEffectivePinnedIds(),
         getPackOptions(),
         existingPlan.name,
+        pinnedPhaseEntries,
       );
       return {
         ...generated,
@@ -91,13 +156,16 @@ export function usePackBuilder() {
         start_time: existingPlan.start_time,
       };
     },
-    [rejectedFoodIds, pinnedFoodIds, pantryFoodIds, useFromPantry, getPackOptions],
+    [rejectedFoodIds, pinnedPhaseEntries, getEffectivePinnedIds, getPackOptions, foods],
   );
 
   return {
     currentPlan,
     generatePack,
     rejectItem,
+    rejectFromPhase,
+    adjustServings,
+    togglePhaseLock,
     resetPlan,
     rebuildFromConfig,
   };

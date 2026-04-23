@@ -10,7 +10,6 @@ import {
 } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import { Platform } from 'react-native';
 import { auth } from '@/services/firebase';
 import { useStore } from '@/store/useStore';
 import { AuthUser } from '@/types/auth';
@@ -48,18 +47,11 @@ export function useAuth() {
 }
 
 export function useGoogleAuth() {
-  // Google auth requires platform-specific client IDs; only webClientId is configured so far.
-  // On native platforms this would crash, so we skip the auth request entirely.
-  const isWeb = Platform.OS === 'web';
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    isWeb
-      ? {
-          webClientId: '755816808702-oqa3od92i32ongg1dhob62tj70tmmjku.apps.googleusercontent.com',
-          // Add iosClientId and androidClientId later for standalone builds
-        }
-      : ({} as any),
-  );
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: '755816808702-oqa3od92i32ongg1dhob62tj70tmmjku.apps.googleusercontent.com',
+    iosClientId: '755816808702-7dq251tq5flpigtp0sj35aa06gdeuemk.apps.googleusercontent.com',
+    androidClientId: '755816808702-qv56tf0a9ikc7ov34jsshg7ome75ju01.apps.googleusercontent.com',
+  });
 
   useEffect(() => {
     if (response?.type === 'success') {
@@ -70,7 +62,7 @@ export function useGoogleAuth() {
   }, [response]);
 
   return {
-    promptGoogleSignIn: isWeb ? () => promptAsync() : undefined,
-    ready: isWeb && !!request,
+    promptGoogleSignIn: () => promptAsync(),
+    ready: !!request,
   };
 }
