@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,15 +20,30 @@ import { colors } from '@/theme';
 import { HomeIcon, FoodsIcon, SettingsIcon, FooterBackground } from '@/components/illustrations';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from '@/hooks/useAuth';
+import { useFoods } from '@/hooks/useFoods';
+import { initSentry, Sentry } from '@/services/sentry';
 
 SplashScreen.preventAutoHideAsync();
+initSentry();
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 64;
 
-export default function RootLayout() {
+function TabBarBackground() {
+  const { width } = useWindowDimensions();
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width }}
+    >
+      <FooterBackground width={width} height={TAB_BAR_HEIGHT} />
+    </View>
+  );
+}
+
+function RootLayout() {
   useLocalStorage();
   useAuth();
+  useFoods();
 
   const [fontsLoaded, fontError] = useFonts({
     Nunito_600SemiBold,
@@ -65,17 +81,11 @@ export default function RootLayout() {
               height: TAB_BAR_HEIGHT,
               elevation: 0,
             },
-            tabBarBackground: () => (
-              <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-                <FooterBackground width={SCREEN_WIDTH} height={TAB_BAR_HEIGHT} />
-              </View>
-            ),
+            tabBarBackground: () => <TabBarBackground />,
             tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: colors.textMuted,
-            tabBarLabelStyle: {
-              fontFamily: 'DMSans_400Regular',
-              fontSize: 11,
-            },
+            tabBarShowLabel: false,
+            tabBarIconStyle: { marginTop: 8 },
             headerShadowVisible: false,
           }}
         >
@@ -103,8 +113,14 @@ export default function RootLayout() {
               ),
             }}
             listeners={({ navigation }) => ({
-              tabPress: () => {
-                navigation.navigate('database', { screen: 'index' });
+              tabPress: (e) => {
+                e.preventDefault();
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'database', state: { routes: [{ name: 'index' }] } }],
+                  })
+                );
               },
             })}
           />
@@ -165,3 +181,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 });
+
+export default Sentry.wrap(RootLayout);

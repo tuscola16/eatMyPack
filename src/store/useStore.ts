@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { FoodItem, FoodCategory, GutRating } from '../types/food';
-import { RaceConfig, RaceDistance, Conditions } from '../types/race';
-import { PackPlan } from '../types/plan';
+import { RaceConfig, RaceDistance, Conditions, WaystationFoodEntry } from '../types/race';
+import { FOODS as LOCAL_FOODS } from '../data/foods';
+import { PackPlan, PinnedPhaseEntry } from '../types/plan';
 import { AuthUser } from '../types/auth';
 import {
   CategoryPreferences,
@@ -23,6 +24,10 @@ interface AppState {
   // Auth
   user: AuthUser | null;
   setUser: (user: AuthUser | null) => void;
+
+  // Food database (initialized from local data, augmented by Firebase async)
+  foods: FoodItem[];
+  setFoods: (foods: FoodItem[]) => void;
 
   // Food filters
   filters: FoodFilters;
@@ -67,14 +72,19 @@ interface AppState {
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: Partial<UserPreferences>) => void;
 
+  // Phase-level pinned entries (food + serving locked into a phase across rebuilds)
+  pinnedPhaseEntries: PinnedPhaseEntry[];
+  togglePinnedPhaseEntry: (entry: PinnedPhaseEntry) => void;
+  clearPinnedPhaseEntries: () => void;
+
   // Build-from-pantry toggle (per-session, not persisted)
   useFromPantry: boolean;
   setUseFromPantry: (val: boolean) => void;
 
-  // Ephemeral: food picker handoff between WaystationEditor and /database
+  // Ephemeral: food picker handoff between WaystationEditor and /race/food-picker
   pendingWaystationFoods: {
     waystationId: string;
-    foodIds: string[];
+    foods: WaystationFoodEntry[];
     committed: boolean;
   } | null;
   setPendingWaystationFoods: (value: AppState['pendingWaystationFoods']) => void;
@@ -94,6 +104,10 @@ export const useStore = create<AppState>()(
     // Auth
     user: null,
     setUser: (user) => set({ user }),
+
+    // Food database
+    foods: LOCAL_FOODS,
+    setFoods: (foods) => set({ foods }),
 
     // Food filters
     filters: { ...DEFAULT_FILTERS },
@@ -184,6 +198,22 @@ export const useStore = create<AppState>()(
       userPreferences: { ...state.userPreferences, ...prefs },
     })),
 
+    // Phase-level pinned entries
+    pinnedPhaseEntries: [],
+    togglePinnedPhaseEntry: (entry) => set((state) => {
+      const exists = state.pinnedPhaseEntries.some(
+        (p) => p.foodId === entry.foodId && p.phaseType === entry.phaseType,
+      );
+      return {
+        pinnedPhaseEntries: exists
+          ? state.pinnedPhaseEntries.filter(
+              (p) => !(p.foodId === entry.foodId && p.phaseType === entry.phaseType),
+            )
+          : [...state.pinnedPhaseEntries, entry],
+      };
+    }),
+    clearPinnedPhaseEntries: () => set({ pinnedPhaseEntries: [] }),
+
     // Build-from-pantry toggle
     useFromPantry: false,
     setUseFromPantry: (val) => set({ useFromPantry: val }),
@@ -194,10 +224,11 @@ export const useStore = create<AppState>()(
     togglePendingWaystationFood: (foodId) => set((state) => {
       const pending = state.pendingWaystationFoods;
       if (!pending) return {};
-      const foodIds = pending.foodIds.includes(foodId)
-        ? pending.foodIds.filter((id) => id !== foodId)
-        : [...pending.foodIds, foodId];
-      return { pendingWaystationFoods: { ...pending, foodIds } };
+      const exists = pending.foods.some((e) => e.foodId === foodId);
+      const foods = exists
+        ? pending.foods.filter((e) => e.foodId !== foodId)
+        : [...pending.foods, { foodId, qty: 1 }];
+      return { pendingWaystationFoods: { ...pending, foods } };
     }),
   }))
 );

@@ -102,11 +102,15 @@ function splitPhasesAtWaystations(phases: RacePhase[], config: RaceConfig): Race
   }
 
   // Resolve waystation hours, sorted
+  const distanceUnit = config.distance_unit ?? 'mi';
   const waystationHours: { hour: number; ws: Waystation }[] = config.waystations!
     .map(ws => {
       let hour: number;
       if (ws.marker_type === 'mile' && totalMiles) {
-        hour = (ws.marker_value / totalMiles) * duration;
+        const markerMiles = distanceUnit === 'km'
+          ? ws.marker_value * 0.621371
+          : ws.marker_value;
+        hour = (markerMiles / totalMiles) * duration;
       } else {
         hour = ws.estimated_hour ?? ws.marker_value;
       }

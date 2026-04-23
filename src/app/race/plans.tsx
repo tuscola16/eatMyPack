@@ -38,7 +38,7 @@ export default function PlansListScreen() {
         renderItem={({ item }) => (
           <PlanCard
             plan={item}
-            onPress={() => router.push(`/race/plan?id=${item.id}`)}
+            onPress={() => router.push({ pathname: '/race/plan', params: { id: item.id, source: 'plans' } })}
             onDelete={() => handleDelete(item.id)}
           />
         )}

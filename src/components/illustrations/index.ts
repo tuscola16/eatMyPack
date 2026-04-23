@@ -17,3 +17,6 @@ export { default as FoodsIcon } from './FoodsIcon';
 export { default as SettingsIcon } from './SettingsIcon';
 export { default as ArrowIcon } from './ArrowIcon';
 export { default as PantryIcon } from './PantryIcon';
+export { default as HotIcon } from './HotIcon';
+export { default as ColdIcon } from './ColdIcon';
+export { default as ModerateIcon } from './ModerateIcon';

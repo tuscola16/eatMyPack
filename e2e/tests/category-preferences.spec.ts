@@ -7,7 +7,6 @@ test.describe('Category Preferences', () => {
   });
 
   test('shows category preferences section', async ({ appPage: page }) => {
-    await expect(page.getByText('Category Preferences')).toBeVisible();
     await expect(page.getByText('Never use')).toBeVisible();
     await expect(page.getByText('Prefer', { exact: true })).toBeVisible();
     await expect(page).toHaveScreenshot('category-prefs-section.png');

@@ -17,6 +17,20 @@ export function formatWeightOz(grams: number): string {
   return `${oz.toFixed(1)} oz`;
 }
 
+/**
+ * Format weight respecting the user's unit preference.
+ *   'g':  grams under 1kg, kg above
+ *   'oz': oz under 16 oz, lb above
+ */
+export function formatWeightAuto(grams: number, unit: 'oz' | 'g'): string {
+  if (unit === 'g') return formatWeight(grams);
+  const oz = grams / 28.35;
+  if (oz >= 16) {
+    return `${(oz / 16).toFixed(1)} lb`;
+  }
+  return `${Math.round(oz)} oz`;
+}
+
 export function formatCalDensity(calPerOz: number): string {
   if (calPerOz >= 130) return 'Ultralight';
   if (calPerOz >= 100) return 'Excellent';

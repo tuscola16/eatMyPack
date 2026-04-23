@@ -4,16 +4,16 @@ import { Stack, useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '@/theme';
 import { useStore } from '@/store/useStore';
 import FoodList from '@/components/food/FoodList';
-import { FOODS } from '@/data/foods';
 
 export default function PantryScreen() {
   const router = useRouter();
   const pantryFoodIds = useStore((s) => s.pantryFoodIds);
   const togglePantryFood = useStore((s) => s.togglePantryFood);
+  const allFoods = useStore((s) => s.foods);
 
   const pantryFoods = useMemo(() => {
-    return FOODS.filter((f) => pantryFoodIds.includes(f.id));
-  }, [pantryFoodIds]);
+    return allFoods.filter((f) => pantryFoodIds.includes(f.id));
+  }, [allFoods, pantryFoodIds]);
 
   return (
     <View style={styles.container}>

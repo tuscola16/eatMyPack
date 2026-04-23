@@ -28,6 +28,14 @@ import PhaseBanner from '@/components/race/PhaseBanner';
 import PackItem from '@/components/race/PackItem';
 import EmptyState from '@/components/common/EmptyState';
 import type { PackPlan, Waystation } from '@/types';
+import {
+  sanitizeRaceTitle,
+  RACE_TITLE_MAX_LENGTH,
+  isValidRaceDate,
+  isValidStartTime,
+  formatRaceDateTime,
+} from '@/utils/validation';
+import { formatWallClockTime } from '@/utils/timeUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (160 / 390);
@@ -46,24 +54,39 @@ const WS_TYPE_LABELS: Record<string, string> = {
 
 function WaystationBar({
   waystation,
+  distanceUnit,
+  startTime,
+  timeFormat,
   onPress,
 }: {
   waystation: Waystation;
+  distanceUnit?: 'km' | 'mi';
+  startTime?: string;
+  timeFormat?: '12h' | '24h';
   onPress?: () => void;
 }) {
   const color = WS_TYPE_COLORS[waystation.type] ?? colors.primary;
   const hour = waystation.estimated_hour ?? waystation.marker_value;
   const label = WS_TYPE_LABELS[waystation.type] ?? waystation.type;
+  const distLabel = distanceUnit === 'km' ? 'Km' : 'Mile';
+
+  const timeLabel = (() => {
+    if (waystation.marker_type === 'mile') {
+      const approx = startTime
+        ? formatWallClockTime(startTime, hour, timeFormat ?? '12h')
+        : `~${hour}h`;
+      return `${distLabel} ${waystation.marker_value} (${approx})`;
+    }
+    return startTime
+      ? formatWallClockTime(startTime, hour, timeFormat ?? '12h')
+      : `Hour ${hour}`;
+  })();
 
   return (
     <Pressable style={styles.waystationBar} onPress={onPress}>
       <View style={styles.waystationInfo}>
-        <Text style={[styles.waystationLabel, { color }]}>{label}</Text>
-        <Text style={styles.waystationTime}>
-          {waystation.marker_type === 'mile'
-            ? `Mile ${waystation.marker_value} (~${hour}h)`
-            : `Hour ${hour}`}
-        </Text>
+        <Text style={[styles.waystationLabel, { color }]}>{waystation.name ?? label}</Text>
+        <Text style={styles.waystationTime}>{timeLabel}</Text>
       </View>
       {waystation.calories_consumed != null && waystation.calories_consumed > 0 && (
         <Text style={styles.waystationCals}>{waystation.calories_consumed} cal</Text>
@@ -78,15 +101,21 @@ function WaystationBar({
 
 export default function PackPlanScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const { currentPlan, rejectItem } = usePackBuilder();
+  const { id, source } = useLocalSearchParams<{ id?: string; source?: string }>();
+  const { currentPlan, rejectItem, rejectFromPhase, adjustServings, togglePhaseLock } = usePackBuilder();
   const savedPlans = useStore((s) => s.savedPlans);
   const deletePlan = useStore((s) => s.deletePlan);
   const savePlan = useStore((s) => s.savePlan);
+  const setCurrentPlan = useStore((s) => s.setCurrentPlan);
+  const pinnedPhaseEntries = useStore((s) => s.pinnedPhaseEntries);
+  const timeFormat = useStore((s) => s.userPreferences.timeFormat);
   const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
 
   const plan: PackPlan | null | undefined = id
     ? savedPlans.find((p) => p.id === id) ?? null
@@ -107,22 +136,43 @@ export default function PackPlanScreen() {
       confirmLabel: 'Delete',
       onConfirm: () => {
         deletePlan(id);
-        router.back();
+        source === 'plans' ? router.replace('/race/plans') : router.replace('/');
       },
     });
   };
 
-  const handleRejectItem = (foodId: string) => {
-    rejectItem(foodId);
-    // Auto-save after rejection
-    if (plan && id) {
-      // rejectItem updates currentPlan in the hook; we need to save the updated version
-      // The store will be updated by rejectItem, so we defer the save
-      setTimeout(() => {
-        const updatedPlan = useStore.getState().currentPlan;
-        if (updatedPlan) savePlan(updatedPlan);
-      }, 0);
+  // Ensure the store's currentPlan matches the displayed plan before any pack operation.
+  const ensurePlanIsCurrent = () => {
+    if (!plan) return false;
+    const storeCurrentPlan = useStore.getState().currentPlan;
+    if (!storeCurrentPlan || storeCurrentPlan.id !== plan.id) {
+      setCurrentPlan(plan);
     }
+    return true;
+  };
+
+  const persistIfSaved = () => {
+    if (!id) return;
+    setTimeout(() => {
+      const updatedPlan = useStore.getState().currentPlan;
+      if (updatedPlan && plan && updatedPlan.id === plan.id) savePlan(updatedPlan);
+    }, 0);
+  };
+
+  const handleRemoveFromPhase = (phaseIndex: number, foodId: string) => {
+    if (!ensurePlanIsCurrent()) return;
+    rejectFromPhase(phaseIndex, foodId);
+    persistIfSaved();
+  };
+
+  const handleToggleLock = (foodId: string, phaseType: string, servings: number) => {
+    togglePhaseLock(foodId, phaseType, servings);
+  };
+
+  const handleAdjustServings = (phaseIndex: number, foodId: string, delta: number) => {
+    if (!ensurePlanIsCurrent()) return;
+    adjustServings(phaseIndex, foodId, delta);
+    persistIfSaved();
   };
 
   const handleEdit = () => {
@@ -147,12 +197,31 @@ export default function PackPlanScreen() {
     setShowEditModal(false);
     if (!plan) return;
     setEditName(plan.name);
+    setEditDate(plan.race_date ?? '');
+    setEditStartTime(plan.start_time ?? '');
+    setEditError(null);
     setIsEditing(true);
   };
 
   const handleSaveEdits = () => {
     if (!plan || !id) return;
-    savePlan({ ...plan, name: editName.trim() || plan.name });
+    const trimmedDate = editDate.trim();
+    const trimmedTime = editStartTime.trim();
+    if (trimmedDate && !isValidRaceDate(trimmedDate)) {
+      setEditError('Date must be YYYY-MM-DD.');
+      return;
+    }
+    if (trimmedTime && !isValidStartTime(trimmedTime)) {
+      setEditError('Start time must be HH:MM (24-hour).');
+      return;
+    }
+    savePlan({
+      ...plan,
+      name: editName.trim() || plan.name,
+      race_date: trimmedDate || undefined,
+      start_time: trimmedTime || undefined,
+    });
+    setEditError(null);
     setIsEditing(false);
   };
 
@@ -183,17 +252,31 @@ export default function PackPlanScreen() {
       >
         {/* Hero Banner with name overlay */}
         <View style={styles.heroContainer}>
-          <HeroPlan width={SCREEN_WIDTH} height={HERO_HEIGHT} />
+          <View style={styles.heroSvgWrapper}>
+            <HeroPlan width={SCREEN_WIDTH} height={HERO_HEIGHT} />
+          </View>
+          <View style={styles.heroScrim} pointerEvents="none" />
           <View style={styles.heroOverlay}>
             <Text style={styles.heroTitle} numberOfLines={2}>
               {plan.name || plan.race_config.distance}
             </Text>
+            {(plan.race_date || plan.start_time) && (
+              <Text style={styles.heroSubtitle}>
+                {formatRaceDateTime(plan.race_date, plan.start_time)}
+              </Text>
+            )}
           </View>
         </View>
 
         {/* Back + Edit + Delete header row */}
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={styles.headerBtn}>
+          <Pressable
+            onPress={() => id
+              ? (source === 'plans' ? router.replace('/race/plans') : router.replace('/'))
+              : router.back()
+            }
+            style={styles.headerBtn}
+          >
             <Text style={styles.headerBtnText}>‹ Back</Text>
           </Pressable>
           <View style={styles.headerActions}>
@@ -218,15 +301,42 @@ export default function PackPlanScreen() {
               <TextInput
                 style={styles.editInput}
                 value={editName}
-                onChangeText={setEditName}
+                onChangeText={(v) => setEditName(sanitizeRaceTitle(v))}
                 placeholder="Plan name"
                 placeholderTextColor={colors.textMuted}
+                maxLength={RACE_TITLE_MAX_LENGTH}
                 autoFocus
               />
+              <Text style={styles.editLabel}>Race Date (YYYY-MM-DD)</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editDate}
+                onChangeText={setEditDate}
+                placeholder="2026-04-20"
+                placeholderTextColor={colors.textMuted}
+                maxLength={10}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text style={styles.editLabel}>Start Time (HH:MM, 24h)</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editStartTime}
+                onChangeText={setEditStartTime}
+                placeholder="06:00"
+                placeholderTextColor={colors.textMuted}
+                maxLength={5}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {editError && <Text style={styles.editErrorText}>{editError}</Text>}
               <View style={styles.editActions}>
                 <Pressable
                   style={styles.editCancelBtn}
-                  onPress={() => setIsEditing(false)}
+                  onPress={() => {
+                    setIsEditing(false);
+                    setEditError(null);
+                  }}
                 >
                   <Text style={styles.editCancelText}>Cancel</Text>
                 </Pressable>
@@ -264,21 +374,39 @@ export default function PackPlanScreen() {
                   phase={packPhase}
                   isExpanded={isExpanded}
                   onToggle={() => togglePhase(phaseIndex)}
+                  startTime={plan.start_time}
+                  timeFormat={timeFormat}
                 />
                 {isExpanded && (
                   <>
-                    {packPhase.entries.map((entry, itemIndex) => (
-                      <PackItem
-                        key={`${entry.food.id}-${itemIndex}`}
-                        entry={entry}
-                        onReject={(foodId) => handleRejectItem(foodId)}
-                        onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
-                      />
-                    ))}
+                    {packPhase.entries.map((entry, itemIndex) => {
+                      const isLocked = pinnedPhaseEntries.some(
+                        (p) => p.foodId === entry.food.id && p.phaseType === packPhase.phase.type,
+                      );
+                      return (
+                        <PackItem
+                          key={`${entry.food.id}-${itemIndex}`}
+                          entry={entry}
+                          phaseIndex={phaseIndex}
+                          isLocked={isLocked}
+                          onRemove={(foodId) => handleRemoveFromPhase(phaseIndex, foodId)}
+                          onToggleLock={(foodId) =>
+                            handleToggleLock(foodId, packPhase.phase.type, entry.servings)
+                          }
+                          onAdjustServings={(foodId, delta) =>
+                            handleAdjustServings(phaseIndex, foodId, delta)
+                          }
+                          onPress={() => router.push({ pathname: '/database/[id]', params: { id: entry.food.id } })}
+                        />
+                      );
+                    })}
                     {waystationsInPhase.map((ws) => (
                       <WaystationBar
                         key={ws.id}
                         waystation={ws}
+                        distanceUnit={plan.race_config.distance_unit}
+                        startTime={plan.start_time}
+                        timeFormat={timeFormat}
                         onPress={() =>
                           router.push({
                             pathname: '/race/waystation-detail',
@@ -317,7 +445,7 @@ export default function PackPlanScreen() {
               onPress={handleEditDetails}
             >
               <Text style={styles.modalOptionTitle}>Edit Details</Text>
-              <Text style={styles.modalOptionSub}>Change the plan name</Text>
+              <Text style={styles.modalOptionSub}>Change name, race date, or start time</Text>
             </Pressable>
             <Pressable
               style={styles.modalCancelBtn}
@@ -346,6 +474,18 @@ const styles = StyleSheet.create({
   heroContainer: {
     width: SCREEN_WIDTH,
     height: HERO_HEIGHT,
+    overflow: 'hidden',
+  },
+  heroSvgWrapper: {
+    opacity: 0.55,
+  },
+  heroScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: HERO_HEIGHT * 0.65,
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   heroOverlay: {
     position: 'absolute',
@@ -356,9 +496,18 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   heroTitle: {
-    ...typography.h2,
+    ...typography.h1,
     color: colors.textInverse,
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+  },
+  heroSubtitle: {
+    ...typography.caption,
+    color: colors.textInverse,
+    opacity: 0.9,
+    marginTop: 2,
+    textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
@@ -422,6 +571,11 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
+  },
+  editErrorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginBottom: spacing.xs,
   },
   editActions: {
     flexDirection: 'row',

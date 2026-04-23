@@ -1,21 +1,24 @@
 import { useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useStore } from '../store/useStore';
-import { PackPlan } from '../types/plan';
+import { PackPlan, PinnedPhaseEntry } from '../types/plan';
 import { CategoryPreferences } from '../types/preferences';
+import { migrateWaystationFoods } from '../types/race';
 
 const SAVED_PLANS_KEY = '@eatmypack:saved_plans';
 const PANTRY_KEY = '@eatmypack:pantry_food_ids';
 const CATEGORY_PREFS_KEY = '@eatmypack:category_prefs';
+const PINNED_PHASE_ENTRIES_KEY = '@eatmypack:pinned_phase_entries';
 
 export function useLocalStorage() {
-  const { savedPlans, savePlan, pantryFoodIds, categoryPreferences } = useStore();
+  const { savedPlans, savePlan, pantryFoodIds, categoryPreferences, pinnedPhaseEntries } = useStore();
 
   // Load all persisted data on mount
   useEffect(() => {
     loadPlans();
     loadPantry();
     loadCategoryPrefs();
+    loadPinnedPhaseEntries();
   }, []);
 
   // Save whenever plans change
@@ -35,14 +38,25 @@ export function useLocalStorage() {
     persistCategoryPrefs(categoryPreferences);
   }, [categoryPreferences]);
 
+  // Save whenever pinned phase entries change
+  useEffect(() => {
+    persistPinnedPhaseEntries(pinnedPhaseEntries);
+  }, [pinnedPhaseEntries]);
+
   const loadPlans = async () => {
     try {
       const data = await AsyncStorage.getItem(SAVED_PLANS_KEY);
       if (data) {
         const plans: PackPlan[] = JSON.parse(data);
         plans.forEach(p => {
-          // Migrate old plans that may not have a name
           if (!p.name) p.name = '';
+          // Migrate old string[] waystation foods to WaystationFoodEntry[]
+          if (p.race_config.waystations) {
+            p.race_config.waystations = p.race_config.waystations.map((ws) => ({
+              ...ws,
+              foods: migrateWaystationFoods(ws.foods),
+            }));
+          }
           savePlan(p);
         });
       }
@@ -114,9 +128,37 @@ export function useLocalStorage() {
     }
   };
 
+  const loadPinnedPhaseEntries = async () => {
+    try {
+      const data = await AsyncStorage.getItem(PINNED_PHASE_ENTRIES_KEY);
+      if (data) {
+        const entries: PinnedPhaseEntry[] = JSON.parse(data);
+        entries.forEach((entry) => {
+          const existing = useStore.getState().pinnedPhaseEntries;
+          const alreadyExists = existing.some(
+            (p) => p.foodId === entry.foodId && p.phaseType === entry.phaseType,
+          );
+          if (!alreadyExists) {
+            useStore.getState().togglePinnedPhaseEntry(entry);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to load pinned phase entries:', e);
+    }
+  };
+
+  const persistPinnedPhaseEntries = async (entries: PinnedPhaseEntry[]) => {
+    try {
+      await AsyncStorage.setItem(PINNED_PHASE_ENTRIES_KEY, JSON.stringify(entries));
+    } catch (e) {
+      console.warn('Failed to save pinned phase entries:', e);
+    }
+  };
+
   const clearAll = useCallback(async () => {
     try {
-      await AsyncStorage.multiRemove([SAVED_PLANS_KEY, PANTRY_KEY, CATEGORY_PREFS_KEY]);
+      await AsyncStorage.multiRemove([SAVED_PLANS_KEY, PANTRY_KEY, CATEGORY_PREFS_KEY, PINNED_PHASE_ENTRIES_KEY]);
     } catch (e) {
       console.warn('Failed to clear data:', e);
     }

@@ -10,20 +10,31 @@ import { PackEntry } from '@/types/plan';
 import { formatWeight, formatWeightOz } from '@/utils/formatters';
 import { useStore } from '@/store/useStore';
 import CategoryIcon from '@/components/illustrations/CategoryIcon';
-import SwipeableRow from '@/components/common/SwipeableRow';
 
 interface PackItemProps {
   entry: PackEntry;
-  onReject: (foodId: string) => void;
+  phaseIndex: number;
+  isLocked: boolean;
+  onRemove: (foodId: string) => void;
+  onToggleLock: (foodId: string) => void;
+  onAdjustServings: (foodId: string, delta: number) => void;
   onPress?: () => void;
 }
 
-export default function PackItem({ entry, onReject, onPress }: PackItemProps) {
+export default function PackItem({
+  entry,
+  phaseIndex,
+  isLocked,
+  onRemove,
+  onToggleLock,
+  onAdjustServings,
+  onPress,
+}: PackItemProps) {
   const weightUnit = useStore((s) => s.userPreferences.weightUnit);
   const { food, servings, total_calories, total_weight_g } = entry;
 
-  const content = (
-    <View style={styles.container}>
+  const info = (
+    <View style={styles.infoRow}>
       <CategoryIcon category={food.category} size={22} />
 
       <View style={styles.info}>
@@ -48,31 +59,82 @@ export default function PackItem({ entry, onReject, onPress }: PackItemProps) {
   );
 
   return (
-    <SwipeableRow
-      onSwipeLeft={() => onReject(food.id)}
-      leftLabel="Don't have"
-    >
+    <View style={styles.container}>
+      {/* Food info — tappable to navigate to food detail */}
       {onPress ? (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          {content}
+        <TouchableOpacity style={styles.infoTouchable} onPress={onPress} activeOpacity={0.7}>
+          {info}
         </TouchableOpacity>
       ) : (
-        content
+        <View style={styles.infoTouchable}>{info}</View>
       )}
-    </SwipeableRow>
+
+      {/* Action column: X / lock / +- */}
+      <View style={styles.actionCol}>
+        {/* Top zone: remove */}
+        <TouchableOpacity
+          style={styles.actionZone}
+          onPress={() => onRemove(food.id)}
+          activeOpacity={0.6}
+          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+        >
+          <Text style={styles.removeText}>✕</Text>
+        </TouchableOpacity>
+
+        {/* Mid zone: lock */}
+        <TouchableOpacity
+          style={styles.actionZone}
+          onPress={() => onToggleLock(food.id)}
+          activeOpacity={0.6}
+          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+        >
+          <Text style={[styles.lockText, isLocked && styles.lockTextActive]}>
+            {isLocked ? '🔒' : '🔓'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Bottom zone: +/- */}
+        <View style={[styles.actionZone, styles.adjustRow]}>
+          <TouchableOpacity
+            onPress={() => onAdjustServings(food.id, -1)}
+            activeOpacity={0.6}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          >
+            <Text style={styles.adjustText}>−</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onAdjustServings(food.id, 1)}
+            activeOpacity={0.6}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          >
+            <Text style={styles.adjustText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: colors.surface,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.xs,
+    overflow: 'hidden',
+    minHeight: 72,
+  },
+  infoTouchable: {
+    flex: 1,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
     gap: spacing.sm,
+    flex: 1,
   },
   info: {
     flex: 1,
@@ -111,5 +173,43 @@ const styles = StyleSheet.create({
   weight: {
     ...typography.small,
     color: colors.textSecondary,
+  },
+
+  // Action column
+  actionCol: {
+    width: 44,
+    borderLeftWidth: 1,
+    borderLeftColor: colors.border,
+    flexDirection: 'column',
+  },
+  actionZone: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  adjustRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 0,
+    gap: 2,
+  },
+  removeText: {
+    fontSize: 13,
+    color: colors.error,
+    fontWeight: '700',
+  },
+  lockText: {
+    fontSize: 13,
+    opacity: 0.4,
+  },
+  lockTextActive: {
+    opacity: 1,
+  },
+  adjustText: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '700',
+    paddingHorizontal: 4,
   },
 });

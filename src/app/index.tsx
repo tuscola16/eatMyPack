@@ -26,12 +26,14 @@ import type { PackPlan } from '@/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = SCREEN_WIDTH * (340 / 390);
-const MAX_PREVIEW_ITEMS = 6;
+const MAX_PREVIEW_ITEMS = 4;
 
 function getPlanDisplayName(plan: PackPlan): string {
   if (plan.name) return plan.name;
   const dist = plan.race_config.distance === 'custom'
-    ? `${plan.race_config.custom_distance_km ?? '?'}km`
+    ? plan.race_config.distance_unit === 'mi'
+      ? `${Math.round((plan.race_config.custom_distance_km ?? 0) / 1.609344)}mi`
+      : `${plan.race_config.custom_distance_km ?? '?'}km`
     : plan.race_config.distance;
   return `${dist} ${plan.race_config.expected_duration_hours}h`;
 }
@@ -109,7 +111,7 @@ export default function HomeScreen() {
               <AnimatedPressable
                 key={plan.id}
                 style={styles.planCard}
-                onPress={() => router.push({ pathname: '/race/plan', params: { id: plan.id } })}
+                onPress={() => router.push({ pathname: '/race/plan', params: { id: plan.id, source: 'home' } })}
               >
                 <View style={styles.planCardLeft}>
                   <Text style={styles.planCardName} numberOfLines={1}>
@@ -130,6 +132,14 @@ export default function HomeScreen() {
                 </View>
               </AnimatedPressable>
             ))}
+            {savedPlans.length > MAX_PREVIEW_ITEMS && (
+              <Pressable
+                style={styles.moreLink}
+                onPress={() => router.push('/race/plans')}
+              >
+                <Text style={styles.moreLinkText}>More races →</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
           <AnimatedPressable
@@ -138,11 +148,9 @@ export default function HomeScreen() {
           >
             <View style={styles.emptySvgFill}>
               <EmptyPlans width={SCREEN_WIDTH - spacing.lg * 2} height={200} />
-              <View style={styles.emptyTitleOverlay}>
-                <Text style={styles.emptyTitle}>No plans yet</Text>
-              </View>
             </View>
             <View style={styles.emptyOverlay}>
+              <Text style={styles.emptyTitle}>No plans yet</Text>
               <Text style={styles.emptySubtitle}>Add an adventure</Text>
             </View>
           </AnimatedPressable>
@@ -274,6 +282,15 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textMuted,
   },
+  moreLink: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  moreLinkText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
 
   // Empty state card
   emptyCard: {
@@ -291,15 +308,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  emptyTitleOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   emptyOverlay: {
     flex: 1,
     alignItems: 'center',
@@ -310,6 +318,7 @@ const styles = StyleSheet.create({
     ...typography.h4,
     color: colors.textPrimary,
     textAlign: 'center',
+    marginBottom: 16,
   },
   emptySubtitle: {
     ...typography.caption,

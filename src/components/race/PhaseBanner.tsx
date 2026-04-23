@@ -17,6 +17,7 @@ import {
   PhaseFinal,
 } from '@/components/illustrations';
 import type { PhaseType } from '@/types/race';
+import { formatWallClockTime } from '@/utils/timeUtils';
 
 const PHASE_ILLUSTRATIONS: Record<PhaseType, React.ComponentType<{ width?: number; height?: number }>> = {
   early:      PhaseEarly,
@@ -30,12 +31,16 @@ interface PhaseBannerProps {
   phase: PackPhase;
   isExpanded: boolean;
   onToggle: () => void;
+  startTime?: string;
+  timeFormat?: '12h' | '24h';
 }
 
-export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBannerProps) {
+export default function PhaseBanner({ phase, isExpanded, onToggle, startTime, timeFormat = '12h' }: PhaseBannerProps) {
   const { width: screenWidth } = useWindowDimensions();
   const phaseColor = PHASE_COLORS[phase.phase.type] ?? colors.primary;
-  const timeRange = `${phase.phase.start_hour}–${phase.phase.end_hour}h`;
+  const timeRange = startTime
+    ? formatWallClockTime(startTime, phase.phase.start_hour, timeFormat)
+    : `${phase.phase.start_hour}h`;
   const PhaseIllustration = PHASE_ILLUSTRATIONS[phase.phase.type];
 
   // Cap illustration at 40% of card width (card ~= screen - 2*padding)
@@ -70,7 +75,7 @@ export default function PhaseBanner({ phase, isExpanded, onToggle }: PhaseBanner
           </Text>
         </View>
 
-        <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
+        {!isExpanded && <Text style={styles.chevron}>▼</Text>}
       </View>
     </TouchableOpacity>
   );

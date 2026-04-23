@@ -14,7 +14,7 @@ import AnimatedPressable from '@/components/common/AnimatedPressable';
 import { EmptyFoods, ArrowIcon, PantryIcon } from '@/components/illustrations';
 import PantryCard from './PantryCard';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
-import { FOODS } from '@/data/foods';
+import { useStore } from '@/store/useStore';
 import type { FoodItem } from '@/types/food';
 
 interface PantryCarouselProps {
@@ -39,15 +39,16 @@ const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
 export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCarouselProps) {
   const router = useRouter();
+  const allFoods = useStore((s) => s.foods);
   const [activeDot, setActiveDot] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
   const foods = useMemo(() => {
     return pantryFoodIds
       .slice(0, MAX_FOOD_ITEMS)
-      .map((id) => FOODS.find((f) => f.id === id))
+      .map((id) => allFoods.find((f) => f.id === id))
       .filter(Boolean) as FoodItem[];
-  }, [pantryFoodIds]);
+  }, [pantryFoodIds, allFoods]);
 
   const showSeeAll = pantryFoodIds.length > MAX_FOOD_ITEMS;
   const totalCards = foods.length + (showSeeAll ? 1 : 0);
@@ -113,7 +114,7 @@ export default function PantryCarousel({ pantryFoodIds, weightUnit }: PantryCaro
           <View style={styles.emptyOverlay}>
             <Text style={styles.emptyTitle}>Pantry is empty</Text>
             <Text style={styles.emptySubtitle}>
-              Add foods from the Foods tab to restrict your pack to what you own
+              Add foods to restrict your pack
             </Text>
           </View>
         </AnimatedPressable>

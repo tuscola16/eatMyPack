@@ -1,13 +1,20 @@
 {
   "expo": {
     "name": "eatMyPack",
-    "slug": "eatmypack",
+    "slug": "eat-my-pack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "scheme": "eatmypack",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7aeb7c2c-bb8c-4286-8d52-866d8b66ce36",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,7 +22,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.eatmypack.app"
+      "bundleIdentifier": "com.eatmypack.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +34,8 @@
         "backgroundColor": "#1A1F16"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.eatmypack.app"
+      "package": "com.eatmypack.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -33,7 +45,23 @@
       "expo-router",
       "expo-sqlite",
       "expo-web-browser",
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-updates",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "bagel-runs-technology"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7aeb7c2c-bb8c-4286-8d52-866d8b66ce36"
+      },
+      "router": {}
+    },
+    "owner": "bagel-run-technologies"
   }
 }

@@ -20,6 +20,8 @@ interface FoodListProps {
   onTogglePin?: (id: string) => void;
   pantryIds?: string[];
   onTogglePantry?: (id: string) => void;
+  selectedIds?: string[];
+  onToggleSelected?: (id: string) => void;
   emptyMessage?: string;
 }
 
@@ -30,10 +32,13 @@ const FoodList: React.FC<FoodListProps> = ({
   onTogglePin,
   pantryIds = [],
   onTogglePantry,
+  selectedIds = [],
+  onToggleSelected,
   emptyMessage = 'No foods found. Try adjusting your filters.',
 }) => {
   const pinnedSet = new Set(pinnedIds);
   const pantrySet = new Set(pantryIds);
+  const selectedSet = new Set(selectedIds);
 
   const keyExtractor = useCallback((item: FoodItem) => item.id, []);
 
@@ -56,6 +61,8 @@ const FoodList: React.FC<FoodListProps> = ({
           onTogglePin={onTogglePin ? () => onTogglePin(item.id) : undefined}
           isInPantry={pantrySet.has(item.id)}
           onTogglePantry={onTogglePantry ? () => onTogglePantry(item.id) : undefined}
+          isSelected={selectedSet.has(item.id)}
+          onToggleSelected={onToggleSelected ? () => onToggleSelected(item.id) : undefined}
         />
       );
 
@@ -69,7 +76,7 @@ const FoodList: React.FC<FoodListProps> = ({
       }
       return card;
     },
-    [onPressFood, pinnedSet, onTogglePin, pantrySet, onTogglePantry],
+    [onPressFood, pinnedSet, onTogglePin, pantrySet, onTogglePantry, selectedSet, onToggleSelected],
   );
 
   const renderEmpty = useCallback(
