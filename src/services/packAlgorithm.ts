@@ -4,17 +4,15 @@ import { PackPlan, PackPhase, PackEntry, PinnedPhaseEntry, PhaseRejection } from
 import { calculatePhases } from './phaseCalculator';
 import { scoreFood, ScoringOptions } from './scoringEngine';
 import { calculatePartialFill } from './quantityCalculator';
+import * as Crypto from 'expo-crypto';
 
 export interface PackOptions {
   excludedCategories?: FoodCategory[];
   preferredCategories?: FoodCategory[];
 }
 
-/** Generate a unique ID without depending on crypto.getRandomValues */
 function generateId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 10);
-  return `${timestamp}-${random}`;
+  return Crypto.randomUUID();
 }
 
 const FILL_TOLERANCE = 0.90; // 90% of target is acceptable

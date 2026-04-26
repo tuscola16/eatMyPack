@@ -32,8 +32,13 @@ export default function SignUpScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (password.length < 12) {
+      setError('Password must be at least 12 characters.');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      setError('Password must include an uppercase letter, a number, and a special character.');
       return;
     }
 
@@ -49,7 +54,7 @@ export default function SignUpScreen() {
       } else if (code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
       } else if (code === 'auth/weak-password') {
-        setError('Password is too weak. Use at least 6 characters.');
+        setError('Password is too weak. Use at least 12 characters with uppercase, number, and special character.');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -89,7 +94,7 @@ export default function SignUpScreen() {
 
         <TextInput
           label="Password"
-          placeholder="At least 6 characters"
+          placeholder="At least 12 characters"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -112,6 +117,8 @@ export default function SignUpScreen() {
           onPress={handleSignUp}
           disabled={loading}
           activeOpacity={0.8}
+          accessibilityLabel="Create account"
+          accessibilityRole="button"
         >
           {loading ? (
             <ActivityIndicator color={colors.textInverse} />
@@ -122,7 +129,11 @@ export default function SignUpScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.replace('/auth/sign-in')}>
+          <TouchableOpacity
+            onPress={() => router.replace('/auth/sign-in')}
+            accessibilityLabel="Go to sign in"
+            accessibilityRole="link"
+          >
             <Text style={styles.footerLink}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -162,7 +173,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   primaryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingVertical: 14,
     alignItems: 'center',
@@ -186,7 +197,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     ...typography.body,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '600',
   },
 });

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Pressable,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
@@ -48,7 +49,8 @@ export default function SettingsScreen() {
   const clearPantry = useStore((s) => s.clearPantry);
   const userPreferences = useStore((s) => s.userPreferences);
   const setUserPreferences = useStore((s) => s.setUserPreferences);
-  const { signOut } = useAuth();
+  const { signOut, deleteAccount } = useAuth();
+  const clearUserData = useStore((s) => s.clearUserData);
   const { fullSync, syncStatus } = useCloudSync();
 
   const handleClearPlans = () => {
@@ -78,6 +80,30 @@ export default function SettingsScreen() {
       message: 'Are you sure you want to sign out?',
       confirmLabel: 'Sign Out',
       onConfirm: () => signOut(),
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    confirmDestructive({
+      title: 'Delete Account',
+      message: 'This will permanently delete your account and all associated data. This cannot be undone.',
+      confirmLabel: 'Delete Account',
+      onConfirm: async () => {
+        try {
+          await deleteAccount();
+          await AsyncStorage.clear();
+          clearUserData();
+        } catch (e: any) {
+          if (e.code === 'auth/requires-recent-login') {
+            Alert.alert(
+              'Sign In Again',
+              'For security, please sign out and sign back in before deleting your account.',
+            );
+          } else {
+            Alert.alert('Error', 'Could not delete account. Please try again.');
+          }
+        }
+      },
     });
   };
 
@@ -284,6 +310,9 @@ export default function SettingsScreen() {
                   styles.feedbackButton,
                   pressed && { opacity: 0.8 },
                 ]}
+                onPress={() => Linking.openURL('mailto:tuscola16@gmail.com?subject=eatMyPack%20Feedback')}
+                accessibilityLabel="Send feedback email"
+                accessibilityRole="button"
               >
                 <Text style={styles.feedbackButtonText}>Send Feedback</Text>
               </Pressable>
@@ -355,6 +384,13 @@ export default function SettingsScreen() {
                   onPress={handleSignOut}
                 >
                   <Text style={styles.signOutButtonText}>Sign Out</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.deleteAccountButton}
+                  onPress={handleDeleteAccount}
+                >
+                  <Text style={styles.deleteAccountButtonText}>Delete Account</Text>
                 </Pressable>
               </View>
             ) : (
@@ -541,7 +577,7 @@ const styles = StyleSheet.create({
   },
   feedbackButtonText: {
     ...typography.button,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontSize: 13,
   },
 
@@ -590,7 +626,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     ...typography.h4,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   accountDetails: {
     flex: 1,
@@ -614,7 +650,7 @@ const styles = StyleSheet.create({
   },
   syncButtonText: {
     ...typography.button,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   signOutButton: {
     padding: spacing.md,
@@ -624,6 +660,15 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textMuted,
   },
+  deleteAccountButton: {
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  deleteAccountButtonText: {
+    ...typography.body,
+    color: colors.error,
+    fontSize: 13,
+  },
   guestText: {
     ...typography.body,
     color: colors.textSecondary,
@@ -631,7 +676,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   signInButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     padding: spacing.md,
     alignItems: 'center',

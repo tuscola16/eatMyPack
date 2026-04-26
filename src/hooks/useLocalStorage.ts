@@ -47,7 +47,15 @@ export function useLocalStorage() {
     try {
       const data = await AsyncStorage.getItem(SAVED_PLANS_KEY);
       if (data) {
-        const plans: PackPlan[] = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (!Array.isArray(parsed)) {
+          console.warn('Corrupted saved plans data, clearing');
+          await AsyncStorage.removeItem(SAVED_PLANS_KEY);
+          return;
+        }
+        const plans: PackPlan[] = parsed.filter(
+          (p) => p && typeof p === 'object' && typeof p.id === 'string'
+        );
         plans.forEach(p => {
           if (!p.name) p.name = '';
           // Migrate old string[] waystation foods to WaystationFoodEntry[]
@@ -77,7 +85,13 @@ export function useLocalStorage() {
     try {
       const data = await AsyncStorage.getItem(PANTRY_KEY);
       if (data) {
-        const ids: string[] = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (!Array.isArray(parsed)) {
+          console.warn('Corrupted pantry data, clearing');
+          await AsyncStorage.removeItem(PANTRY_KEY);
+          return;
+        }
+        const ids: string[] = parsed.filter((id) => typeof id === 'string');
         ids.forEach(id => {
           if (!useStore.getState().pantryFoodIds.includes(id)) {
             useStore.getState().togglePantryFood(id);
@@ -101,7 +115,18 @@ export function useLocalStorage() {
     try {
       const data = await AsyncStorage.getItem(CATEGORY_PREFS_KEY);
       if (data) {
-        const prefs: CategoryPreferences = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (
+          !parsed ||
+          typeof parsed !== 'object' ||
+          !Array.isArray(parsed.excludedCategories) ||
+          !Array.isArray(parsed.preferredCategories)
+        ) {
+          console.warn('Corrupted category preferences data, clearing');
+          await AsyncStorage.removeItem(CATEGORY_PREFS_KEY);
+          return;
+        }
+        const prefs: CategoryPreferences = parsed;
         // Set excluded categories
         prefs.excludedCategories.forEach(cat => {
           if (!useStore.getState().categoryPreferences.excludedCategories.includes(cat)) {
@@ -132,7 +157,15 @@ export function useLocalStorage() {
     try {
       const data = await AsyncStorage.getItem(PINNED_PHASE_ENTRIES_KEY);
       if (data) {
-        const entries: PinnedPhaseEntry[] = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (!Array.isArray(parsed)) {
+          console.warn('Corrupted pinned phase entries data, clearing');
+          await AsyncStorage.removeItem(PINNED_PHASE_ENTRIES_KEY);
+          return;
+        }
+        const entries: PinnedPhaseEntry[] = parsed.filter(
+          (e) => e && typeof e === 'object' && typeof e.foodId === 'string' && typeof e.phaseType === 'string'
+        );
         entries.forEach((entry) => {
           const existing = useStore.getState().pinnedPhaseEntries;
           const alreadyExists = existing.some(

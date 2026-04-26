@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   pinIndicator: {
-    color: colors.primary,
+    color: colors.primaryDark,
     fontSize: 14,
     fontWeight: '700',
     marginRight: 4,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   checkIconActive: {
-    color: colors.primary,
+    color: colors.primaryDark,
   },
 });
 

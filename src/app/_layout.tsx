@@ -82,7 +82,7 @@ function RootLayout() {
               elevation: 0,
             },
             tabBarBackground: () => <TabBarBackground />,
-            tabBarActiveTintColor: colors.primary,
+            tabBarActiveTintColor: colors.primaryDark,
             tabBarInactiveTintColor: colors.textMuted,
             tabBarShowLabel: false,
             tabBarIconStyle: { marginTop: 8 },

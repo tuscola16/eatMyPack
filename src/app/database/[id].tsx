@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   pinTextActive: {
-    color: colors.primary,
+    color: colors.primaryDark,
   },
 });

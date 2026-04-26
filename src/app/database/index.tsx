@@ -49,7 +49,12 @@ export default function DatabaseScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
         {inSelectionMode && (
-          <Pressable onPress={handleCancel} style={styles.selectionAction}>
+          <Pressable
+            accessibilityLabel="Cancel food selection"
+            accessibilityRole="button"
+            onPress={handleCancel}
+            style={styles.selectionAction}
+          >
             <Text style={styles.selectionActionText}>Cancel</Text>
           </Pressable>
         )}
@@ -64,14 +69,24 @@ export default function DatabaseScreen() {
             <Text style={styles.filterCount}>{displayedFoods.length} in pantry</Text>
           )}
           {!inSelectionMode && (
-            <Pressable onPress={() => setPantryOnly((v) => !v)} style={styles.pantryToggle}>
+            <Pressable
+              accessibilityLabel={pantryOnly ? 'Show all foods' : 'Show pantry foods only'}
+              accessibilityRole="button"
+              onPress={() => setPantryOnly((v) => !v)}
+              style={styles.pantryToggle}
+            >
               <View style={{ opacity: pantryOnly ? 1 : 0.3 }}>
                 <PantryIcon width={28} height={28} />
               </View>
             </Pressable>
           )}
           {inSelectionMode && (
-            <Pressable onPress={handleDone} style={styles.selectionAction}>
+            <Pressable
+              accessibilityLabel="Confirm food selection"
+              accessibilityRole="button"
+              onPress={handleDone}
+              style={styles.selectionAction}
+            >
               <Text style={[styles.selectionActionText, styles.selectionActionPrimary]}>Done</Text>
             </Pressable>
           )}
@@ -122,7 +137,7 @@ const styles = StyleSheet.create({
   },
   filterCount: {
     ...typography.caption,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '600',
   },
   pantryToggle: {
@@ -137,6 +152,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   selectionActionPrimary: {
-    color: colors.primary,
+    color: colors.primaryDark,
   },
 });

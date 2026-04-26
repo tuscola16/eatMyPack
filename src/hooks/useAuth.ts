@@ -4,10 +4,13 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
+  deleteUser,
   GoogleAuthProvider,
   signInWithCredential,
   type User,
 } from 'firebase/auth';
+import { getDocs, deleteDoc, doc, collection } from 'firebase/firestore';
+import { db } from '@/services/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { auth } from '@/services/firebase';
@@ -43,14 +46,26 @@ export function useAuth() {
 
   const signOut = () => firebaseSignOut(auth);
 
-  return { signIn, signUp, signOut };
+  const deleteAccount = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    const uid = currentUser.uid;
+    const plansSnap = await getDocs(collection(db, 'users', uid, 'savedPlans'));
+    await Promise.all([
+      ...plansSnap.docs.map((d) => deleteDoc(d.ref)),
+      deleteDoc(doc(db, 'users', uid, 'preferences')),
+    ]);
+    await deleteUser(currentUser);
+  };
+
+  return { signIn, signUp, signOut, deleteAccount };
 }
 
 export function useGoogleAuth() {
   const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: '755816808702-oqa3od92i32ongg1dhob62tj70tmmjku.apps.googleusercontent.com',
-    iosClientId: '755816808702-7dq251tq5flpigtp0sj35aa06gdeuemk.apps.googleusercontent.com',
-    androidClientId: '755816808702-qv56tf0a9ikc7ov34jsshg7ome75ju01.apps.googleusercontent.com',
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
   });
 
   useEffect(() => {

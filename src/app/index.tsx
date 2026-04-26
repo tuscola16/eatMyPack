@@ -76,6 +76,8 @@ export default function HomeScreen() {
           {/* "Add an adventure" button overlaid on hero bottom */}
           <View style={styles.chipOverlay} pointerEvents="box-none">
             <Pressable
+              accessibilityLabel="Add an adventure"
+              accessibilityRole="button"
               style={({ pressed }) => [
                 styles.adventureButton,
                 pressed && styles.adventureButtonPressed,
@@ -90,6 +92,8 @@ export default function HomeScreen() {
         {/* My Plans Section */}
         <View style={styles.sectionHeader}>
           <TouchableOpacity
+            accessibilityLabel="View all plans"
+            accessibilityRole="link"
             style={styles.headerLeft}
             onPress={() => router.push('/race/plans')}
             activeOpacity={0.6}
@@ -98,6 +102,8 @@ export default function HomeScreen() {
             <ArrowIcon width={5} height={10} />
           </TouchableOpacity>
           <AnimatedPressable
+            accessibilityLabel="Add new race plan"
+            accessibilityRole="button"
             style={styles.plansAddButton}
             onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'simple' } })}
           >
@@ -110,6 +116,8 @@ export default function HomeScreen() {
             {savedPlans.slice(0, MAX_PREVIEW_ITEMS).map((plan) => (
               <AnimatedPressable
                 key={plan.id}
+                accessibilityLabel={`Open ${getPlanDisplayName(plan)}`}
+                accessibilityRole="button"
                 style={styles.planCard}
                 onPress={() => router.push({ pathname: '/race/plan', params: { id: plan.id, source: 'home' } })}
               >
@@ -134,6 +142,8 @@ export default function HomeScreen() {
             ))}
             {savedPlans.length > MAX_PREVIEW_ITEMS && (
               <Pressable
+                accessibilityLabel="View all races"
+                accessibilityRole="link"
                 style={styles.moreLink}
                 onPress={() => router.push('/race/plans')}
               >
@@ -143,6 +153,8 @@ export default function HomeScreen() {
           </View>
         ) : (
           <AnimatedPressable
+            accessibilityLabel="Create your first race plan"
+            accessibilityRole="button"
             style={styles.emptyCard}
             onPress={() => router.push({ pathname: '/race/setup', params: { mode: 'simple' } })}
           >

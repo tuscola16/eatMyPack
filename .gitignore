@@ -54,3 +54,6 @@ dist-web/
 .claude/settings.local.json
 
 .env.local
+
+# Google Play service account key (sensitive)
+google-play-service-account.json

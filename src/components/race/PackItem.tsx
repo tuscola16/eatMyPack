@@ -62,7 +62,13 @@ export default function PackItem({
     <View style={styles.container}>
       {/* Food info — tappable to navigate to food detail */}
       {onPress ? (
-        <TouchableOpacity style={styles.infoTouchable} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.infoTouchable}
+          onPress={onPress}
+          activeOpacity={0.7}
+          accessibilityLabel={`${food.name}, ${food.brand}, ${servings} serving${servings !== 1 ? 's' : ''}, ${total_calories} calories`}
+          accessibilityRole="button"
+        >
           {info}
         </TouchableOpacity>
       ) : (
@@ -77,6 +83,8 @@ export default function PackItem({
           onPress={() => onRemove(food.id)}
           activeOpacity={0.6}
           hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          accessibilityLabel={`Remove ${food.name}`}
+          accessibilityRole="button"
         >
           <Text style={styles.removeText}>✕</Text>
         </TouchableOpacity>
@@ -87,6 +95,8 @@ export default function PackItem({
           onPress={() => onToggleLock(food.id)}
           activeOpacity={0.6}
           hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          accessibilityLabel={isLocked ? `Unlock ${food.name}` : `Lock ${food.name} in plan`}
+          accessibilityRole="button"
         >
           <Text style={[styles.lockText, isLocked && styles.lockTextActive]}>
             {isLocked ? '🔒' : '🔓'}
@@ -99,6 +109,8 @@ export default function PackItem({
             onPress={() => onAdjustServings(food.id, -1)}
             activeOpacity={0.6}
             hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+            accessibilityLabel={`Decrease ${food.name} servings`}
+            accessibilityRole="button"
           >
             <Text style={styles.adjustText}>−</Text>
           </TouchableOpacity>
@@ -106,6 +118,8 @@ export default function PackItem({
             onPress={() => onAdjustServings(food.id, 1)}
             activeOpacity={0.6}
             hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+            accessibilityLabel={`Increase ${food.name} servings`}
+            accessibilityRole="button"
           >
             <Text style={styles.adjustText}>+</Text>
           </TouchableOpacity>
@@ -161,7 +175,7 @@ const styles = StyleSheet.create({
   },
   servingsText: {
     ...typography.caption,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '700',
     fontSize: 11,
   },
@@ -208,7 +222,7 @@ const styles = StyleSheet.create({
   },
   adjustText: {
     fontSize: 16,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '700',
     paddingHorizontal: 4,
   },

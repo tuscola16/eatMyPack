@@ -102,6 +102,8 @@ export default function SignInScreen() {
           onPress={handleSignIn}
           disabled={loading}
           activeOpacity={0.8}
+          accessibilityLabel="Sign in with email and password"
+          accessibilityRole="button"
         >
           {loading ? (
             <ActivityIndicator color={colors.textInverse} />
@@ -121,13 +123,19 @@ export default function SignInScreen() {
           onPress={handleGoogleSignIn}
           disabled={!googleReady}
           activeOpacity={0.8}
+          accessibilityLabel="Sign in with Google"
+          accessibilityRole="button"
         >
           <Text style={styles.googleButtonText}>Sign in with Google</Text>
         </TouchableOpacity>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => router.replace('/auth/sign-up')}>
+          <TouchableOpacity
+            onPress={() => router.replace('/auth/sign-up')}
+            accessibilityLabel="Go to sign up"
+            accessibilityRole="link"
+          >
             <Text style={styles.footerLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   primaryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingVertical: 14,
     alignItems: 'center',
@@ -218,7 +226,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     ...typography.body,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '600',
   },
 });

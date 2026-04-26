@@ -83,7 +83,12 @@ function WaystationBar({
   })();
 
   return (
-    <Pressable style={styles.waystationBar} onPress={onPress}>
+    <Pressable
+      accessibilityLabel={waystation.name ?? label}
+      accessibilityRole="button"
+      style={styles.waystationBar}
+      onPress={onPress}
+    >
       <View style={styles.waystationInfo}>
         <Text style={[styles.waystationLabel, { color }]}>{waystation.name ?? label}</Text>
         <Text style={styles.waystationTime}>{timeLabel}</Text>
@@ -271,6 +276,8 @@ export default function PackPlanScreen() {
         {/* Back + Edit + Delete header row */}
         <View style={styles.headerRow}>
           <Pressable
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
             onPress={() => id
               ? (source === 'plans' ? router.replace('/race/plans') : router.replace('/'))
               : router.back()
@@ -281,12 +288,22 @@ export default function PackPlanScreen() {
           </Pressable>
           <View style={styles.headerActions}>
             {id && (
-              <Pressable onPress={handleEdit} style={styles.headerBtn}>
+              <Pressable
+                accessibilityLabel="Edit plan"
+                accessibilityRole="button"
+                onPress={handleEdit}
+                style={styles.headerBtn}
+              >
                 <Text style={styles.headerBtnText}>Edit</Text>
               </Pressable>
             )}
             {id && (
-              <Pressable onPress={handleDelete} style={styles.headerBtn}>
+              <Pressable
+                accessibilityLabel="Delete plan"
+                accessibilityRole="button"
+                onPress={handleDelete}
+                style={styles.headerBtn}
+              >
                 <Text style={[styles.headerBtnText, { color: colors.error }]}>Delete</Text>
               </Pressable>
             )}
@@ -299,6 +316,7 @@ export default function PackPlanScreen() {
             <View style={styles.editSection}>
               <Text style={styles.editLabel}>Plan Name</Text>
               <TextInput
+                accessibilityLabel="Plan name"
                 style={styles.editInput}
                 value={editName}
                 onChangeText={(v) => setEditName(sanitizeRaceTitle(v))}
@@ -309,6 +327,7 @@ export default function PackPlanScreen() {
               />
               <Text style={styles.editLabel}>Race Date (YYYY-MM-DD)</Text>
               <TextInput
+                accessibilityLabel="Race date"
                 style={styles.editInput}
                 value={editDate}
                 onChangeText={setEditDate}
@@ -320,6 +339,7 @@ export default function PackPlanScreen() {
               />
               <Text style={styles.editLabel}>Start Time (HH:MM, 24h)</Text>
               <TextInput
+                accessibilityLabel="Start time"
                 style={styles.editInput}
                 value={editStartTime}
                 onChangeText={setEditStartTime}
@@ -332,6 +352,8 @@ export default function PackPlanScreen() {
               {editError && <Text style={styles.editErrorText}>{editError}</Text>}
               <View style={styles.editActions}>
                 <Pressable
+                  accessibilityLabel="Cancel editing"
+                  accessibilityRole="button"
                   style={styles.editCancelBtn}
                   onPress={() => {
                     setIsEditing(false);
@@ -341,6 +363,8 @@ export default function PackPlanScreen() {
                   <Text style={styles.editCancelText}>Cancel</Text>
                 </Pressable>
                 <Pressable
+                  accessibilityLabel="Save plan changes"
+                  accessibilityRole="button"
                   style={styles.editSaveBtn}
                   onPress={handleSaveEdits}
                 >
@@ -353,6 +377,8 @@ export default function PackPlanScreen() {
           {/* Packing list chip */}
           {id && (
             <Pressable
+              accessibilityLabel="View packing list"
+              accessibilityRole="button"
               style={styles.packingListChip}
               onPress={() => router.push({ pathname: '/race/packing-list', params: { id } })}
             >
@@ -430,10 +456,17 @@ export default function PackPlanScreen() {
         animationType="fade"
         onRequestClose={() => setShowEditModal(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setShowEditModal(false)}>
+        <Pressable
+          accessibilityLabel="Close edit menu"
+          accessibilityRole="button"
+          style={styles.modalOverlay}
+          onPress={() => setShowEditModal(false)}
+        >
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit Plan</Text>
             <Pressable
+              accessibilityLabel="Re-generate pack plan"
+              accessibilityRole="button"
               style={styles.modalOption}
               onPress={handleRegenerate}
             >
@@ -441,6 +474,8 @@ export default function PackPlanScreen() {
               <Text style={styles.modalOptionSub}>Go back to setup with this config</Text>
             </Pressable>
             <Pressable
+              accessibilityLabel="Edit plan details"
+              accessibilityRole="button"
               style={styles.modalOption}
               onPress={handleEditDetails}
             >
@@ -448,6 +483,8 @@ export default function PackPlanScreen() {
               <Text style={styles.modalOptionSub}>Change name, race date, or start time</Text>
             </Pressable>
             <Pressable
+              accessibilityLabel="Cancel"
+              accessibilityRole="button"
               style={styles.modalCancelBtn}
               onPress={() => setShowEditModal(false)}
             >
@@ -528,7 +565,7 @@ const styles = StyleSheet.create({
   },
   headerBtnText: {
     ...typography.bodyBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   body: {
     padding: spacing.lg,
@@ -546,7 +583,7 @@ const styles = StyleSheet.create({
   },
   packingListChipText: {
     ...typography.captionBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   editSection: {
     backgroundColor: colors.surface,
@@ -591,7 +628,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   editSaveBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xs,

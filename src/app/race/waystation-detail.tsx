@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     ...typography.bodyBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   headerInfo: {
     flex: 1,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   saveBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   markerPillActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
   },
   markerPillText: {
     ...typography.caption,
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   },
   addFoodsButtonText: {
     ...typography.captionBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   foodTotalRow: {
     flexDirection: 'row',
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   primaryBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.full,

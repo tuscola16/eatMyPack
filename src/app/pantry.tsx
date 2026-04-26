@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
   headerBtnText: {
     ...typography.bodyBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   headerTitle: {
     ...typography.h3,
@@ -72,13 +72,13 @@ const styles = StyleSheet.create({
   },
   countBadge: {
     ...typography.caption,
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: '600',
     minWidth: 64,
     textAlign: 'right',
   },
   addFoodsButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingVertical: spacing.md,
     marginHorizontal: spacing.lg,
