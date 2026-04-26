@@ -24,6 +24,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.eatmypack.app",
       "googleServicesFile": "./GoogleService-Info.plist",
+      "appleTeamId": "GVJ7DFUGUX",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
