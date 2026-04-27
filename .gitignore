@@ -57,3 +57,7 @@ dist-web/
 
 # Google Play service account key (sensitive)
 google-play-service-account.json
+
+# Firebase native config files — contain API keys; keep locally, use EAS credentials for CI
+GoogleService-Info.plist
+google-services.json
