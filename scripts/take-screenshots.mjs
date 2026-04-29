@@ -23,50 +23,96 @@ const DEVICES = [
 
 const BASE_URL = 'http://localhost:8082';
 
+// Seed plans shown on the home screen
+const SEED_PLANS = [
+  {
+    id: 'seed-plan-jigger-100',
+    name: 'Jigger Johnson 100',
+    created_at: '2026-04-20T08:00:00.000Z',
+    race_date: '2026-09-12',
+    race_config: {
+      distance: '100mi',
+      expected_duration_hours: 26,
+      conditions: 'moderate',
+    },
+    phases: [],
+    total_calories: 9200,
+    total_weight_g: 1850,
+    total_volume_ml: 3200,
+    total_items: 48,
+    rejected_food_ids: [],
+    pinned_food_ids: [],
+  },
+  {
+    id: 'seed-plan-seven-sisters',
+    name: 'Seven Sisters Race',
+    created_at: '2026-04-15T10:00:00.000Z',
+    race_date: '2026-08-03',
+    race_config: {
+      distance: '50K',
+      expected_duration_hours: 8,
+      conditions: 'cool',
+    },
+    phases: [],
+    total_calories: 2400,
+    total_weight_g: 580,
+    total_volume_ml: 1200,
+    total_items: 18,
+    rejected_food_ids: [],
+    pinned_food_ids: [],
+  },
+];
+
+// Pantry: variety of gels, bars, chews, real food, freeze-dried, nut butters
+const SEED_PANTRY = [
+  'gu-original-gel',
+  'maurten-gel-100',
+  'huma-chia-gel',
+  'clif-bar',
+  'rxbar',
+  'honey-stinger-waffle',
+  'clif-bloks',
+  'honey-stinger-chews',
+  'rice-cakes-homemade',
+  'trail-mix-1oz',
+  'peanut-butter-packet',
+  'mh-mac-and-cheese',
+];
+
 const SCREENS = [
   {
     name: 'onboarding',
     url: `${BASE_URL}/onboarding`,
-    setup: null,
+    clearOnboardingFlag: true, // temporarily remove so onboarding screen renders
     delay: 1500,
   },
   {
     name: 'home',
     url: `${BASE_URL}/`,
-    setup: async (page) => {
-      await page.evaluate(() => {
-        localStorage.setItem('@AsyncStorage:hasSeenOnboarding_v1', 'true');
-      });
-      await page.reload({ waitUntil: 'domcontentloaded' });
-    },
     delay: 3000,
   },
   {
     name: 'race-setup',
     url: `${BASE_URL}/race/setup`,
-    setup: async (page) => {
-      await page.evaluate(() => {
-        localStorage.setItem('@AsyncStorage:hasSeenOnboarding_v1', 'true');
-      });
-      await page.reload({ waitUntil: 'domcontentloaded' });
-    },
     delay: 3000,
   },
   {
     name: 'food-database',
     url: `${BASE_URL}/database`,
-    setup: async (page) => {
-      await page.evaluate(() => {
-        localStorage.setItem('@AsyncStorage:hasSeenOnboarding_v1', 'true');
-      });
-      await page.reload({ waitUntil: 'domcontentloaded' });
-    },
     delay: 2000,
   },
 ];
 
 async function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+async function seedStorage(page, plans, pantry) {
+  await page.evaluate((p, pt) => {
+    localStorage.setItem('hasSeenOnboarding_v1', 'true');
+    localStorage.setItem('@eatmypack:saved_plans', JSON.stringify(p));
+    localStorage.setItem('@eatmypack:pantry_food_ids', JSON.stringify(pt));
+  }, plans, pantry);
 }
 
 (async () => {
@@ -83,21 +129,27 @@ async function sleep(ms) {
       fs.default.mkdirSync(deviceDir, { recursive: true });
     }
 
+    // One page per device so localStorage persists across screen navigations
+    const page = await browser.newPage();
+    await page.setViewport({
+      width: device.width,
+      height: device.height,
+      deviceScaleFactor: device.scale,
+    });
+
+    // Navigate to a non-redirecting page first to establish the origin,
+    // then seed localStorage before visiting any screen that checks onboarding.
+    await page.goto(`${BASE_URL}/race/setup`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await seedStorage(page, SEED_PLANS, SEED_PANTRY);
+
     for (const screen of SCREENS) {
       console.log(`[${device.dir}] Capturing: ${screen.name}`);
-      const page = await browser.newPage();
-      await page.setViewport({
-        width: device.width,
-        height: device.height,
-        deviceScaleFactor: device.scale,
-      });
 
-      await page.goto(screen.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-
-      if (screen.setup) {
-        await screen.setup(page);
+      if (screen.clearOnboardingFlag) {
+        await page.evaluate(() => localStorage.removeItem('hasSeenOnboarding_v1'));
       }
 
+      await page.goto(screen.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await sleep(screen.delay);
 
       const outPath = path.join(deviceDir, `${screen.name}.png`);
@@ -106,8 +158,13 @@ async function sleep(ms) {
       const ph = device.height * device.scale;
       console.log(`  Saved: ${outPath} (${pw}×${ph})`);
 
-      await page.close();
+      // Restore the flag after onboarding so subsequent screens don't redirect
+      if (screen.clearOnboardingFlag) {
+        await page.evaluate(() => localStorage.setItem('hasSeenOnboarding_v1', 'true'));
+      }
     }
+
+    await page.close();
   }
 
   await browser.close();

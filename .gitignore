@@ -52,6 +52,12 @@ dist-web/
 
 # Claude Code local settings
 .claude/settings.local.json
+.claude/worktrees/
+
+# Generated store screenshots (reproduced via scripts/take-screenshots.mjs)
+assets/screenshots/ios-67/
+assets/screenshots/ios-55/
+assets/screenshots/android/
 
 .env.local
 
