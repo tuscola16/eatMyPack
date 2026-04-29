@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   headerBtnText: {
     ...typography.bodyBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   headerTitle: {
     ...typography.h3,

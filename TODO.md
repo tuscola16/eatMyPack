@@ -8,16 +8,14 @@
 
 ### Blocking — must be done before submission
 
-- [ ] **[You]** Register Apple Developer Program ($99/yr) at developer.apple.com
-- [ ] **[You]** Register Google Play Console ($25 one-time) at play.google.com/console
-- [ ] **[You]** Create app listings in App Store Connect and Play Console (name, bundle IDs already set: `com.eatmypack.app`)
+- [x] **[You]** Register Apple Developer Program ($99/yr) at developer.apple.com — approved ✓
+- [x] **[You]** Register Google Play Console ($25 one-time) at play.google.com/console — approved ✓
+- [x] **[Together]** Create app listing in App Store Connect — eatMyPack created, Apple App ID `6763881350`, bundle ID `com.eatmypack.app` registered, Team ID `GVJ7DFUGUX` wired into `app.json`
+- [x] **[Together]** Create app listing in Google Play Console — eatMyPack created, package `com.eatmypack.app`, Play app ID `4975031986073797065`
 - [x] **[Together]** Fix Google OAuth placeholder client IDs — real iOS + Android client IDs set, `GoogleService-Info.plist` and `google-services.json` wired into `app.json`
-- [ ] **[Together]** Host a Privacy Policy (required by both stores)
-  - I can draft the full text; you post it at any URL (GitHub Pages, Notion, your own site)
-  - Add the URL to your App Store Connect / Play Console listing
-- [ ] **[Claude]** Verify `assets/icon.png` is ≥ 1024×1024 px (Expo scales down; too-small icon fails the build)
-  - *Tool needed: ImageMagick (`magick identify`) or I can check via Expo build output*
-- [x] **[Together]** Sentry DSN + auth token set in `.env.local`; run `eas secret:create --name EXPO_PUBLIC_SENTRY_DSN --value <dsn>` before first cloud build
+- [x] **[Together]** Privacy Policy hosted — GitHub Pages configured (main/docs). URL: `https://tuscola16.github.io/eatMyPack/privacy` — add this to store listings
+- [x] **[Claude]** Verified `assets/icon.png`, `adaptive-icon.png`, `splash-icon.png` are all 1024×1024 ✓
+- [x] **[Together]** Sentry DSN set in `.env.local` and already exists as EAS environment variable ✓
 - [ ] **[Claude]** Run EAS production build once credentials are set: `eas build --profile production --platform all`
   - *Requires: EAS CLI logged in on your machine (`eas whoami`)*
 - [ ] **[Together]** Write app store metadata (description, keywords, category, support URL)
@@ -30,8 +28,7 @@
 ### Pre-launch polish (do before or shortly after launch)
 
 - [ ] **[Together]** Upgrade Firebase JS SDK to v12 (see item 5 below) — Firebase v11 works fine but v12 is cleaner; this is safe to do before or after launch
-- [ ] **[Claude]** Audit all interactive elements for accessibility labels (`accessibilityLabel`, `accessibilityRole`) — Apple review team flags missing labels
-  - *No tools needed beyond code reading + editing*
+- [x] **[Claude]** Full accessibility pass complete — PackItem, auth screens, TextInput, Home, Plan, Database screens all labeled
 - [ ] **[Claude]** Confirm `eas.json` production profile `autoIncrement: true` is working — do a dry-run build to verify version bump
 - [ ] **[You]** Set up TestFlight (iOS) and Internal Testing track (Android) to smoke-test the production build on a real device before public release
 

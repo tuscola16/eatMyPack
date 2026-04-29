@@ -9,6 +9,7 @@ import {
   uploadPantry,
 } from '@/services/cloudSync';
 import { PackPlan } from '@/types/plan';
+import { Sentry } from '@/services/sentry';
 
 type SyncStatus = 'idle' | 'syncing' | 'error';
 
@@ -45,7 +46,9 @@ export function useCloudSync() {
     const unsub = useStore.subscribe(
       (state) => state.pinnedFoodIds,
       (pinnedFoodIds) => {
-        uploadPreferences(user.uid, pinnedFoodIds).catch(console.warn);
+        uploadPreferences(user.uid, pinnedFoodIds).catch((e) =>
+          Sentry.captureException(e, { level: 'warning' })
+        );
       }
     );
 
@@ -59,7 +62,9 @@ export function useCloudSync() {
     const unsub = useStore.subscribe(
       (state) => state.pantryFoodIds,
       (pantryFoodIds) => {
-        uploadPantry(user.uid, pantryFoodIds).catch(console.warn);
+        uploadPantry(user.uid, pantryFoodIds).catch((e) =>
+          Sentry.captureException(e, { level: 'warning' })
+        );
       }
     );
 
@@ -82,7 +87,7 @@ export function useCloudSync() {
       // Delete removed plans
       await Promise.all(deleted.map((p) => deletePlanRemote(uid, p.id)));
     } catch (e) {
-      console.warn('Cloud sync failed:', e);
+      Sentry.captureException(e, { level: 'warning' });
     }
   };
 
@@ -116,7 +121,7 @@ export function useCloudSync() {
 
       setSyncStatus('idle');
     } catch (e) {
-      console.warn('Sync from cloud failed:', e);
+      Sentry.captureException(e, { level: 'warning' });
       setSyncStatus('error');
     }
   }, [user]);
@@ -161,7 +166,7 @@ export function useCloudSync() {
 
       setSyncStatus('idle');
     } catch (e) {
-      console.warn('Full sync failed:', e);
+      Sentry.captureException(e, { level: 'warning' });
       setSyncStatus('error');
     }
   }, [user]);

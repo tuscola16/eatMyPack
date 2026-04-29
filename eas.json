@@ -28,6 +28,16 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "tuscola16@gmail.com",
+        "ascAppId": "6763881350",
+        "appleTeamId": "GVJ7DFUGUX"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
+      }
+    }
   }
 }

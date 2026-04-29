@@ -104,7 +104,7 @@ export default function RaceForm({
   const customDistanceKm: number | undefined = (() => {
     if (!customDistanceInput) return undefined;
     const n = parseFloat(customDistanceInput);
-    if (isNaN(n)) return undefined;
+    if (isNaN(n) || n <= 0 || n > 1000) return undefined;
     return distanceUnit === 'mi' ? n * 1.609344 : n;
   })();
 
@@ -192,7 +192,7 @@ export default function RaceForm({
     if (setupMode === 'complex') {
       if (calPerHour) {
         const cal = parseFloat(calPerHour);
-        if (!isNaN(cal) && cal > 0) {
+        if (!isNaN(cal) && cal >= 50 && cal <= 1000) {
           config.cal_per_hour_override = cal;
         }
       }
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepCircleActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
   },
   stepCircleText: {
     fontSize: 11,
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xs,
   },
   stepLineActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
   },
 
   stepContainer: {
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
   },
   durationValue: {
     ...typography.h1,
-    color: colors.primary,
+    color: colors.primaryDark,
     marginBottom: spacing.sm,
   },
   slider: {
@@ -869,7 +869,7 @@ const styles = StyleSheet.create({
 
   // Submit
   submitButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingVertical: spacing.lg,
     alignItems: 'center',

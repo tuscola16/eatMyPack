@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   itemQty: {
     ...typography.bodyBold,
-    color: colors.primary,
+    color: colors.primaryDark,
     minWidth: 30,
     textAlign: 'right',
   },

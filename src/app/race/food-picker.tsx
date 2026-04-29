@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   headerActionPrimary: {
-    color: colors.primary,
+    color: colors.primaryDark,
   },
 });

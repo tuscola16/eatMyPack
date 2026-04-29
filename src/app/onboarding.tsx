@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: borderRadius.full,
     paddingVertical: 16,
     alignItems: 'center',

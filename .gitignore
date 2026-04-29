@@ -52,5 +52,18 @@ dist-web/
 
 # Claude Code local settings
 .claude/settings.local.json
+.claude/worktrees/
+
+# Generated store screenshots (reproduced via scripts/take-screenshots.mjs)
+assets/screenshots/ios-67/
+assets/screenshots/ios-55/
+assets/screenshots/android/
 
 .env.local
+
+# Google Play service account key (sensitive)
+google-play-service-account.json
+
+# Firebase native config files — contain API keys; keep locally, use EAS credentials for CI
+GoogleService-Info.plist
+google-services.json

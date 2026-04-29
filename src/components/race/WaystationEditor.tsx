@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   markerPillActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
   },
   markerPillText: {
     ...typography.caption,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   },
   addFoodsButtonText: {
     ...typography.captionBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   notesSection: {
     marginBottom: spacing.xs,
@@ -510,6 +510,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     ...typography.captionBold,
-    color: colors.primary,
+    color: colors.primaryDark,
   },
 });

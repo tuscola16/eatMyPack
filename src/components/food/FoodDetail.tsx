@@ -177,7 +177,7 @@ const FoodDetail: React.FC<FoodDetailProps> = ({ food }) => {
               <Badge
                 key={phase}
                 label={phase.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                color={colors.primary}
+                color={colors.primaryDark}
                 variant="outline"
               />
             ))}
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   calorieValue: {
     fontSize: 36,
     fontWeight: '700',
-    color: colors.primary,
+    color: colors.primaryDark,
   },
   calorieLabel: {
     ...typography.caption,

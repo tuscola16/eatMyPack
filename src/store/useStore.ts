@@ -81,6 +81,9 @@ interface AppState {
   useFromPantry: boolean;
   setUseFromPantry: (val: boolean) => void;
 
+  // Wipe all user data (called on account deletion)
+  clearUserData: () => void;
+
   // Ephemeral: food picker handoff between WaystationEditor and /race/food-picker
   pendingWaystationFoods: {
     waystationId: string;
@@ -217,6 +220,18 @@ export const useStore = create<AppState>()(
     // Build-from-pantry toggle
     useFromPantry: false,
     setUseFromPantry: (val) => set({ useFromPantry: val }),
+
+    // Wipe all user data
+    clearUserData: () => set({
+      savedPlans: [],
+      currentPlan: null,
+      raceConfig: null,
+      pinnedFoodIds: [],
+      pantryFoodIds: [],
+      pinnedPhaseEntries: [],
+      categoryPreferences: { ...DEFAULT_CATEGORY_PREFERENCES },
+      userPreferences: { ...DEFAULT_USER_PREFERENCES },
+    }),
 
     // Waystation food picker handoff
     pendingWaystationFoods: null,
